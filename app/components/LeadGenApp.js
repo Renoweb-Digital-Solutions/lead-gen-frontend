@@ -14,6 +14,25 @@ import { useSessionState } from "../hooks/useSessionState";
 import { exportLeads, downloadBlob } from "../lib/api";
 import { STEPS } from "../lib/constants";
 
+/**
+ * Component: LeadGenApp
+ * 
+ * WHAT IT DOES:
+ * This is the main orchestrator component for the entire Lead Generation UI. 
+ * It manages the multi-step wizard logic, tracks the active step, and holds the layout 
+ * shell (Header, Sidebar, Main Content area). It serves as the bridge connecting the UI 
+ * to the `useFormState` custom hook, passing down updater functions to individual step components.
+ * 
+ * PROPS RECEIVED:
+ * - None (It acts as a top-level route component rendered by page.js)
+ * 
+ * PROPS OUTGOING (to children):
+ * - to <Header>: `onClearAll` (function to show clear modal) -> e:\WORK\Renoweb\lead-gen\app\components\Header.js
+ * - to <Sidebar>: `activeStep` (number), `onStepChange` (function) -> e:\WORK\Renoweb\lead-gen\app\components\Sidebar.js
+ * - to Step Components (<PeopleStep>, <CompanyStep>, etc.): `formState` (object), `updateField` (function), `updateFields` (function) -> e:\WORK\Renoweb\lead-gen\app\components\steps\*.js
+ * - to <ExportStep>: additionally `onExport` (function) and `isExporting` (boolean) -> e:\WORK\Renoweb\lead-gen\app\components\steps\ExportStep.js
+ * - to <Modal>: `isOpen` (boolean), `onClose` (function), `onConfirm` (function), etc. -> e:\WORK\Renoweb\lead-gen\app\components\Modal.js
+ */
 export default function LeadGenApp() {
   const { formState, updateField, updateFields, clearAll } = useFormState();
   const [activeStep, setActiveStep] = useSessionState("renoweb-active-step", 0);

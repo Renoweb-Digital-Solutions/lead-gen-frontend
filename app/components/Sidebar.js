@@ -2,6 +2,22 @@
 
 import { STEPS } from "../lib/constants";
 
+/**
+ * Component: Sidebar
+ * 
+ * WHAT IT DOES:
+ * Renders the left-hand navigation sidebar (using a glassmorphism design). 
+ * It lists all the available steps in the lead generation wizard, highlighting the current step
+ * and allowing the user to click between steps.
+ * 
+ * PROPS RECEIVED:
+ * - `activeStep` (Number): The index of the currently active step (e.g. 0 for PeopleStep).
+ * - `onStepChange` (Function): Callback executed when a step button is clicked to navigate to that step.
+ * - `completedSteps` (Object): Map of which steps have been finished (optional/future enhancement).
+ *   Props come from: e:\WORK\Renoweb\lead-gen\app\components\LeadGenApp.js
+ * 
+ * PROPS OUTGOING: None.
+ */
 export default function Sidebar({ activeStep, onStepChange, completedSteps = {} }) {
   return (
     <nav

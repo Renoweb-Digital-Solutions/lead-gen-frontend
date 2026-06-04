@@ -3,6 +3,20 @@
 import { useState, useEffect } from "react";
 import { checkHealth } from "../lib/api";
 
+/**
+ * Component: Header
+ * 
+ * WHAT IT DOES:
+ * Renders the top navigation bar of the application. It includes the Renoweb logo,
+ * a real-time health status indicator for the backend API (polls every 30s), 
+ * and a "Clear All" button to reset the form session.
+ * 
+ * PROPS RECEIVED:
+ * - `onClearAll` (Function): Callback executed when the user clicks the "Clear All" button.
+ *   Comes from: e:\WORK\Renoweb\lead-gen\app\components\LeadGenApp.js
+ * 
+ * PROPS OUTGOING: None.
+ */
 export default function Header({ onClearAll }) {
   const [health, setHealth] = useState(null);
 

@@ -16,6 +16,23 @@ import {
   COUNTRIES,
 } from "../../lib/constants";
 
+/**
+ * Component: PeopleStep
+ * 
+ * WHAT IT DOES:
+ * Renders the form UI for Step 1 ("People"). It contains fields for setting total results, 
+ * email/phone filters, target job titles, role match modes, seniority, functions, and locations.
+ * 
+ * PROPS RECEIVED:
+ * - `formState` (Object): The complete state tree managed by `useFormState`.
+ * - `updateField` (Function): Function to update a single key in `formState`.
+ *   Props come from: e:\WORK\Renoweb\lead-gen\app\components\LeadGenApp.js
+ * 
+ * PROPS OUTGOING:
+ * - to custom inputs (SliderInput, MultiSelect, TagInput, ToggleGroup, ChipSelect, SearchableDropdown):
+ *   Passes specific values from `formState` and onChange handlers that call `updateField`.
+ *   (Located in: e:\WORK\Renoweb\lead-gen\app\components\inputs\*)
+ */
 export default function PeopleStep({ formState, updateField }) {
   return (
     <div>

@@ -2,7 +2,15 @@ const BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 /**
- * Check backend health status
+ * Function: checkHealth
+ * 
+ * WHAT IT DOES: 
+ * Pings the backend health endpoint to ensure the API is running and reachable.
+ * 
+ * WHERE IT IS USED:
+ * - e:\WORK\Renoweb\lead-gen\app\components\Header.js (polled every 30s to update connection status)
+ * 
+ * RETURNS: Object containing health status and version info.
  */
 export async function checkHealth() {
   const res = await fetch(`${BASE_URL}/health`);
@@ -11,7 +19,17 @@ export async function checkHealth() {
 }
 
 /**
- * Build the request body from form state
+ * Function: buildRequestBody
+ * 
+ * WHAT IT DOES: 
+ * Transforms the local frontend `formState` object into the exact JSON schema expected by the backend API.
+ * This is a crucial mapping function that bridges the frontend state and the backend API requirements.
+ * 
+ * ARGUMENTS:
+ * - `formState` (Object): The complete state tree managed by `useFormState`.
+ * 
+ * RETURNS: 
+ * - Object: A nested JSON structure with `input`, `filename`, `limit_items`, etc., ready to be sent as the POST request body.
  */
 function buildRequestBody(formState) {
   return {
@@ -63,7 +81,21 @@ function buildRequestBody(formState) {
 }
 
 /**
- * Export leads — returns a Blob (for ZIP) or text (for CSV)
+ * Function: exportLeads
+ * 
+ * WHAT IT DOES:
+ * Acts as the primary API caller to start the lead generation pipeline on the backend.
+ * It looks up the correct endpoint based on the requested format, builds the payload via `buildRequestBody`,
+ * and makes a POST request to the API. It handles parsing the response either as a ZIP (blob) or CSV.
+ * 
+ * WHERE IT IS USED:
+ * - e:\WORK\Renoweb\lead-gen\app\components\LeadGenApp.js (called when clicking Generate Leads in the ExportStep)
+ * 
+ * ARGUMENTS:
+ * - `formState` (Object): The complete state tree managed by `useFormState`.
+ * 
+ * RETURNS:
+ * - Promise resolving to an Object: `{ blob: Blob, filename: String, type: String }`
  */
 export async function exportLeads(formState) {
   const { EXPORT_FORMATS } = await import("./constants");
@@ -96,7 +128,18 @@ export async function exportLeads(formState) {
 }
 
 /**
- * Trigger download of a blob
+ * Function: downloadBlob
+ * 
+ * WHAT IT DOES:
+ * Takes a Blob (binary data) received from the API and artificially triggers a browser file download.
+ * It creates a temporary URL pointing to the Blob, creates a hidden <a> tag, clicks it, and cleans up.
+ * 
+ * WHERE IT IS USED:
+ * - e:\WORK\Renoweb\lead-gen\app\components\LeadGenApp.js (called after `exportLeads` succeeds)
+ * 
+ * ARGUMENTS:
+ * - `blob` (Blob): The binary file data to download.
+ * - `filename` (String): The name the file should be saved as (e.g. "leads.csv").
  */
 export function downloadBlob(blob, filename) {
   const url = URL.createObjectURL(blob);
