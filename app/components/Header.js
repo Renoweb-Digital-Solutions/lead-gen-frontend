@@ -5,20 +5,46 @@ import { checkHealth } from "../lib/api";
 
 /**
  * Component: Header
- * 
+ *
  * WHAT IT DOES:
  * Renders the top navigation bar of the application. It includes the Renoweb logo,
- * a real-time health status indicator for the backend API (polls every 30s), 
+ * module tabs (Lead Gen Pipeline / Google Maps) for switching between tools,
+ * a real-time health status indicator for the backend API (polls every 30s),
  * and a "Clear All" button to reset the form session.
- * 
+ *
  * PROPS RECEIVED:
  * - `onClearAll` (Function): Callback executed when the user clicks the "Clear All" button.
+ * - `activeModule` (String): Currently active module — "leadgen" or "gmaps".
+ * - `onModuleChange` (Function): Callback to switch between modules.
  *   Comes from: e:\WORK\Renoweb\lead-gen\app\components\LeadGenApp.js
- * 
+ *
  * PROPS OUTGOING: None.
  */
-export default function Header({ onClearAll }) {
+
+const MODULES = [
+  { id: "leadgen", label: "Lead Gen Pipeline", icon: "🎯" },
+  { id: "gmaps", label: "Google Maps", icon: "🗺️" },
+];
+
+export default function Header({ onClearAll, activeModule, onModuleChange }) {
   const [health, setHealth] = useState(null);
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    // Sync with DOM on mount
+    setIsDark(document.documentElement.classList.contains("dark"));
+  }, []);
+
+  const toggleTheme = () => {
+    const newTheme = isDark ? "light" : "dark";
+    setIsDark(!isDark);
+    if (newTheme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+    localStorage.setItem("theme", newTheme);
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -44,49 +70,92 @@ export default function Header({ onClearAll }) {
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        padding: "14px 28px",
+        padding: "0 28px",
         background: "var(--rw-surface)",
         borderBottom: "1px solid var(--rw-border)",
         position: "sticky",
         top: 0,
         zIndex: 40,
         backdropFilter: "blur(10px)",
-        backgroundColor: "rgba(255, 255, 255, 0.9)",
+        height: 57,
       }}
     >
-      {/* Logo */}
-      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 3,
-            fontWeight: 800,
-            fontSize: 22,
-            letterSpacing: "-0.02em",
-          }}
-        >
-          <span style={{ color: "var(--rw-deep-blue)" }}>RENO</span>
-          <span style={{ color: "var(--rw-bright-blue)" }}>WEB</span>
+      {/* Left: Logo + Module Tabs */}
+      <div style={{ display: "flex", alignItems: "center", gap: 0, height: "100%" }}>
+        {/* Logo */}
+        <div style={{ display: "flex", alignItems: "center", gap: 3, marginRight: 24 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 3,
+              fontWeight: 800,
+              fontSize: 22,
+              letterSpacing: "-0.02em",
+            }}
+          >
+            <span style={{ color: "var(--rw-deep-blue)" }}>RENO</span>
+            <span style={{ color: "var(--rw-bright-blue)" }}>WEB</span>
+          </div>
         </div>
+
+        {/* Divider */}
         <div
           style={{
             width: 1,
             height: 24,
             background: "var(--rw-border)",
-            margin: "0 4px",
+            marginRight: 8,
           }}
         />
-        <span
-          style={{
-            fontSize: 14,
-            fontWeight: 500,
-            color: "var(--rw-text-secondary)",
-            letterSpacing: "0.02em",
-          }}
-        >
-          Lead Gen Tool
-        </span>
+
+        {/* Module Tabs */}
+        <nav style={{ display: "flex", alignItems: "center", gap: 0, height: "100%" }}>
+          {MODULES.map((mod) => {
+            const isActive = activeModule === mod.id;
+            return (
+              <button
+                key={mod.id}
+                type="button"
+                onClick={() => onModuleChange(mod.id)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "0 16px",
+                  height: "100%",
+                  border: "none",
+                  background: "transparent",
+                  cursor: "pointer",
+                  fontSize: 13.5,
+                  fontWeight: isActive ? 600 : 400,
+                  fontFamily: "inherit",
+                  color: isActive ? "var(--rw-deep-blue)" : "var(--rw-text-muted)",
+                  borderBottom: isActive
+                    ? "2.5px solid var(--rw-bright-blue)"
+                    : "2.5px solid transparent",
+                  transition: "all 0.2s ease",
+                  position: "relative",
+                }}
+                onMouseEnter={(e) => {
+                  if (!isActive) {
+                    e.currentTarget.style.color = "var(--rw-text-secondary)";
+                    e.currentTarget.style.borderBottomColor = "var(--rw-border)";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isActive) {
+                    e.currentTarget.style.color = "var(--rw-text-muted)";
+                    e.currentTarget.style.borderBottomColor = "transparent";
+                  }
+                }}
+              >
+                <span style={{ fontSize: 16 }}>{mod.icon}</span>
+                {mod.label}
+              </button>
+            );
+          })}
+        </nav>
       </div>
 
       {/* Right side */}
@@ -109,7 +178,32 @@ export default function Header({ onClearAll }) {
           <span>{health?.ok ? `API v${health.version}` : "API Offline"}</span>
         </div>
 
-        {/* Clear All button */}
+        {/* Dark Mode Toggle */}
+        <button
+          type="button"
+          onClick={toggleTheme}
+          style={{
+            background: "transparent",
+            border: "none",
+            cursor: "pointer",
+            fontSize: 18,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: 32,
+            height: 32,
+            borderRadius: "50%",
+            color: "var(--rw-text-secondary)",
+            transition: "all 0.2s ease",
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.background = "var(--rw-surface-hover)")}
+          onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+          title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+        >
+          {isDark ? "☀️" : "🌙"}
+        </button>
+
+        {/* Clear Data button */}
         <button
           type="button"
           className="rw-btn rw-btn-ghost"
@@ -128,7 +222,7 @@ export default function Header({ onClearAll }) {
               strokeLinejoin="round"
             />
           </svg>
-          Clear All
+          {activeModule === "gmaps" ? "Clear GMaps Data" : "Clear Pipeline"}
         </button>
       </div>
     </header>

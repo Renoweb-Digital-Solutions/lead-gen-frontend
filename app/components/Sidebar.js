@@ -24,8 +24,7 @@ export default function Sidebar({ activeStep, onStepChange, completedSteps = {} 
       style={{
         width: 250,
         minHeight: "calc(100vh - 57px)",
-        background:
-          "linear-gradient(165deg, rgba(235, 243, 255, 0.85) 0%, rgba(220, 235, 255, 0.75) 40%, rgba(200, 225, 255, 0.7) 100%)",
+        background: "var(--rw-sidebar-bg)",
         backdropFilter: "blur(24px) saturate(1.4)",
         WebkitBackdropFilter: "blur(24px) saturate(1.4)",
         borderRight: "1px solid rgba(255, 255, 255, 0.5)",

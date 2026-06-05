@@ -151,3 +151,124 @@ export function downloadBlob(blob, filename) {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
+
+// ═══════════════════════════════════════════════════════════
+// GOOGLE MAPS API FUNCTIONS
+// ═══════════════════════════════════════════════════════════
+
+/**
+ * Function: gmapsSearch
+ *
+ * WHAT IT DOES:
+ * Triggers a Google Maps / Google Places search via the Compass actor on the backend.
+ * Searches for local businesses matching the given keywords and location.
+ *
+ * WHERE IT IS USED:
+ * - e:\WORK\Renoweb\lead-gen\app\components\gmaps\GmapsView.js
+ *
+ * ARGUMENTS:
+ * - `params` (Object): { keywords: string[], location: string, limit: number }
+ *
+ * RETURNS: Promise<Object> — The search results from the backend.
+ */
+export async function gmapsSearch({ keywords, location, limit }) {
+  const body = {
+    sources: { yc: false, gmaps: true },
+    domain_keywords: keywords,
+    location: { q: location },
+    limits: { yc: 0, gmaps: limit },
+    require_min_identifiers: 0,
+  };
+
+  const res = await fetch(`${BASE_URL}/gmaps/search`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`GMaps search failed: ${res.status} — ${text}`);
+  }
+
+  return res.json();
+}
+
+/**
+ * Function: gmapsGetRuns
+ *
+ * WHAT IT DOES:
+ * Fetches the list of all previously saved Google Maps search runs.
+ *
+ * WHERE IT IS USED:
+ * - e:\WORK\Renoweb\lead-gen\app\components\gmaps\GmapsView.js
+ *
+ * RETURNS: Promise<Array> — List of run objects.
+ */
+export async function gmapsGetRuns() {
+  const res = await fetch(`${BASE_URL}/gmaps/runs`);
+  if (!res.ok) throw new Error("Failed to fetch GMaps runs");
+  return res.json();
+}
+
+/**
+ * Function: gmapsGetRun
+ *
+ * WHAT IT DOES:
+ * Fetches the detailed rows/results for a specific Google Maps run by ID.
+ *
+ * WHERE IT IS USED:
+ * - e:\WORK\Renoweb\lead-gen\app\components\gmaps\GmapsView.js
+ *
+ * ARGUMENTS:
+ * - `runId` (String): The ID of the run to fetch.
+ *
+ * RETURNS: Promise<Object> — Run data including rows.
+ */
+export async function gmapsGetRun(runId) {
+  const res = await fetch(`${BASE_URL}/gmaps/runs/${runId}`);
+  if (!res.ok) throw new Error(`Failed to fetch GMaps run ${runId}`);
+  return res.json();
+}
+
+/**
+ * Function: gmapsExportCsv
+ *
+ * WHAT IT DOES:
+ * Downloads the standard CSV export for a specific Google Maps run.
+ *
+ * WHERE IT IS USED:
+ * - e:\WORK\Renoweb\lead-gen\app\components\gmaps\GmapsView.js
+ *
+ * ARGUMENTS:
+ * - `runId` (String): The ID of the run to export.
+ *
+ * RETURNS: Promise<{ blob: Blob, filename: string }>
+ */
+export async function gmapsExportCsv(runId) {
+  const res = await fetch(`${BASE_URL}/gmaps/runs/${runId}/export.csv`);
+  if (!res.ok) throw new Error("Failed to export GMaps CSV");
+  return { blob: await res.blob(), filename: `gmaps_${runId}.csv` };
+}
+
+/**
+ * Function: gmapsExportEnrichedCsv
+ *
+ * WHAT IT DOES:
+ * Downloads the enriched CSV export (with executive contacts) for a specific Google Maps run.
+ * Columns include: name, title, company_name, domain, source, work_email,
+ * phone_number, linkedin_profile, other_public_profiles.
+ *
+ * WHERE IT IS USED:
+ * - e:\WORK\Renoweb\lead-gen\app\components\gmaps\GmapsView.js
+ *
+ * ARGUMENTS:
+ * - `runId` (String): The ID of the run to export.
+ *
+ * RETURNS: Promise<{ blob: Blob, filename: string }>
+ */
+export async function gmapsExportEnrichedCsv(runId) {
+  const res = await fetch(`${BASE_URL}/gmaps/runs/${runId}/export_enriched.csv`);
+  if (!res.ok) throw new Error("Failed to export enriched GMaps CSV");
+  return { blob: await res.blob(), filename: `gmaps_enriched_${runId}.csv` };
+}

@@ -18,8 +18,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
  * PROPS OUTGOING: None.
  */
 
-// Casual log messages — picked sequentially (no repeats) every 15–20s
-const LOG_MESSAGES = [
+const LOG_MESSAGES_APOLLO = [
   { icon: "🔍", text: "Scanning Apollo databases for matching profiles..." },
   { icon: "🌐", text: "Resolving company domains and org charts..." },
   { icon: "📡", text: "Pulling fresh contact data from enrichment APIs..." },
@@ -47,21 +46,40 @@ const LOG_MESSAGES = [
   { icon: "🔥", text: "Almost there — finalizing the last batch..." },
 ];
 
+const LOG_MESSAGES_GMAPS = [
+  { icon: "🗺️", text: "Navigating local streets via satellite..." },
+  { icon: "🏪", text: "Knocking on digital storefronts..." },
+  { icon: "⭐", text: "Reading the tea leaves from Google Reviews..." },
+  { icon: "📍", text: "Dropping pins on every corner..." },
+  { icon: "📞", text: "Dialing numbers to see who picks up..." },
+  { icon: "🕵️", text: "Sleuthing for hidden websites..." },
+  { icon: "🚗", text: "Taking the street-view car for a spin..." },
+  { icon: "📸", text: "Checking out the storefront photos..." },
+  { icon: "🔍", text: "Zooming in on the local map..." },
+  { icon: "🌐", text: "Cross-referencing Yelp and social profiles..." },
+  { icon: "🍔", text: "Getting distracted by local restaurant menus..." },
+  { icon: "🧭", text: "Recalibrating the compass..." },
+];
+
 function formatElapsed(seconds) {
   const m = Math.floor(seconds / 60);
   const s = seconds % 60;
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
-export default function ExportProgress({ isActive, totalResults = 1000 }) {
+export default function ExportProgress({ isActive, totalResults = 1000, logType = "apollo" }) {
   const [logs, setLogs] = useState([]);
   const [elapsed, setElapsed] = useState(0);
   const nextIndexRef = useRef(0);
   const elapsedRef = useRef(0);
   const logEndRef = useRef(null);
 
-  // Estimate: ~1.5s per lead, minimum 2 minutes
-  const estimatedMinutes = Math.max(2, Math.ceil((totalResults * 1.5) / 60));
+  const MESSAGES = logType === "gmaps" ? LOG_MESSAGES_GMAPS : LOG_MESSAGES_APOLLO;
+
+  // Estimate: ~1.5s per lead for Apollo, ~0.5s for GMaps
+  const estimatedMinutes = logType === "gmaps"
+    ? Math.max(1, Math.ceil((totalResults * 0.5) / 60))
+    : Math.max(2, Math.ceil((totalResults * 1.5) / 60));
 
   // Reset everything when export starts
   useEffect(() => {
@@ -87,8 +105,8 @@ export default function ExportProgress({ isActive, totalResults = 1000 }) {
 
   // Add a new log message
   const addLogMessage = useCallback(() => {
-    const idx = nextIndexRef.current % LOG_MESSAGES.length;
-    const msg = LOG_MESSAGES[idx];
+    const idx = nextIndexRef.current % MESSAGES.length;
+    const msg = MESSAGES[idx];
     nextIndexRef.current += 1;
 
     setLogs((prev) => [
@@ -137,7 +155,7 @@ export default function ExportProgress({ isActive, totalResults = 1000 }) {
         border: "1px solid var(--rw-border)",
         overflow: "hidden",
         animation: "rw-fadeInUp 0.4s ease-out both",
-        background: "#ffffff",
+        background: "var(--rw-surface)",
       }}
     >
       {/* Header bar */}
@@ -173,9 +191,15 @@ export default function ExportProgress({ isActive, totalResults = 1000 }) {
           </span>
           <span style={{ color: "var(--rw-text-muted)" }}>
             Est. remaining:{" "}
-            <strong style={{ color: "#d97706" }}>
-              ~{remainingMin > 0 ? `${remainingMin}m ` : ""}{remainingSec}s
-            </strong>
+            {elapsed > estimatedMinutes * 60 ? (
+              <strong style={{ color: "var(--rw-error)" }}>
+                Taking longer than usual, please hold on...
+              </strong>
+            ) : (
+              <strong style={{ color: "var(--rw-warning)" }}>
+                ~{remainingMin > 0 ? `${remainingMin}m ` : ""}{remainingSec}s
+              </strong>
+            )}
           </span>
         </div>
       </div>
@@ -186,7 +210,7 @@ export default function ExportProgress({ isActive, totalResults = 1000 }) {
           maxHeight: 220,
           overflowY: "auto",
           padding: "12px 0",
-          background: "linear-gradient(180deg, #f8faff 0%, #ffffff 100%)",
+          background: "var(--rw-gradient-surface)",
           fontFamily: "'Inter', sans-serif",
           fontSize: 13,
           lineHeight: 2,

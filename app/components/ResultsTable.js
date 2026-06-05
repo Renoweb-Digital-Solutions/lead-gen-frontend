@@ -7,14 +7,16 @@ import { AllCommunityModule, ModuleRegistry, themeQuartz } from "ag-grid-communi
 // Register AG Grid Community modules
 ModuleRegistry.registerModules([AllCommunityModule]);
 
-// Custom Renoweb theme based on Quartz, with brand-matching overrides
+// Custom Renoweb theme based on Quartz, mapping to our CSS variables for Dark Mode support
 const renowebTheme = themeQuartz.withParams({
   headerBackgroundColor: "transparent",
   headerTextColor: "#ffffff",
-  rowHoverColor: "rgba(48, 143, 239, 0.04)",
-  selectedRowBackgroundColor: "rgba(48, 143, 239, 0.08)",
-  borderColor: "#e2e8f0",
-  oddRowBackgroundColor: "#fafbfd",
+  rowHoverColor: "var(--rw-surface-hover)",
+  selectedRowBackgroundColor: "rgba(48, 143, 239, 0.12)",
+  borderColor: "var(--rw-border)",
+  oddRowBackgroundColor: "var(--rw-bg)",
+  backgroundColor: "var(--rw-surface)",
+  foregroundColor: "var(--rw-text)",
 });
 
 /**

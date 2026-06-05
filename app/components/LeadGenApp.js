@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import Papa from "papaparse";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
+import GmapsView from "./gmaps/GmapsView";
 import Modal from "./Modal";
 import PeopleStep from "./steps/PeopleStep";
 import CompanyStep from "./steps/CompanyStep";
@@ -37,6 +38,7 @@ import { STEPS } from "../lib/constants";
 export default function LeadGenApp() {
   const { formState, updateField, updateFields, clearAll } = useFormState();
   const [activeStep, setActiveStep] = useSessionState("renoweb-active-step", 0);
+  const [activeModule, setActiveModule] = useSessionState("renoweb-active-module", "leadgen");
   const [showClearModal, setShowClearModal] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [exportError, setExportError] = useState(null);
@@ -68,6 +70,16 @@ export default function LeadGenApp() {
   };
 
   const handleClearAll = () => {
+    if (activeModule === "gmaps") {
+      sessionStorage.removeItem("gmaps-keywords");
+      sessionStorage.removeItem("gmaps-location");
+      sessionStorage.removeItem("gmaps-limit");
+      sessionStorage.removeItem("gmaps-results");
+      sessionStorage.removeItem("gmaps-runid");
+      window.location.reload();
+      return;
+    }
+
     clearAll();
     setActiveStep(0);
     setShowClearModal(false);
@@ -146,9 +158,19 @@ export default function LeadGenApp() {
 
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
-      <Header onClearAll={() => setShowClearModal(true)} />
+      <Header
+        onClearAll={() => setShowClearModal(true)}
+        activeModule={activeModule}
+        onModuleChange={setActiveModule}
+      />
 
-      <div style={{ display: "flex", flex: 1 }}>
+      {/* ── Google Maps Module ─────────────────────────── */}
+      <div style={{ display: activeModule === "gmaps" ? "block" : "none", flex: 1, overflowY: "auto", maxHeight: "calc(100vh - 57px)" }}>
+        <GmapsView />
+      </div>
+
+      {/* ── Lead Gen Pipeline ───────────────────────────── */}
+      <div style={{ display: activeModule === "leadgen" ? "flex" : "none", flex: 1 }}>
         <Sidebar
           activeStep={activeStep}
           onStepChange={goToStep}
@@ -341,13 +363,17 @@ export default function LeadGenApp() {
         </main>
       </div>
 
-      {/* Clear All Confirmation Modal */}
+      {/* Clear Confirmation Modal */}
       <Modal
         isOpen={showClearModal}
         onClose={() => setShowClearModal(false)}
         onConfirm={handleClearAll}
-        title="Clear All Data?"
-        description="This will reset all form fields to their defaults and remove all saved progress for this session. This action cannot be undone."
+        title={activeModule === "gmaps" ? "Clear GMaps Data?" : "Clear All Data?"}
+        description={
+          activeModule === "gmaps"
+            ? "This will reset your GMaps search parameters and clear current results. Your past runs will remain unaffected."
+            : "This will reset all form fields to their defaults and remove all saved progress for this session. This action cannot be undone."
+        }
       />
     </div>
   );
