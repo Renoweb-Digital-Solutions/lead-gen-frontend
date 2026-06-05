@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import Papa from "papaparse";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
 import Modal from "./Modal";
@@ -40,6 +41,8 @@ export default function LeadGenApp() {
   const [isExporting, setIsExporting] = useState(false);
   const [exportError, setExportError] = useState(null);
   const [exportSuccess, setExportSuccess] = useState(null);
+  const [exportData, setExportData] = useState(null);
+  const [exportResultFile, setExportResultFile] = useState(null);
   const [direction, setDirection] = useState("forward");
   const contentRef = useRef(null);
 
@@ -48,6 +51,8 @@ export default function LeadGenApp() {
     setActiveStep(index);
     setExportError(null);
     setExportSuccess(null);
+    setExportData(null);
+    setExportResultFile(null);
     // Scroll to top of content area
     if (contentRef.current) {
       contentRef.current.scrollTo({ top: 0, behavior: "smooth" });
@@ -68,17 +73,42 @@ export default function LeadGenApp() {
     setShowClearModal(false);
     setExportError(null);
     setExportSuccess(null);
+    setExportData(null);
+    setExportResultFile(null);
   };
 
   const handleExport = async () => {
     setIsExporting(true);
     setExportError(null);
     setExportSuccess(null);
+    setExportData(null);
+    setExportResultFile(null);
 
     try {
       const result = await exportLeads(formState);
-      downloadBlob(result.blob, result.filename);
-      setExportSuccess(`Successfully exported ${result.filename}!`);
+      
+      // Store the file details for manual download
+      setExportResultFile({ blob: result.blob, filename: result.filename });
+      
+      if (result.type === "csv") {
+        // Parse CSV to show in table
+        const text = await result.blob.text();
+        Papa.parse(text, {
+          header: true,
+          skipEmptyLines: true,
+          complete: (parsedResult) => {
+            setExportData(parsedResult.data);
+            setExportSuccess(`Successfully generated ${parsedResult.data.length} records!`);
+          },
+          error: (error) => {
+            setExportError("Failed to parse results for preview.");
+            setExportSuccess(`Successfully generated ${result.filename}!`);
+          }
+        });
+      } else {
+        // For ZIP or other formats
+        setExportSuccess(`Successfully generated ${result.filename}! (Preview not available for bundles)`);
+      }
     } catch (err) {
       setExportError(err.message || "Export failed. Please try again.");
     } finally {
@@ -104,6 +134,9 @@ export default function LeadGenApp() {
             {...props}
             onExport={handleExport}
             isExporting={isExporting}
+            exportData={exportData}
+            exportResultFile={exportResultFile}
+            onDownload={() => downloadBlob(exportResultFile.blob, exportResultFile.filename)}
           />
         );
       default:

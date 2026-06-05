@@ -1,6 +1,8 @@
 "use client";
 
 import RadioCards from "../inputs/RadioCards";
+import ResultsTable from "../ResultsTable";
+import ExportProgress from "../ExportProgress";
 import { EXPORT_FORMATS } from "../../lib/constants";
 
 export default function ExportStep({
@@ -8,6 +10,9 @@ export default function ExportStep({
   updateField,
   onExport,
   isExporting,
+  exportData,
+  exportResultFile,
+  onDownload,
 }) {
   return (
     <div>
@@ -222,6 +227,39 @@ export default function ExportStep({
           </div>
         </div>
       </div>
+
+      {/* ── Progress Logs (shown while exporting) ─────────── */}
+      <ExportProgress
+        isActive={isExporting}
+        totalResults={formState.totalResults}
+      />
+
+      {/* ── Results Table Preview ───────────────────────────── */}
+      {(exportData || exportResultFile) && (
+        <div className="rw-section" style={{ marginTop: 40, animation: "rw-fadeInUp 0.4s ease-out both" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+            <div className="rw-section-title" style={{ marginBottom: 0 }}>
+              Live Preview
+            </div>
+            
+            {exportResultFile && (
+              <button
+                type="button"
+                className="rw-btn rw-btn-primary"
+                onClick={onDownload}
+                style={{ padding: "8px 16px", fontSize: 13 }}
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ marginRight: 6 }}>
+                  <path d="M14 11V14H2V11M8 3V11M8 11L4 7M8 11L12 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Download {exportResultFile.filename}
+              </button>
+            )}
+          </div>
+          
+          <ResultsTable data={exportData} />
+        </div>
+      )}
     </div>
   );
 }

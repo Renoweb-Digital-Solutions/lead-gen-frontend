@@ -20,29 +20,39 @@ import { useState, useEffect, useCallback } from "react";
  * - `defaultValue` (Any): The default state to use if nothing is found in sessionStorage.
  */
 export function useSessionState(key, defaultValue) {
-  const [state, setState] = useState(() => {
-    if (typeof window === "undefined") return defaultValue;
+  const [state, setState] = useState(defaultValue);
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // Read from storage on mount (after initial render to prevent hydration mismatch)
+  useEffect(() => {
     try {
       const stored = sessionStorage.getItem(key);
-      return stored !== null ? JSON.parse(stored) : defaultValue;
+      if (stored !== null) {
+        setState(JSON.parse(stored));
+      }
     } catch {
-      return defaultValue;
+      // ignore
     }
-  });
+    setIsHydrated(true);
+  }, [key]);
 
   // Sync state → sessionStorage
   useEffect(() => {
+    // Only sync after hydration is complete to prevent overwriting stored values with defaultValue
+    if (!isHydrated) return;
+    
     try {
       sessionStorage.setItem(key, JSON.stringify(state));
     } catch {
       // sessionStorage full or unavailable — ignore
     }
-  }, [key, state]);
+  }, [key, state, isHydrated]);
 
   const clearState = useCallback(() => {
     sessionStorage.removeItem(key);
     setState(defaultValue);
   }, [key, defaultValue]);
 
+  // Before hydration, we return the server-rendered default value.
   return [state, setState, clearState];
 }
