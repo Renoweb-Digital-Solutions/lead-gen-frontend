@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 import RadioCards from "../inputs/RadioCards";
 import ResultsTable from "../ResultsTable";
 import ExportProgress from "../ExportProgress";
@@ -14,6 +16,8 @@ export default function ExportStep({
   exportResultFile,
   onDownload,
 }) {
+  const [showPipelineOptions, setShowPipelineOptions] = useState(false);
+
   return (
     <div>
       {/* ── Export Format ───────────────────────────────────── */}
@@ -65,79 +69,109 @@ export default function ExportStep({
 
       {/* ── Pipeline Options ────────────────────────────────── */}
       <div className="rw-section">
-        <div className="rw-section-title">Pipeline Options</div>
-
-        <div className="rw-field">
-          <div className="rw-toggle-field">
-            <div>
-              <div className="rw-toggle-field-label">Strict Output Schema</div>
-              <div className="rw-toggle-field-hint">Enforce standardized column format</div>
-            </div>
-            <button
-              type="button"
-              className="rw-toggle"
-              data-checked={formState.strictOutputSchema}
-              onClick={() =>
-                updateField("strictOutputSchema", !formState.strictOutputSchema)
-              }
-              aria-label="Strict Output Schema"
-            />
-          </div>
+        <div 
+          className="rw-section-title" 
+          style={{ 
+            cursor: "pointer", 
+            display: "flex", 
+            alignItems: "center", 
+            justifyContent: "space-between",
+            marginBottom: showPipelineOptions ? 16 : 0,
+            userSelect: "none"
+          }}
+          onClick={() => setShowPipelineOptions(!showPipelineOptions)}
+        >
+          <span>Pipeline Options</span>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+            style={{
+              transform: showPipelineOptions ? "rotate(180deg)" : "rotate(0deg)",
+              transition: "transform 0.2s ease",
+              color: "var(--rw-text-muted)"
+            }}
+          >
+            <path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
         </div>
 
-        <div className="rw-field">
-          <div className="rw-toggle-field">
-            <div>
-              <div className="rw-toggle-field-label">Reset Progress</div>
-              <div className="rw-toggle-field-hint">Start fresh instead of resuming</div>
+        {showPipelineOptions && (
+          <div style={{ animation: "rw-fadeInUp 0.2s ease-out" }}>
+            <div className="rw-field">
+              <div className="rw-toggle-field">
+                <div>
+                  <div className="rw-toggle-field-label">Strict Output Schema</div>
+                  <div className="rw-toggle-field-hint">Enforce standardized column format</div>
+                </div>
+                <button
+                  type="button"
+                  className="rw-toggle"
+                  data-checked={formState.strictOutputSchema}
+                  onClick={() =>
+                    updateField("strictOutputSchema", !formState.strictOutputSchema)
+                  }
+                  aria-label="Strict Output Schema"
+                />
+              </div>
             </div>
-            <button
-              type="button"
-              className="rw-toggle"
-              data-checked={formState.resetProgress}
-              onClick={() =>
-                updateField("resetProgress", !formState.resetProgress)
-              }
-              aria-label="Reset Progress"
-            />
-          </div>
-        </div>
 
-        <div className="rw-field">
-          <div className="rw-toggle-field">
-            <div>
-              <div className="rw-toggle-field-label">Don't Save Progress</div>
-              <div className="rw-toggle-field-hint">Run without saving checkpoint data</div>
+            <div className="rw-field">
+              <div className="rw-toggle-field">
+                <div>
+                  <div className="rw-toggle-field-label">Reset Progress</div>
+                  <div className="rw-toggle-field-hint">Start fresh instead of resuming</div>
+                </div>
+                <button
+                  type="button"
+                  className="rw-toggle"
+                  data-checked={formState.resetProgress}
+                  onClick={() =>
+                    updateField("resetProgress", !formState.resetProgress)
+                  }
+                  aria-label="Reset Progress"
+                />
+              </div>
             </div>
-            <button
-              type="button"
-              className="rw-toggle"
-              data-checked={formState.dontSaveProgress}
-              onClick={() =>
-                updateField("dontSaveProgress", !formState.dontSaveProgress)
-              }
-              aria-label="Don't Save Progress"
-            />
-          </div>
-        </div>
 
-        <div className="rw-field">
-          <div className="rw-toggle-field">
-            <div>
-              <div className="rw-toggle-field-label">Count Only</div>
-              <div className="rw-toggle-field-hint">Only return result count, no data</div>
+            <div className="rw-field">
+              <div className="rw-toggle-field">
+                <div>
+                  <div className="rw-toggle-field-label">Don't Save Progress</div>
+                  <div className="rw-toggle-field-hint">Run without saving checkpoint data</div>
+                </div>
+                <button
+                  type="button"
+                  className="rw-toggle"
+                  data-checked={formState.dontSaveProgress}
+                  onClick={() =>
+                    updateField("dontSaveProgress", !formState.dontSaveProgress)
+                  }
+                  aria-label="Don't Save Progress"
+                />
+              </div>
             </div>
-            <button
-              type="button"
-              className="rw-toggle"
-              data-checked={formState.countOnly}
-              onClick={() =>
-                updateField("countOnly", !formState.countOnly)
-              }
-              aria-label="Count Only"
-            />
+
+            <div className="rw-field">
+              <div className="rw-toggle-field">
+                <div>
+                  <div className="rw-toggle-field-label">Count Only</div>
+                  <div className="rw-toggle-field-hint">Only return result count, no data</div>
+                </div>
+                <button
+                  type="button"
+                  className="rw-toggle"
+                  data-checked={formState.countOnly}
+                  onClick={() =>
+                    updateField("countOnly", !formState.countOnly)
+                  }
+                  aria-label="Count Only"
+                />
+              </div>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* ── Generate Button ─────────────────────────────────── */}
@@ -235,11 +269,13 @@ export default function ExportStep({
       />
 
       {/* ── Results Table Preview ───────────────────────────── */}
-      {(exportData || exportResultFile) && (
+      {(exportData || exportResultFile || formState.exportFormat === "bundle") && (
         <div className="rw-section" style={{ marginTop: 40, animation: "rw-fadeInUp 0.4s ease-out both" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
             <div className="rw-section-title" style={{ marginBottom: 0 }}>
-              Live Preview
+              {formState.exportFormat === "bundle" 
+                ? "Bundle Export" 
+                : `Live Preview of ${EXPORT_FORMATS.find((f) => f.id === formState.exportFormat)?.label || "Data"}`}
             </div>
             
             {exportResultFile && (
@@ -257,7 +293,15 @@ export default function ExportStep({
             )}
           </div>
           
-          <ResultsTable data={exportData} />
+          {formState.exportFormat === "bundle" ? (
+            <div style={{ padding: 40, textAlign: "center", color: "var(--rw-text-muted)", background: "var(--rw-bg)", borderRadius: 12, border: "1px dashed var(--rw-border)", marginTop: 20 }}>
+              <div style={{ fontSize: 32, marginBottom: 12 }}>📦</div>
+              <div style={{ fontWeight: 500, color: "var(--rw-text)", marginBottom: 4 }}>No preview available</div>
+              <div>This will be a downloadable ZIP file containing all individual CSVs.</div>
+            </div>
+          ) : (
+            <ResultsTable data={exportData} />
+          )}
         </div>
       )}
     </div>

@@ -41,20 +41,14 @@ export default function LeadGenApp() {
   const [activeModule, setActiveModule] = useSessionState("renoweb-active-module", "leadgen");
   const [showClearModal, setShowClearModal] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
-  const [exportError, setExportError] = useState(null);
-  const [exportSuccess, setExportSuccess] = useState(null);
-  const [exportData, setExportData] = useState(null);
-  const [exportResultFile, setExportResultFile] = useState(null);
+  const [exportResults, setExportResults] = useState({});
   const [direction, setDirection] = useState("forward");
   const contentRef = useRef(null);
 
   const goToStep = (index) => {
     setDirection(index > activeStep ? "forward" : "backward");
     setActiveStep(index);
-    setExportError(null);
-    setExportSuccess(null);
-    setExportData(null);
-    setExportResultFile(null);
+    // State is intentionally persisted when navigating between steps
     // Scroll to top of content area
     if (contentRef.current) {
       contentRef.current.scrollTo({ top: 0, behavior: "smooth" });
@@ -83,24 +77,29 @@ export default function LeadGenApp() {
     clearAll();
     setActiveStep(0);
     setShowClearModal(false);
-    setExportError(null);
-    setExportSuccess(null);
-    setExportData(null);
-    setExportResultFile(null);
+    setExportResults({});
   };
 
   const handleExport = async () => {
     setIsExporting(true);
-    setExportError(null);
-    setExportSuccess(null);
-    setExportData(null);
-    setExportResultFile(null);
+    const format = formState.exportFormat;
+    
+    setExportResults(prev => ({
+      ...prev,
+      [format]: {
+        ...prev[format],
+        error: null,
+        success: null,
+        data: null,
+        file: null,
+      }
+    }));
 
     try {
       const result = await exportLeads(formState);
       
       // Store the file details for manual download
-      setExportResultFile({ blob: result.blob, filename: result.filename });
+      const fileObj = { blob: result.blob, filename: result.filename };
       
       if (result.type === "csv") {
         // Parse CSV to show in table
@@ -109,24 +108,56 @@ export default function LeadGenApp() {
           header: true,
           skipEmptyLines: true,
           complete: (parsedResult) => {
-            setExportData(parsedResult.data);
-            setExportSuccess(`Successfully generated ${parsedResult.data.length} records!`);
+            setExportResults(prev => ({
+              ...prev,
+              [format]: {
+                data: parsedResult.data,
+                file: fileObj,
+                success: `Successfully generated ${parsedResult.data.length} records!`,
+                error: null
+              }
+            }));
           },
           error: (error) => {
-            setExportError("Failed to parse results for preview.");
-            setExportSuccess(`Successfully generated ${result.filename}!`);
+            setExportResults(prev => ({
+              ...prev,
+              [format]: {
+                data: null,
+                file: fileObj,
+                success: `Successfully generated ${result.filename}!`,
+                error: "Failed to parse results for preview."
+              }
+            }));
           }
         });
       } else {
         // For ZIP or other formats
-        setExportSuccess(`Successfully generated ${result.filename}! (Preview not available for bundles)`);
+        setExportResults(prev => ({
+          ...prev,
+          [format]: {
+            data: null,
+            file: fileObj,
+            success: `Successfully generated ${result.filename}! (Preview not available for bundles)`,
+            error: null
+          }
+        }));
       }
     } catch (err) {
-      setExportError(err.message || "Export failed. Please try again.");
+      setExportResults(prev => ({
+        ...prev,
+        [format]: {
+          ...prev[format],
+          error: err.message || "Export failed. Please try again.",
+          success: null
+        }
+      }));
     } finally {
       setIsExporting(false);
     }
   };
+
+  const currentFormat = formState.exportFormat;
+  const currentExportState = exportResults[currentFormat] || {};
 
   const renderStep = () => {
     const props = { formState, updateField, updateFields };
@@ -146,9 +177,13 @@ export default function LeadGenApp() {
             {...props}
             onExport={handleExport}
             isExporting={isExporting}
-            exportData={exportData}
-            exportResultFile={exportResultFile}
-            onDownload={() => downloadBlob(exportResultFile.blob, exportResultFile.filename)}
+            exportData={currentExportState.data || null}
+            exportResultFile={currentExportState.file || null}
+            onDownload={() => {
+              if (currentExportState.file) {
+                downloadBlob(currentExportState.file.blob, currentExportState.file.filename);
+              }
+            }}
           />
         );
       default:
@@ -228,7 +263,7 @@ export default function LeadGenApp() {
           </div>
 
           {/* Alerts */}
-          {exportError && (
+          {currentExportState.error && (
             <div
               className="rw-animate-fade-in-up"
               style={{
@@ -245,11 +280,11 @@ export default function LeadGenApp() {
               }}
             >
               <span>❌</span>
-              {exportError}
+              {currentExportState.error}
             </div>
           )}
 
-          {exportSuccess && (
+          {currentExportState.success && (
             <div
               className="rw-animate-fade-in-up"
               style={{
@@ -266,7 +301,7 @@ export default function LeadGenApp() {
               }}
             >
               <span>✅</span>
-              {exportSuccess}
+              {currentExportState.success}
             </div>
           )}
 
