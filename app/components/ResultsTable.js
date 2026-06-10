@@ -61,8 +61,10 @@ const linkStyle = {
  * Cell renderer for email fields — opens mailto: link
  */
 function EmailCellRenderer(params) {
-  const value = params.value;
-  if (!value) return null;
+  let value = params.value;
+  if (!value || (Array.isArray(value) && value.length === 0)) return null;
+  if (Array.isArray(value)) value = value.join(", ");
+  
   return (
     <a href={`mailto:${value}`} style={linkStyle} title={`Email ${value}`}>
       {value}
@@ -74,8 +76,10 @@ function EmailCellRenderer(params) {
  * Cell renderer for phone fields — opens tel: link
  */
 function PhoneCellRenderer(params) {
-  const value = params.value;
-  if (!value) return null;
+  let value = params.value;
+  if (!value || (Array.isArray(value) && value.length === 0)) return null;
+  if (Array.isArray(value)) value = value.join(", ");
+  
   return (
     <a href={`tel:${value}`} style={linkStyle} title={`Call ${value}`}>
       {value}
@@ -88,18 +92,23 @@ function PhoneCellRenderer(params) {
  * Auto-prepends https:// if missing.
  */
 function UrlCellRenderer(params) {
-  const value = params.value;
-  if (!value) return null;
-  const href = value.startsWith("http") ? value : `https://${value}`;
+  let value = params.value;
+  if (!value || (Array.isArray(value) && value.length === 0)) return null;
+  
+  // If multiple URLs, we'll just link the first one but show all
+  const firstUrl = Array.isArray(value) ? value[0] : value;
+  const displayValue = Array.isArray(value) ? value.join(", ") : value;
+  
+  const href = firstUrl.startsWith("http") ? firstUrl : `https://${firstUrl}`;
   return (
     <a
       href={href}
       target="_blank"
       rel="noopener noreferrer"
       style={linkStyle}
-      title={`Open ${value}`}
+      title={`Open ${firstUrl}`}
     >
-      {value}
+      {displayValue}
     </a>
   );
 }
@@ -113,11 +122,26 @@ export default function ResultsTable({ data }) {
     if (data && data.length > 0) {
       const firstRow = data[0];
       
-      // Fields to hide from the table
-      const HIDDEN_FIELDS = ["reviews_distribution", "evidence"];
+      const TARGET_COLUMNS = [
+        "firstName", "lastName", "first_name", "last_name", "name", "email", "company", "companyName", "role", "seniority",
+        "title", "categoryName", "address", "city", "state", "countryCode", "website",
+        "phone", "emails", "linkedIns", "facebooks", "instagrams", "socials",
+        "totalScore", "reviewsCount", "rank", "website_status", "opportunity_score",
+        "opportunity_tier", "opportunity_reason", "opportunity_signals",
+        "identifier_coverage", "coverage_count", "confidence", "url", "placeId", "domain"
+      ];
       
-      const cols = Object.keys(firstRow)
-        .filter((key) => !HIDDEN_FIELDS.includes(key))
+      const availableKeys = Object.keys(firstRow);
+      
+      // Keys from TARGET_COLUMNS that are present (for preferred ordering)
+      const orderedKeys = TARGET_COLUMNS.filter((key) => availableKeys.includes(key));
+      
+      // Keys that are present but not in TARGET_COLUMNS
+      const remainingKeys = availableKeys.filter((key) => !TARGET_COLUMNS.includes(key));
+      
+      const allKeysToDisplay = [...orderedKeys, ...remainingKeys];
+      
+      const cols = allKeysToDisplay
         .map((key) => {
           const linkType = detectLinkType(key);
 

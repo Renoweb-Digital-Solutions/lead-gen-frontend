@@ -173,11 +173,38 @@ export function downloadBlob(blob, filename) {
  */
 export async function gmapsSearch({ keywords, location, limit }) {
   const body = {
-    sources: { yc: false, gmaps: true },
-    domain_keywords: keywords,
-    location: { q: location },
-    limits: { yc: 0, gmaps: limit },
-    require_min_identifiers: 0,
+    includeWebResults: false,
+    language: "en",
+    locationQuery: location,
+    maxCrawledPlacesPerSearch: limit,
+    maximumLeadsEnrichmentRecords: 0,
+    scrapeContacts: true,
+    scrapeDirectories: false,
+    scrapeImageAuthors: false,
+    scrapeOrderOnline: false,
+    scrapePlaceDetailPage: false,
+    scrapeReviewsPersonalData: true,
+    scrapeSocialMediaProfiles: {
+      facebooks: true,
+      instagrams: true,
+      tiktoks: false,
+      twitters: false,
+      youtubes: false
+    },
+    scrapeTableReservationProvider: false,
+    searchStringsArray: keywords,
+    skipClosedPlaces: false,
+    verifyLeadsEnrichmentEmails: false,
+    searchMatching: "all",
+    placeMinimumStars: "",
+    website: "allPlaces",
+    maxQuestions: 0,
+    maxReviews: 0,
+    reviewsSort: "newest",
+    reviewsFilterString: "",
+    reviewsOrigin: "all",
+    maxImages: 0,
+    allPlacesNoSearchAction: ""
   };
 
   const res = await fetch(`${BASE_URL}/gmaps/search`, {
