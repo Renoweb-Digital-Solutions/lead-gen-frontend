@@ -112,31 +112,49 @@ export default function ResultsTable({ data }) {
   useMemo(() => {
     if (data && data.length > 0) {
       const firstRow = data[0];
-      const cols = Object.keys(firstRow).map((key) => {
-        const linkType = detectLinkType(key);
+      
+      // Fields to hide from the table
+      const HIDDEN_FIELDS = ["reviews_distribution", "evidence"];
+      
+      const cols = Object.keys(firstRow)
+        .filter((key) => !HIDDEN_FIELDS.includes(key))
+        .map((key) => {
+          const linkType = detectLinkType(key);
 
-        const colDef = {
-          field: key,
-          headerName: key
-            .replace(/_/g, " ")
-            .replace(/\b\w/g, (l) => l.toUpperCase()),
-          sortable: true,
-          filter: true,
-          resizable: true,
-          minWidth: 150,
-        };
+          const colDef = {
+            field: key,
+            headerName: key
+              .replace(/_/g, " ")
+              .replace(/\b\w/g, (l) => l.toUpperCase()),
+            sortable: true,
+            filter: true,
+            resizable: true,
+            minWidth: 150,
+          };
 
-        // Assign the appropriate cell renderer based on detected link type
-        if (linkType === "email") {
-          colDef.cellRenderer = EmailCellRenderer;
-        } else if (linkType === "phone") {
-          colDef.cellRenderer = PhoneCellRenderer;
-        } else if (linkType === "url") {
-          colDef.cellRenderer = UrlCellRenderer;
-        }
+          // Format specific boolean columns as Yes/No
+          if (
+            key === "claim_this_business" ||
+            key === "temporarily_closed" ||
+            key === "permanently_closed"
+          ) {
+            colDef.cellRenderer = (params) => {
+              if (params.value === true || params.value === "true") return "Yes";
+              if (params.value === false || params.value === "false") return "No";
+              return params.value != null ? String(params.value) : "";
+            };
+          } 
+          // Assign the appropriate cell renderer based on detected link type
+          else if (linkType === "email") {
+            colDef.cellRenderer = EmailCellRenderer;
+          } else if (linkType === "phone") {
+            colDef.cellRenderer = PhoneCellRenderer;
+          } else if (linkType === "url") {
+            colDef.cellRenderer = UrlCellRenderer;
+          }
 
-        return colDef;
-      });
+          return colDef;
+        });
       setColDefs(cols);
     }
   }, [data]);
