@@ -175,7 +175,7 @@ export default function Header({ onClearAll, activeModule, onModuleChange }) {
               health?.ok ? "rw-status-dot-online" : "rw-status-dot-offline"
             }`}
           />
-          <span>{health?.ok ? `API v${health.version}` : "API Offline"}</span>
+          <span>{health?.ok ? "API Online" : "API Offline"}</span>
         </div>
 
         {/* Dark Mode Toggle */}

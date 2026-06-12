@@ -33,6 +33,31 @@ export default function TagInput({
     }
   };
 
+  const handleInputChange = (e) => {
+    const val = e.target.value;
+    if (val.includes(",")) {
+      const parts = val.split(",");
+      const newTagsList = [...tags];
+      const lastPart = parts.pop();
+      let added = false;
+
+      parts.forEach((p) => {
+        const trimmed = p.trim();
+        if (trimmed && !newTagsList.includes(trimmed)) {
+          newTagsList.push(trimmed);
+          added = true;
+        }
+      });
+
+      setInputValue(lastPart.trimStart());
+      if (added) {
+        onChange(newTagsList);
+      }
+    } else {
+      setInputValue(val);
+    }
+  };
+
   return (
     <div className="rw-field">
       {label && (
@@ -77,7 +102,7 @@ export default function TagInput({
           ref={inputRef}
           type="text"
           value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
+          onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           onBlur={() => {
             if (inputValue.trim()) addTag(inputValue);

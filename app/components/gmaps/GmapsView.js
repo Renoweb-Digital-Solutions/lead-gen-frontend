@@ -11,7 +11,6 @@ import {
   gmapsGetRuns,
   gmapsGetRun,
   gmapsExportCsv,
-  gmapsExportEnrichedCsv,
   downloadBlob,
 } from "../../lib/api";
 import { useSessionState } from "../../hooks/useSessionState";
@@ -50,7 +49,6 @@ export default function GmapsView() {
   const [runs, setRuns] = useState([]);
   const [loadingRuns, setLoadingRuns] = useState(false);
   const [isExportingCsv, setIsExportingCsv] = useState(false);
-  const [isExportingEnriched, setIsExportingEnriched] = useState(false);
 
   // Load past runs on mount
   useEffect(() => {
@@ -141,28 +139,35 @@ export default function GmapsView() {
 
   // ─── Export Handlers ─────────────────────────────────────
   const handleExportCsv = async () => {
-    if (!currentRunId) return;
+    if (!resultData || resultData.length === 0) return;
     setIsExportingCsv(true);
     try {
-      const result = await gmapsExportCsv(currentRunId);
-      downloadBlob(result.blob, result.filename);
+      if (currentRunId) {
+        const result = await gmapsExportCsv(currentRunId);
+        downloadBlob(result.blob, result.filename);
+      } else {
+        const headers = Object.keys(resultData[0]);
+        const csvContent = [
+          headers.join(","),
+          ...resultData.map((row) =>
+            headers
+              .map((h) => {
+                let val = row[h];
+                if (val === null || val === undefined) val = "";
+                if (typeof val === "object") val = JSON.stringify(val);
+                return `"${val.toString().replace(/"/g, '""')}"`;
+              })
+              .join(",")
+          ),
+        ].join("\n");
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        downloadBlob(blob, "gmaps_export.csv");
+      }
     } catch (err) {
+      alert("CSV Export failed: " + err.message);
       setSearchError(err.message);
     } finally {
       setIsExportingCsv(false);
-    }
-  };
-
-  const handleExportEnriched = async () => {
-    if (!currentRunId) return;
-    setIsExportingEnriched(true);
-    try {
-      const result = await gmapsExportEnrichedCsv(currentRunId);
-      downloadBlob(result.blob, result.filename);
-    } catch (err) {
-      setSearchError(err.message);
-    } finally {
-      setIsExportingEnriched(false);
     }
   };
 
@@ -352,7 +357,6 @@ export default function GmapsView() {
               Results ({resultData.length} businesses)
             </div>
 
-            {currentRunId && (
               <div style={{ display: "flex", gap: 8 }}>
                 <button
                   type="button"
@@ -366,20 +370,7 @@ export default function GmapsView() {
                   </svg>
                   {isExportingCsv ? "Exporting..." : "CSV"}
                 </button>
-                <button
-                  type="button"
-                  className="rw-btn rw-btn-primary"
-                  onClick={handleExportEnriched}
-                  disabled={isExportingEnriched}
-                  style={{ padding: "8px 14px", fontSize: 13 }}
-                >
-                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style={{ marginRight: 6 }}>
-                    <path d="M14 11V14H2V11M8 3V11M8 11L4 7M8 11L12 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                  {isExportingEnriched ? "Exporting..." : "Enriched CSV"}
-                </button>
               </div>
-            )}
           </div>
 
           <ResultsTable data={resultData} />

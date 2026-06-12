@@ -42,7 +42,7 @@ export default function ExportStep({
               className="rw-input"
               value={formState.filename}
               onChange={(e) => updateField("filename", e.target.value)}
-              placeholder="summary.csv"
+              placeholder={EXPORT_FORMATS.find((f) => f.id === formState.exportFormat)?.defaultFilename || "export.csv"}
             />
           </div>
           <div className="rw-field">
@@ -198,7 +198,7 @@ export default function ExportStep({
                   strokeLinejoin="round"
                 />
               </svg>
-              <span>Generate & Export Leads</span>
+              <span>Generate and Export</span>
             </>
           )}
         </button>

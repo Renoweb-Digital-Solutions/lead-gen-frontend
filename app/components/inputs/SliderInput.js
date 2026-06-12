@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 
 export default function SliderInput({
   label,
@@ -14,6 +14,13 @@ export default function SliderInput({
 }) {
   const trackRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [inputValue, setInputValue] = useState(value.toString());
+
+  useEffect(() => {
+    if (!isDragging) {
+      setInputValue(value.toString());
+    }
+  }, [value, isDragging]);
 
   const percentage = ((value - min) / (max - min)) * 100;
 
@@ -74,19 +81,87 @@ export default function SliderInput({
           {label}
           {hint && <span className="rw-label-hint">{hint}</span>}
         </label>
-        <span
-          style={{
-            fontSize: 20,
-            fontWeight: 700,
-            color: "var(--rw-deep-blue)",
-            fontVariantNumeric: "tabular-nums",
-            transition: "all 0.15s ease",
-            transform: isDragging ? "scale(1.05)" : "scale(1)",
-            display: "inline-block",
-          }}
-        >
-          {displayValue}
-        </span>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <button
+            type="button"
+            onClick={() => onChange(Math.max(min, value - step))}
+            style={{
+              width: 26,
+              height: 26,
+              borderRadius: 6,
+              border: "1px solid var(--rw-border)",
+              background: "var(--rw-surface)",
+              color: "var(--rw-text-secondary)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              fontSize: 16,
+              lineHeight: 1,
+              transition: "all 0.15s ease",
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.background = "var(--rw-surface-hover)"}
+            onMouseLeave={(e) => e.currentTarget.style.background = "var(--rw-surface)"}
+          >
+            -
+          </button>
+          <input
+            type="number"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onBlur={() => {
+              let val = parseInt(inputValue, 10);
+              if (isNaN(val)) val = min;
+              val = Math.max(min, Math.min(max, val));
+              onChange(val);
+              setInputValue(val.toString());
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.target.blur();
+              }
+            }}
+            style={{
+              fontSize: 18,
+              fontWeight: 700,
+              color: "var(--rw-deep-blue)",
+              fontVariantNumeric: "tabular-nums",
+              width: 70,
+              textAlign: "center",
+              border: "1px solid transparent",
+              borderRadius: 6,
+              padding: "2px 0",
+              background: "transparent",
+              transition: "all 0.15s ease",
+              outline: "none",
+            }}
+            onFocus={(e) => e.currentTarget.style.border = "1px solid var(--rw-border)"}
+            onBlurCapture={(e) => e.currentTarget.style.border = "1px solid transparent"}
+          />
+          <button
+            type="button"
+            onClick={() => onChange(Math.min(max, value + step))}
+            style={{
+              width: 26,
+              height: 26,
+              borderRadius: 6,
+              border: "1px solid var(--rw-border)",
+              background: "var(--rw-surface)",
+              color: "var(--rw-text-secondary)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              fontSize: 16,
+              lineHeight: 1,
+              transition: "all 0.15s ease",
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.background = "var(--rw-surface-hover)"}
+            onMouseLeave={(e) => e.currentTarget.style.background = "var(--rw-surface)"}
+          >
+            +
+          </button>
+        </div>
       </div>
 
       <div

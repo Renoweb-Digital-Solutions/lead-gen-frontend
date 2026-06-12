@@ -284,7 +284,7 @@ export default function LeadGenApp() {
             </div>
           )}
 
-          {currentExportState.success && (
+          {activeStep === 4 && currentExportState.success && (
             <div
               className="rw-animate-fade-in-up"
               style={{

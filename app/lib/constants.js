@@ -289,6 +289,7 @@ export const EXPORT_FORMATS = [
     description: "ZIP with summary, leads & jobs CSVs",
     endpoint: "/export/bundle.zip",
     icon: "📦",
+    defaultFilename: "bundle.zip",
   },
   {
     id: "summary",
@@ -296,6 +297,7 @@ export const EXPORT_FORMATS = [
     description: "Scored leads with all data combined",
     endpoint: "/export/summary.csv",
     icon: "📊",
+    defaultFilename: "summary.csv",
   },
   {
     id: "leads",
@@ -303,6 +305,7 @@ export const EXPORT_FORMATS = [
     description: "Normalized leads with contact info",
     endpoint: "/export/leads.csv",
     icon: "👥",
+    defaultFilename: "leads.csv",
   },
   {
     id: "jobs",
@@ -310,6 +313,7 @@ export const EXPORT_FORMATS = [
     description: "Normalized jobs with scoring data",
     endpoint: "/export/jobs.csv",
     icon: "💼",
+    defaultFilename: "jobs.csv",
   },
 ];
 

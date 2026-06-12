@@ -34,7 +34,7 @@ export async function checkHealth() {
  * RETURNS: 
  * - Object: A nested JSON structure with `input`, `filename`, `limit_items`, etc., ready to be sent as the POST request body.
  */
-function buildRequestBody(formState) {
+function buildRequestBody(formState, defaultFilename = "summary.csv") {
   return {
     input: {
       totalResults: formState.totalResults,
@@ -68,7 +68,7 @@ function buildRequestBody(formState) {
       dontSaveProgress: formState.dontSaveProgress,
       countOnly: formState.countOnly,
     },
-    filename: formState.filename || "summary.csv",
+    filename: formState.filename || defaultFilename,
     limit_items: formState.limitItems,
     strict_output_schema: formState.strictOutputSchema,
     jobs_rows: formState.jobsRows,
@@ -105,7 +105,7 @@ export async function exportLeads(formState) {
   const format = EXPORT_FORMATS.find((f) => f.id === formState.exportFormat);
   if (!format) throw new Error("Unknown export format");
 
-  const body = buildRequestBody(formState);
+  const body = buildRequestBody(formState, format.defaultFilename);
 
   const res = await fetch(`${BASE_URL}${format.endpoint}`, {
     method: "POST",
@@ -120,12 +120,12 @@ export async function exportLeads(formState) {
 
   // ZIP comes as binary, CSVs as text
   if (formState.exportFormat === "bundle") {
-    return { blob: await res.blob(), filename: "bundle.zip", type: "zip" };
+    return { blob: await res.blob(), filename: formState.filename || format.defaultFilename || "bundle.zip", type: "zip" };
   }
 
   return {
     blob: await res.blob(),
-    filename: formState.filename || "export.csv",
+    filename: formState.filename || format.defaultFilename || "export.csv",
     type: "csv",
   };
 }
@@ -279,26 +279,4 @@ export async function gmapsExportCsv(runId) {
   const res = await fetch(`${BASE_URL}/gmaps/runs/${runId}/export.csv`);
   if (!res.ok) throw new Error("Failed to export GMaps CSV");
   return { blob: await res.blob(), filename: `gmaps_${runId}.csv` };
-}
-
-/**
- * Function: gmapsExportEnrichedCsv
- *
- * WHAT IT DOES:
- * Downloads the enriched CSV export (with executive contacts) for a specific Google Maps run.
- * Columns include: name, title, company_name, domain, source, work_email,
- * phone_number, linkedin_profile, other_public_profiles.
- *
- * WHERE IT IS USED:
- * - e:\WORK\Renoweb\lead-gen\app\components\gmaps\GmapsView.js
- *
- * ARGUMENTS:
- * - `runId` (String): The ID of the run to export.
- *
- * RETURNS: Promise<{ blob: Blob, filename: string }>
- */
-export async function gmapsExportEnrichedCsv(runId) {
-  const res = await fetch(`${BASE_URL}/gmaps/runs/${runId}/export_enriched.csv`);
-  if (!res.ok) throw new Error("Failed to export enriched GMaps CSV");
-  return { blob: await res.blob(), filename: `gmaps_enriched_${runId}.csv` };
 }

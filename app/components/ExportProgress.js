@@ -76,9 +76,9 @@ export default function ExportProgress({ isActive, totalResults = 1000, logType 
 
   const MESSAGES = logType === "gmaps" ? LOG_MESSAGES_GMAPS : LOG_MESSAGES_APOLLO;
 
-  // Estimate: ~1.5s per lead for Apollo, ~0.5s for GMaps
+  // Estimate: ~1.5s per lead for Apollo, fixed 5m for GMaps
   const estimatedMinutes = logType === "gmaps"
-    ? Math.max(1, Math.ceil((totalResults * 0.5) / 60))
+    ? 5
     : Math.max(2, Math.ceil((totalResults * 1.5) / 60));
 
   // Reset everything when export starts

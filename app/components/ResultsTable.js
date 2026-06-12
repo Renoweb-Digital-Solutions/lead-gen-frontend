@@ -154,6 +154,18 @@ export default function ResultsTable({ data }) {
             filter: true,
             resizable: true,
             minWidth: 150,
+            valueFormatter: (params) => {
+              if (params.value == null) return "";
+              if (typeof params.value === "object") {
+                if (Object.keys(params.value).length === 0) return "";
+                try {
+                  return JSON.stringify(params.value);
+                } catch (e) {
+                  return String(params.value);
+                }
+              }
+              return String(params.value);
+            },
           };
 
           // Format specific boolean columns as Yes/No
