@@ -1,5 +1,8 @@
-const BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
+if (!BASE_URL) {
+  console.warn("Warning: NEXT_PUBLIC_API_URL is not defined in the environment variables.");
+}
 
 /**
  * Function: checkHealth
