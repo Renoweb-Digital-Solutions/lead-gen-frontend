@@ -65,21 +65,7 @@ export default function Header({ onClearAll, activeModule, onModuleChange }) {
   }, []);
 
   return (
-    <header
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: "0 28px",
-        background: "var(--rw-surface)",
-        borderBottom: "1px solid var(--rw-border)",
-        position: "sticky",
-        top: 0,
-        zIndex: 40,
-        backdropFilter: "blur(10px)",
-        height: 57,
-      }}
-    >
+    <header className="rw-header">
       {/* Left: Logo + Module Tabs */}
       <div style={{ display: "flex", alignItems: "center", gap: 0, height: "100%" }}>
         {/* Logo */}
@@ -151,7 +137,7 @@ export default function Header({ onClearAll, activeModule, onModuleChange }) {
                 }}
               >
                 <span style={{ fontSize: 16 }}>{mod.icon}</span>
-                {mod.label}
+                <span className="rw-hide-mobile">{mod.label}</span>
               </button>
             );
           })}
@@ -175,7 +161,7 @@ export default function Header({ onClearAll, activeModule, onModuleChange }) {
               health?.ok ? "rw-status-dot-online" : "rw-status-dot-offline"
             }`}
           />
-          <span>{health?.ok ? "API Online" : "API Offline"}</span>
+          <span className="rw-hide-mobile">{health?.ok ? "API Online" : "API Offline"}</span>
         </div>
 
         {/* Dark Mode Toggle */}
@@ -222,7 +208,7 @@ export default function Header({ onClearAll, activeModule, onModuleChange }) {
               strokeLinejoin="round"
             />
           </svg>
-          {activeModule === "gmaps" ? "Clear GMaps Data" : "Clear Pipeline"}
+          <span className="rw-hide-mobile">{activeModule === "gmaps" ? "Clear GMaps Data" : "Clear Pipeline"}</span>
         </button>
       </div>
     </header>

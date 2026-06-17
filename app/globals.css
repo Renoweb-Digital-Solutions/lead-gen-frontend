@@ -1001,3 +1001,137 @@ body {
 .rw-animate-scale-in {
   animation: rw-scaleIn 0.3s ease-out;
 }
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE LAYOUT (Mobile Styles)
+   ═══════════════════════════════════════════════════════════ */
+
+/* Base Layout Classes */
+.rw-app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.rw-main-layout {
+  display: flex;
+  flex: 1;
+}
+
+.rw-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  background: var(--rw-surface);
+  border-bottom: 1px solid var(--rw-border);
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  height: 57px;
+}
+
+.rw-main-content {
+  flex: 1;
+  padding: 32px 40px;
+  max-height: calc(100vh - 57px);
+  overflow-y: auto;
+}
+
+/* Sidebar default */
+.rw-sidebar {
+  width: 250px;
+  min-height: calc(100vh - 57px);
+  background: var(--rw-sidebar-bg);
+  backdrop-filter: blur(24px) saturate(1.4);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  border-right: 1px solid rgba(255, 255, 255, 0.5);
+  padding: 28px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex-shrink: 0;
+  box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.6), 4px 0 24px rgba(48, 143, 239, 0.06);
+  position: relative;
+  overflow: hidden;
+}
+
+.rw-sidebar-steps {
+  flex: 1;
+  position: relative;
+  z-index: 1;
+}
+
+.rw-sidebar-footer {
+  padding: 16px 24px;
+  border-top: 1px solid rgba(48, 143, 239, 0.1);
+  position: relative;
+  z-index: 1;
+}
+
+/* Mobile Overrides */
+@media (max-width: 768px) {
+  .rw-main-layout {
+    flex-direction: column;
+  }
+
+  .rw-header {
+    padding: 0 16px;
+  }
+
+  .rw-main-content {
+    padding: 16px 20px;
+    max-height: none; /* Let the container define the scrolling on mobile if needed, or adjust */
+    overflow-y: visible; /* Prevent double scrollbars on mobile */
+  }
+  
+  /* Sidebar becomes a horizontal scrollable bar on mobile */
+  .rw-sidebar {
+    width: 100%;
+    min-height: auto;
+    padding: 12px 0;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 4px 12px rgba(48, 143, 239, 0.06);
+    flex-direction: row;
+    align-items: center;
+  }
+  
+  .rw-sidebar-steps {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 0 12px;
+    gap: 8px;
+    /* Hide scrollbar for a cleaner look */
+    scrollbar-width: none; 
+    -ms-overflow-style: none;
+  }
+  
+  .rw-sidebar-steps::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .rw-sidebar-footer {
+    display: none; /* Hide branding on mobile to save space */
+  }
+
+  /* Utility to hide elements on mobile */
+  .rw-hide-mobile {
+    display: none !important;
+  }
+
+  /* Adjust action buttons in forms to wrap nicely */
+  .rw-action-buttons {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch !important;
+  }
+  
+  .rw-action-buttons button {
+    width: 100%;
+    justify-content: center;
+  }
+}

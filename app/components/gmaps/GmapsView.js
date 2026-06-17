@@ -172,7 +172,7 @@ export default function GmapsView() {
   };
 
   return (
-    <div style={{ width: "100%", padding: "32px 40px" }}>
+    <div className="rw-main-content" style={{ width: "100%" }}>
       {/* Page header */}
       <div style={{ marginBottom: 32, animation: "rw-fadeInUp 0.3s ease-out" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>

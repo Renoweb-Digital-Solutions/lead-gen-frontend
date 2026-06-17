@@ -20,25 +20,7 @@ import { STEPS } from "../lib/constants";
  */
 export default function Sidebar({ activeStep, onStepChange, completedSteps = {} }) {
   return (
-    <nav
-      style={{
-        width: 250,
-        minHeight: "calc(100vh - 57px)",
-        background: "var(--rw-sidebar-bg)",
-        backdropFilter: "blur(24px) saturate(1.4)",
-        WebkitBackdropFilter: "blur(24px) saturate(1.4)",
-        borderRight: "1px solid rgba(255, 255, 255, 0.5)",
-        padding: "28px 0",
-        display: "flex",
-        flexDirection: "column",
-        gap: 4,
-        flexShrink: 0,
-        boxShadow:
-          "inset -1px 0 0 rgba(255, 255, 255, 0.6), 4px 0 24px rgba(48, 143, 239, 0.06)",
-        position: "relative",
-        overflow: "hidden",
-      }}
-    >
+    <nav className="rw-sidebar">
       {/* Glass shimmer overlay */}
       <div
         style={{
@@ -51,7 +33,7 @@ export default function Sidebar({ activeStep, onStepChange, completedSteps = {} 
       />
 
       {/* Steps */}
-      <div style={{ flex: 1, position: "relative", zIndex: 1 }}>
+      <div className="rw-sidebar-steps">
         {STEPS.map((step, index) => {
           const isActive = activeStep === index;
           const isCompleted = completedSteps[step.id];
@@ -68,6 +50,7 @@ export default function Sidebar({ activeStep, onStepChange, completedSteps = {} 
                 gap: 12,
                 padding: "14px 20px",
                 border: "none",
+                flexShrink: 0,
                 background: isActive
                   ? "rgba(48, 143, 239, 0.12)"
                   : "transparent",
@@ -180,14 +163,7 @@ export default function Sidebar({ activeStep, onStepChange, completedSteps = {} 
       </div>
 
       {/* Footer branding */}
-      <div
-        style={{
-          padding: "16px 24px",
-          borderTop: "1px solid rgba(48, 143, 239, 0.1)",
-          position: "relative",
-          zIndex: 1,
-        }}
-      >
+      <div className="rw-sidebar-footer">
         <div
           style={{
             fontSize: 11,

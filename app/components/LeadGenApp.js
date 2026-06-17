@@ -192,7 +192,7 @@ export default function LeadGenApp() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+    <div className="rw-app-container">
       <Header
         onClearAll={() => setShowClearModal(true)}
         activeModule={activeModule}
@@ -200,12 +200,12 @@ export default function LeadGenApp() {
       />
 
       {/* ── Google Maps Module ─────────────────────────── */}
-      <div style={{ display: activeModule === "gmaps" ? "block" : "none", flex: 1, overflowY: "auto", maxHeight: "calc(100vh - 57px)" }}>
+      <div className="rw-main-layout" style={{ display: activeModule === "gmaps" ? "flex" : "none" }}>
         <GmapsView />
       </div>
 
       {/* ── Lead Gen Pipeline ───────────────────────────── */}
-      <div style={{ display: activeModule === "leadgen" ? "flex" : "none", flex: 1 }}>
+      <div className="rw-main-layout" style={{ display: activeModule === "leadgen" ? "flex" : "none" }}>
         <Sidebar
           activeStep={activeStep}
           onStepChange={goToStep}
@@ -214,12 +214,7 @@ export default function LeadGenApp() {
         {/* Main content area */}
         <main
           ref={contentRef}
-          style={{
-            flex: 1,
-            padding: "32px 40px",
-            maxHeight: "calc(100vh - 57px)",
-            overflowY: "auto",
-          }}
+          className="rw-main-content"
         >
           {/* Step header */}
           <div
