@@ -28,23 +28,6 @@ const MODULES = [
 
 export default function Header({ onClearAll, activeModule, onModuleChange }) {
   const [health, setHealth] = useState(null);
-  const [isDark, setIsDark] = useState(false);
-
-  useEffect(() => {
-    // Sync with DOM on mount
-    setIsDark(document.documentElement.classList.contains("dark"));
-  }, []);
-
-  const toggleTheme = () => {
-    const newTheme = isDark ? "light" : "dark";
-    setIsDark(!isDark);
-    if (newTheme === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-    localStorage.setItem("theme", newTheme);
-  };
 
   useEffect(() => {
     let mounted = true;
@@ -163,31 +146,6 @@ export default function Header({ onClearAll, activeModule, onModuleChange }) {
           />
           <span className="rw-hide-mobile">{health?.ok ? "API Online" : "API Offline"}</span>
         </div>
-
-        {/* Dark Mode Toggle */}
-        <button
-          type="button"
-          onClick={toggleTheme}
-          style={{
-            background: "transparent",
-            border: "none",
-            cursor: "pointer",
-            fontSize: 18,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: 32,
-            height: 32,
-            borderRadius: "50%",
-            color: "var(--rw-text-secondary)",
-            transition: "all 0.2s ease",
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.background = "var(--rw-surface-hover)")}
-          onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
-          title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
-        >
-          {isDark ? "☀️" : "🌙"}
-        </button>
 
         {/* Clear Data button */}
         <button

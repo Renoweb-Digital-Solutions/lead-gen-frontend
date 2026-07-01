@@ -55,26 +55,6 @@
   --rw-transition-spring: 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.dark {
-    --rw-bg: #090e17;
-    --rw-surface: #111827;
-    --rw-surface-hover: #1f2937;
-    --rw-sidebar-bg: linear-gradient(165deg, rgba(15, 23, 42, 0.85) 0%, rgba(9, 14, 23, 0.75) 40%, rgba(3, 7, 18, 0.7) 100%);
-    --rw-border: #334155;
-    --rw-border-focus: var(--rw-bright-blue);
-    --rw-text: #f8fafc;
-    --rw-text-secondary: #cbd5e1;
-    --rw-text-muted: #94a3b8;
-    
-    --rw-gradient-surface: linear-gradient(180deg, #111827 0%, #090e17 100%);
-    
-    --rw-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
-    --rw-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.6);
-    --rw-shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.7);
-    --rw-shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.8);
-  --rw-shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.8);
-}
-
 /* ── Tailwind v4 Theme ───────────────────────────────────── */
 @theme inline {
   --color-background: var(--rw-bg);

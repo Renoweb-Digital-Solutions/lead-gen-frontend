@@ -38,6 +38,13 @@ export default function GmapsView() {
   const [location, setLocation] = useSessionState("gmaps-location", "");
   const [limit, setLimit] = useSessionState("gmaps-limit", 100);
 
+  // Clamp limit to 200 if loaded value from session storage exceeds it
+  useEffect(() => {
+    if (limit > 200) {
+      setLimit(200);
+    }
+  }, [limit, setLimit]);
+
   // ─── Search State ────────────────────────────────────────
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState(null);
@@ -270,7 +277,7 @@ export default function GmapsView() {
           value={limit}
           onChange={setLimit}
           min={10}
-          max={500}
+          max={200}
           step={10}
         />
       </div>
