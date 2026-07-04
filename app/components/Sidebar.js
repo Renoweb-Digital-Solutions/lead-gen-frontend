@@ -1,179 +1,113 @@
 "use client";
 
+import { motion } from "framer-motion";
+import { Users, Building2, Briefcase, Zap, Rocket, Check } from "lucide-react";
 import { STEPS } from "../lib/constants";
 
-/**
- * Component: Sidebar
- * 
- * WHAT IT DOES:
- * Renders the left-hand navigation sidebar (using a glassmorphism design). 
- * It lists all the available steps in the lead generation wizard, highlighting the current step
- * and allowing the user to click between steps.
- * 
- * PROPS RECEIVED:
- * - `activeStep` (Number): The index of the currently active step (e.g. 0 for PeopleStep).
- * - `onStepChange` (Function): Callback executed when a step button is clicked to navigate to that step.
- * - `completedSteps` (Object): Map of which steps have been finished (optional/future enhancement).
- *   Props come from: e:\WORK\Renoweb\lead-gen\app\components\LeadGenApp.js
- * 
- * PROPS OUTGOING: None.
- */
+const ICON_MAP = {
+  Users: Users,
+  Building2: Building2,
+  Briefcase: Briefcase,
+  Zap: Zap,
+  Rocket: Rocket,
+};
+
 export default function Sidebar({ activeStep, onStepChange, completedSteps = {} }) {
   return (
-    <nav className="rw-sidebar">
+    <nav className="rw-sidebar relative">
       {/* Glass shimmer overlay */}
       <div
+        className="absolute inset-0 pointer-events-none"
         style={{
-          position: "absolute",
-          inset: 0,
-          background:
-            "linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, transparent 50%, rgba(255, 255, 255, 0.2) 100%)",
-          pointerEvents: "none",
+          background: "linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, transparent 50%, rgba(255, 255, 255, 0.2) 100%)",
         }}
       />
 
-      {/* Steps */}
-      <div className="rw-sidebar-steps">
+      <div className="rw-sidebar-steps px-6 pt-4 pb-8 flex flex-col relative z-10">
         {STEPS.map((step, index) => {
           const isActive = activeStep === index;
-          const isCompleted = completedSteps[step.id];
+          const isCompleted = completedSteps[step.id] || index < activeStep; // Auto-complete previous steps
+          const Icon = ICON_MAP[step.iconName];
 
           return (
-            <button
-              key={step.id}
-              type="button"
-              onClick={() => onStepChange(index)}
-              style={{
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                gap: 12,
-                padding: "14px 20px",
-                border: "none",
-                flexShrink: 0,
-                background: isActive
-                  ? "rgba(48, 143, 239, 0.12)"
-                  : "transparent",
-                borderLeft: isActive
-                  ? "3px solid var(--rw-bright-blue)"
-                  : "3px solid transparent",
-                borderRight: "none",
-                borderTop: "none",
-                borderBottom: "none",
-                cursor: "pointer",
-                transition: "all 0.25s ease",
-                textAlign: "left",
-                fontFamily: "inherit",
-                borderRadius: isActive ? "0 8px 8px 0" : "0",
-                margin: isActive ? "2px 8px 2px 0" : "0",
-                boxShadow: isActive
-                  ? "0 2px 12px rgba(48, 143, 239, 0.1), inset 0 0 0 1px rgba(48, 143, 239, 0.08)"
-                  : "none",
-              }}
-              onMouseEnter={(e) => {
-                if (!isActive) {
-                  e.currentTarget.style.background = "rgba(48, 143, 239, 0.06)";
-                  e.currentTarget.style.borderRadius = "0 8px 8px 0";
-                  e.currentTarget.style.margin = "2px 8px 2px 0";
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!isActive) {
-                  e.currentTarget.style.background = "transparent";
-                  e.currentTarget.style.borderRadius = "0";
-                  e.currentTarget.style.margin = "0";
-                }
-              }}
-            >
-              {/* Step number / check */}
-              <div
-                style={{
-                  width: 34,
-                  height: 34,
-                  borderRadius: "10px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 13,
-                  fontWeight: 700,
-                  flexShrink: 0,
-                  background: isCompleted
-                    ? "var(--rw-success)"
-                    : isActive
-                    ? "var(--rw-gradient-primary)"
-                    : "rgba(48, 143, 239, 0.08)",
-                  color: isCompleted || isActive ? "#ffffff" : "var(--rw-bright-blue)",
-                  transition: "all 0.3s ease",
-                  border:
-                    !isCompleted && !isActive
-                      ? "1.5px solid rgba(48, 143, 239, 0.15)"
-                      : "1.5px solid transparent",
-                  boxShadow:
-                    isActive
-                      ? "0 4px 12px rgba(48, 143, 239, 0.25)"
-                      : "none",
-                }}
-              >
-                {isCompleted ? (
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                    <path
-                      d="M3 7L6 10L11 4"
-                      stroke="white"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                ) : (
-                  index + 1
-                )}
-              </div>
+            <div key={step.id} className="relative flex">
+              {/* Connecting Line (except last) */}
+              {index < STEPS.length - 1 && (
+                <div className="absolute left-6 top-10 w-[2px] h-full -ml-px bg-brand-blue/10 rounded-full">
+                  {/* Filled portion of the line */}
+                  <motion.div 
+                    initial={{ height: 0 }}
+                    animate={{ height: isCompleted ? "100%" : "0%" }}
+                    transition={{ duration: 0.5, ease: "easeInOut" }}
+                    className="w-full bg-gradient-to-b from-brand-blue to-brand-cyan rounded-full"
+                  />
+                </div>
+              )}
 
-              {/* Label */}
-              <div>
-                <div
-                  style={{
-                    fontSize: 14,
-                    fontWeight: isActive ? 600 : 500,
-                    color: isActive
-                      ? "var(--rw-deep-blue)"
-                      : "#4a5568",
-                    transition: "all 0.2s ease",
-                    lineHeight: 1.3,
-                  }}
+              <button
+                type="button"
+                onClick={() => onStepChange(index)}
+                className={`group relative flex items-start gap-4 py-3 w-full text-left transition-all duration-300 ${isActive ? "scale-105 origin-left" : ""}`}
+              >
+                {/* Step Icon/Indicator */}
+                <div 
+                  className={`
+                    relative w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 transition-all duration-300 z-10
+                    ${isActive 
+                      ? "bg-gradient-to-br from-brand-blue via-brand-sky to-brand-cyan text-white shadow-[0_0_20px_rgba(48,143,239,0.3)]" 
+                      : isCompleted 
+                        ? "bg-brand-cyan text-white shadow-md"
+                        : "bg-white border-2 border-brand-blue/10 text-brand-blue/40 group-hover:border-brand-blue/30 group-hover:text-brand-blue/60"
+                    }
+                  `}
                 >
-                  {step.label}
+                  {isCompleted && !isActive ? (
+                    <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring" }}>
+                      <Check className="w-5 h-5" strokeWidth={3} />
+                    </motion.div>
+                  ) : (
+                    <Icon className="w-5 h-5" strokeWidth={isActive ? 2.5 : 2} />
+                  )}
                 </div>
-                <div
-                  style={{
-                    fontSize: 11,
-                    color: isActive
-                      ? "var(--rw-bright-blue)"
-                      : "#94a3b8",
-                    marginTop: 2,
-                    transition: "all 0.2s ease",
-                  }}
-                >
-                  {step.description}
+
+                {/* Step Text */}
+                <div className="flex flex-col pt-1.5">
+                  <span 
+                    className={`text-[15px] font-bold tracking-wide transition-colors duration-200 ${
+                      isActive ? "text-brand-blue" : isCompleted ? "text-brand-dark" : "text-gray-400 group-hover:text-gray-600"
+                    }`}
+                  >
+                    {step.label}
+                  </span>
+                  <span 
+                    className={`text-[12px] mt-0.5 transition-colors duration-200 ${
+                      isActive ? "text-brand-sky font-medium" : "text-gray-400/60"
+                    }`}
+                  >
+                    {step.description.charAt(0).toUpperCase() + step.description.slice(1).toLowerCase()}
+                  </span>
                 </div>
-              </div>
-            </button>
+              </button>
+            </div>
           );
         })}
       </div>
 
       {/* Footer branding */}
-      <div className="rw-sidebar-footer">
-        <div
-          style={{
-            fontSize: 11,
-            color: "#94a3b8",
-            lineHeight: 1.5,
-          }}
-        >
+      <div className="rw-sidebar-footer relative z-10 mt-auto pt-6 pb-2">
+        <div className="flex items-center gap-3 mb-5 p-2.5 rounded-xl border border-transparent hover:border-brand-blue/10 hover:bg-white hover:shadow-sm transition-all cursor-pointer">
+          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-brand-blue to-brand-cyan text-white flex items-center justify-center font-bold text-[14px] shadow-[0_2px_10px_rgba(2,61,187,0.2)] shrink-0">
+            N
+          </div>
+          <div className="flex flex-col min-w-0">
+            <span className="text-[13px] font-bold text-brand-dark truncate leading-tight">Noah Smith</span>
+            <span className="text-[11px] text-gray-500 truncate mt-0.5">noah@renoweb.com</span>
+          </div>
+        </div>
+        <div className="text-[10px] text-brand-blue/50 font-bold tracking-[0.1em] uppercase px-2.5">
           Renoweb Digital Solutions
           <br />
-          Lead Generation Pipeline
+          <span className="text-gray-400 font-medium tracking-normal">Lead Gen Pipeline</span>
         </div>
       </div>
     </nav>

@@ -1,11 +1,13 @@
 "use client";
 
+import { motion } from "framer-motion";
 import SliderInput from "../inputs/SliderInput";
 import MultiSelect from "../inputs/MultiSelect";
 import TagInput from "../inputs/TagInput";
 import ToggleGroup from "../inputs/ToggleGroup";
 import ChipSelect from "../inputs/ChipSelect";
 import SearchableDropdown from "../inputs/SearchableDropdown";
+import Toggle from "../inputs/Toggle";
 import {
   EMAIL_STATUS_OPTIONS,
   BOOLEAN_OPTIONS,
@@ -16,29 +18,40 @@ import {
   COUNTRIES,
 } from "../../lib/constants";
 
-/**
- * Component: PeopleStep
- * 
- * WHAT IT DOES:
- * Renders the form UI for Step 1 ("People"). It contains fields for setting total results, 
- * email/phone filters, target job titles, role match modes, seniority, functions, and locations.
- * 
- * PROPS RECEIVED:
- * - `formState` (Object): The complete state tree managed by `useFormState`.
- * - `updateField` (Function): Function to update a single key in `formState`.
- *   Props come from: e:\WORK\Renoweb\lead-gen\app\components\LeadGenApp.js
- * 
- * PROPS OUTGOING:
- * - to custom inputs (SliderInput, MultiSelect, TagInput, ToggleGroup, ChipSelect, SearchableDropdown):
- *   Passes specific values from `formState` and onChange handlers that call `updateField`.
- *   (Located in: e:\WORK\Renoweb\lead-gen\app\components\inputs\*)
- */
+const sectionVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 }
+};
+
+const Card = ({ title, children, zIndex }) => (
+  <motion.div 
+    variants={sectionVariants}
+    style={{ zIndex }}
+    className={`relative bg-white rounded-2xl p-6 lg:p-7 border border-brand-blue/10 shadow-[0_2px_8px_rgba(2,61,187,0.08)] hover:shadow-[0_8px_24px_rgba(2,61,187,0.12)] hover:-translate-y-[2px] transition-all duration-200 mb-6`}
+  >
+    <div className="flex items-center gap-2.5 mb-6 pb-3 border-b border-brand-blue/5">
+      <div className="w-1 h-3.5 bg-gradient-to-b from-brand-blue to-brand-cyan rounded-full" />
+      <h2 className="text-[12px] font-bold uppercase tracking-[0.05em] text-brand-blue m-0 leading-none">{title}</h2>
+    </div>
+    {children}
+  </motion.div>
+);
+
 export default function PeopleStep({ formState, updateField }) {
   return (
-    <div>
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={{
+        hidden: { opacity: 0 },
+        visible: {
+          opacity: 1,
+          transition: { staggerChildren: 0.08 }
+        }
+      }}
+    >
       {/* ── Results ─────────────────────────────────────────── */}
-      <div className="rw-section">
-        <div className="rw-section-title">Search Volume</div>
+      <Card title="Search Volume" zIndex={60}>
         <SliderInput
           label="Total Results"
           hint="Maximum leads to fetch"
@@ -48,13 +61,11 @@ export default function PeopleStep({ formState, updateField }) {
           max={5000}
           step={10}
         />
-      </div>
+      </Card>
 
-      {/* ── Contact Filters ─────────────────────────────────── */}
-      <div className="rw-section">
-        <div className="rw-section-title">Contact Filters</div>
-
-        <div className="rw-field-row-3">
+      {/* ── Email & LinkedIn ────────────────────────────────── */}
+      <Card title="Contact Data Requirements" zIndex={10}>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           <SearchableDropdown
             label="Email Status"
             options={EMAIL_STATUS_OPTIONS}
@@ -75,89 +86,64 @@ export default function PeopleStep({ formState, updateField }) {
             onChange={(val) => updateField("hasPhone", val)}
           />
         </div>
-      </div>
+      </Card>
 
-      {/* ── Titles & Roles ──────────────────────────────────── */}
-      <div className="rw-section">
-        <div className="rw-section-title">Titles & Roles</div>
+      {/* ── Titles ────────────────────────────────────────── */}
+      <Card title="Job Titles & Roles" zIndex={50}>
+        <div className="flex flex-col gap-5">
+          <MultiSelect
+            label="Person Titles"
+            hint="Primary titles to target"
+            options={PERSON_TITLES}
+            selected={formState.personTitleIncludes}
+            onChange={(val) => updateField("personTitleIncludes", val)}
+            placeholder="Search and select titles..."
+          />
 
-        <MultiSelect
-          label="Person Titles"
-          hint="Primary titles to target"
-          options={PERSON_TITLES}
-          selected={formState.personTitleIncludes}
-          onChange={(val) => updateField("personTitleIncludes", val)}
-          placeholder="Search and select titles..."
-        />
+          <TagInput
+            label="Extra Titles"
+            hint="Custom titles not in the list"
+            tags={formState.personTitleExtraIncludes}
+            onChange={(val) => updateField("personTitleExtraIncludes", val)}
+            placeholder="Type a title and press Enter..."
+          />
 
-        <TagInput
-          label="Extra Titles"
-          hint="Custom titles not in the list"
-          tags={formState.personTitleExtraIncludes}
-          onChange={(val) => updateField("personTitleExtraIncludes", val)}
-          placeholder="Type a title and press Enter..."
-        />
-
-        <div className="rw-field-row">
-          <div className="rw-field">
-            <div className="rw-toggle-field">
-              <div>
-                <div className="rw-toggle-field-label">Include Similar Titles</div>
-                <div className="rw-toggle-field-hint">Broaden search with related titles</div>
-              </div>
-              <button
-                type="button"
-                className="rw-toggle"
-                data-checked={formState.includeSimilarTitles}
-                onClick={() =>
-                  updateField("includeSimilarTitles", !formState.includeSimilarTitles)
-                }
-                aria-label="Include Similar Titles"
-              />
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-2 p-5 bg-gray-50/50 rounded-xl border border-gray-100">
+            <Toggle
+              label="Include Similar Titles"
+              hint="Broaden search with related titles"
+              checked={formState.includeSimilarTitles}
+              onChange={(val) => updateField("includeSimilarTitles", val)}
+            />
+            <Toggle
+              label="Include Title Variants"
+              hint="Match different spellings"
+              checked={formState.includeTitleVariants}
+              onChange={(val) => updateField("includeTitleVariants", val)}
+            />
           </div>
 
-          <div className="rw-field">
-            <div className="rw-toggle-field">
-              <div>
-                <div className="rw-toggle-field-label">Include Title Variants</div>
-                <div className="rw-toggle-field-hint">Match different spellings</div>
-              </div>
-              <button
-                type="button"
-                className="rw-toggle"
-                data-checked={formState.includeTitleVariants}
-                onClick={() =>
-                  updateField("includeTitleVariants", !formState.includeTitleVariants)
-                }
-                aria-label="Include Title Variants"
-              />
-            </div>
-          </div>
+          <ToggleGroup
+            label="Role Match Mode"
+            hint="Match any or all roles"
+            options={ROLE_MATCH_MODES}
+            value={formState.roleMatchMode}
+            onChange={(val) => updateField("roleMatchMode", val)}
+          />
         </div>
-
-        <ToggleGroup
-          label="Role Match Mode"
-          hint="Match any or all roles"
-          options={ROLE_MATCH_MODES}
-          value={formState.roleMatchMode}
-          onChange={(val) => updateField("roleMatchMode", val)}
-        />
-      </div>
+      </Card>
 
       {/* ── Seniority ───────────────────────────────────────── */}
-      <div className="rw-section">
-        <div className="rw-section-title">Seniority Level</div>
+      <Card title="Seniority Level" zIndex={40}>
         <ChipSelect
           options={SENIORITY_OPTIONS}
           selected={formState.seniorityIncludes}
           onChange={(val) => updateField("seniorityIncludes", val)}
         />
-      </div>
+      </Card>
 
       {/* ── Functions ───────────────────────────────────────── */}
-      <div className="rw-section">
-        <div className="rw-section-title">Functions</div>
+      <Card title="Functions" zIndex={30}>
         <MultiSelect
           label="Person Functions"
           hint="Department / functional area"
@@ -166,12 +152,11 @@ export default function PeopleStep({ formState, updateField }) {
           onChange={(val) => updateField("personFunctionIncludes", val)}
           placeholder="Select departments..."
         />
-      </div>
+      </Card>
 
       {/* ── Location ────────────────────────────────────────── */}
-      <div className="rw-section">
-        <div className="rw-section-title">Person Location</div>
-        <div className="rw-field-row-3">
+      <Card title="Person Location" zIndex={20}>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           <MultiSelect
             label="Country"
             options={COUNTRIES}
@@ -192,7 +177,7 @@ export default function PeopleStep({ formState, updateField }) {
             placeholder="e.g. Los Angeles"
           />
         </div>
-      </div>
-    </div>
+      </Card>
+    </motion.div>
   );
 }

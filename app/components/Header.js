@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { checkHealth } from "../lib/api";
+import { Target, Map, Trash2, Activity } from "lucide-react";
 
 /**
  * Component: Header
@@ -22,8 +23,8 @@ import { checkHealth } from "../lib/api";
  */
 
 const MODULES = [
-  { id: "leadgen", label: "Lead Gen Pipeline", icon: "🎯" },
-  { id: "gmaps", label: "Google Maps", icon: "🗺️" },
+  { id: "leadgen", label: "Lead Gen Pipeline", icon: Target },
+  { id: "gmaps", label: "Google Maps", icon: Map },
 ];
 
 export default function Header({ onClearAll, activeModule, onModuleChange }) {
@@ -48,7 +49,7 @@ export default function Header({ onClearAll, activeModule, onModuleChange }) {
   }, []);
 
   return (
-    <header className="rw-header">
+    <header className="rw-header shadow-sm border-b border-brand-blue/10 bg-white/90 backdrop-blur-md">
       {/* Left: Logo + Module Tabs */}
       <div style={{ display: "flex", alignItems: "center", gap: 0, height: "100%" }}>
         {/* Logo */}
@@ -82,6 +83,7 @@ export default function Header({ onClearAll, activeModule, onModuleChange }) {
         <nav style={{ display: "flex", alignItems: "center", gap: 0, height: "100%" }}>
           {MODULES.map((mod) => {
             const isActive = activeModule === mod.id;
+            const Icon = mod.icon;
             return (
               <button
                 key={mod.id}
@@ -90,14 +92,14 @@ export default function Header({ onClearAll, activeModule, onModuleChange }) {
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: 6,
+                  gap: 8,
                   padding: "0 16px",
                   height: "100%",
                   border: "none",
                   background: "transparent",
                   cursor: "pointer",
                   fontSize: 13.5,
-                  fontWeight: isActive ? 600 : 400,
+                  fontWeight: isActive ? 600 : 500,
                   fontFamily: "inherit",
                   color: isActive ? "var(--rw-deep-blue)" : "var(--rw-text-muted)",
                   borderBottom: isActive
@@ -119,7 +121,7 @@ export default function Header({ onClearAll, activeModule, onModuleChange }) {
                   }
                 }}
               >
-                <span style={{ fontSize: 16 }}>{mod.icon}</span>
+                <Icon className={`w-4 h-4 ${isActive ? 'text-brand-bright-blue' : 'text-gray-400'}`} />
                 <span className="rw-hide-mobile">{mod.label}</span>
               </button>
             );
@@ -140,33 +142,31 @@ export default function Header({ onClearAll, activeModule, onModuleChange }) {
           }}
         >
           <div
-            className={`rw-status-dot ${
-              health?.ok ? "rw-status-dot-online" : "rw-status-dot-offline"
+            className={`rw-status-dot relative ${
+              health?.ok ? "rw-status-dot-online shadow-[0_0_8px_rgba(16,185,129,0.6)]" : "rw-status-dot-offline shadow-[0_0_8px_rgba(239,68,68,0.6)]"
             }`}
-          />
-          <span className="rw-hide-mobile">{health?.ok ? "API Online" : "API Offline"}</span>
+          >
+            {health?.ok ? (
+              <div className="absolute inset-0 rounded-full bg-emerald-400 animate-ping opacity-75" />
+            ) : (
+              <div className="absolute inset-0 rounded-full bg-red-400 animate-ping opacity-75" />
+            )}
+          </div>
+          <span className="rw-hide-mobile font-medium">{health?.ok ? "API Online" : "API Offline"}</span>
         </div>
 
         {/* Clear Data button */}
         <button
           type="button"
-          className="rw-btn rw-btn-ghost"
+          className="rw-btn rw-btn-ghost hover:bg-red-50"
           onClick={onClearAll}
           style={{
             color: "var(--rw-error)",
             fontSize: 13,
           }}
         >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path
-              d="M2 4H14M5 4V3C5 2.44772 5.44772 2 6 2H10C10.5523 2 11 2.44772 11 3V4M6 7V11M10 7V11M3 4L4 13C4 13.5523 4.44772 14 5 14H11C11.5523 14 12 13.5523 12 13L13 4"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-          <span className="rw-hide-mobile">{activeModule === "gmaps" ? "Clear GMaps Data" : "Clear Pipeline"}</span>
+          <Trash2 className="w-4 h-4" />
+          <span className="rw-hide-mobile font-medium">{activeModule === "gmaps" ? "Clear GMaps Data" : "Clear Pipeline"}</span>
         </button>
       </div>
     </header>

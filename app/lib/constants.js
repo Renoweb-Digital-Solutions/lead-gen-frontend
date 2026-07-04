@@ -288,7 +288,7 @@ export const EXPORT_FORMATS = [
     label: "Full Bundle",
     description: "ZIP with summary, leads & jobs CSVs",
     endpoint: "/export/bundle.zip",
-    icon: "📦",
+    iconName: "Package",
     defaultFilename: "bundle.zip",
   },
   {
@@ -296,7 +296,7 @@ export const EXPORT_FORMATS = [
     label: "Summary CSV",
     description: "Scored leads with all data combined",
     endpoint: "/export/summary.csv",
-    icon: "📊",
+    iconName: "BarChart",
     defaultFilename: "summary.csv",
   },
   {
@@ -304,7 +304,7 @@ export const EXPORT_FORMATS = [
     label: "Leads Only",
     description: "Normalized leads with contact info",
     endpoint: "/export/leads.csv",
-    icon: "👥",
+    iconName: "Users",
     defaultFilename: "leads.csv",
   },
   {
@@ -312,18 +312,17 @@ export const EXPORT_FORMATS = [
     label: "Jobs Only",
     description: "Normalized jobs with scoring data",
     endpoint: "/export/jobs.csv",
-    icon: "💼",
+    iconName: "Briefcase",
     defaultFilename: "jobs.csv",
   },
 ];
 
-// ─── Step Definitions ─────────────────────────────────────
 export const STEPS = [
-  { id: "people", label: "People", icon: "👤", description: "Person filters & targeting" },
-  { id: "company", label: "Company", icon: "🏢", description: "Company filters & criteria" },
-  { id: "jobs", label: "Jobs", icon: "💼", description: "Job search configuration" },
-  { id: "scoring", label: "Scoring", icon: "⚡", description: "Relevance & urgency scoring" },
-  { id: "export", label: "Export", icon: "🚀", description: "Export settings & generate" },
+  { id: "people", label: "People", iconName: "Users", description: "Person filters & targeting" },
+  { id: "company", label: "Company", iconName: "Building2", description: "Company filters & criteria" },
+  { id: "jobs", label: "Jobs", iconName: "Briefcase", description: "Job search configuration" },
+  { id: "scoring", label: "Scoring", iconName: "Zap", description: "Relevance & urgency scoring" },
+  { id: "export", label: "Export", iconName: "Rocket", description: "Export settings & generate" },
 ];
 
 // ─── Default Form State ───────────────────────────────────

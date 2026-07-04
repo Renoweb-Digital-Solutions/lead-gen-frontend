@@ -8,6 +8,7 @@ export default function TagInput({
   tags = [],
   onChange,
   placeholder = "Type and press Enter...",
+  icon: Icon,
 }) {
   const [inputValue, setInputValue] = useState("");
   const inputRef = useRef(null);
@@ -69,20 +70,13 @@ export default function TagInput({
 
       <div
         onClick={() => inputRef.current?.focus()}
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: 6,
-          padding: "8px 12px",
-          minHeight: 42,
-          background: "var(--rw-surface)",
-          border: "1.5px solid var(--rw-border)",
-          borderRadius: "var(--rw-radius-md)",
-          cursor: "text",
-          transition: "border-color var(--rw-transition-fast), box-shadow var(--rw-transition-fast)",
-        }}
-        onFocus={() => {}}
+        className="group flex flex-wrap items-center gap-1.5 p-2 min-h-[42px] bg-white border-1.5 border-gray-200 rounded-xl cursor-text transition-all focus-within:border-brand-sky focus-within:ring-4 focus-within:ring-brand-sky/10 hover:border-brand-sky/40"
       >
+        {Icon && (
+          <div className="pl-1.5 pr-1 text-gray-400 group-focus-within:text-brand-sky transition-colors flex items-center h-full">
+            <Icon className="w-4 h-4" />
+          </div>
+        )}
         {tags.map((tag) => (
           <span key={tag} className="rw-tag">
             {tag}
