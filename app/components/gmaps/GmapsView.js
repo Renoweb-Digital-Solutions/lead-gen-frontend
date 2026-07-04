@@ -1,11 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import Papa from "papaparse";
-import ResultsTable from "../ResultsTable";
-import ExportProgress from "../ExportProgress";
-import TagInput from "../inputs/TagInput";
-import SliderInput from "../inputs/SliderInput";
+import { useState, useEffect } from "react";
 import {
   gmapsSearch,
   gmapsGetRuns,
@@ -14,31 +9,20 @@ import {
   downloadBlob,
 } from "../../lib/api";
 import { useSessionState } from "../../hooks/useSessionState";
+import { Map } from "lucide-react";
 
-/**
- * Component: GmapsView
- *
- * WHAT IT DOES:
- * Full-page view for the Google Maps local business search module.
- * Lets the user enter domain keywords + location, run a search via
- * the Compass Google Places actor, view results in a table,
- * load past runs, and download CSV / enriched CSV exports.
- *
- * PROPS RECEIVED:
- * - None. It manages its own state internally.
- *   Rendered from: e:\WORK\Renoweb\lead-gen\app\components\LeadGenApp.js
- *
- * PROPS OUTGOING:
- * - to <ResultsTable>: `data` -> e:\WORK\Renoweb\lead-gen\app\components\ResultsTable.js
- * - to <ExportProgress>: `isActive`, `totalResults` -> e:\WORK\Renoweb\lead-gen\app\components\ExportProgress.js
- */
+import SearchParametersCard from "./SearchParametersCard";
+import GlobeVisualization from "./GlobeVisualization";
+import ExportProgress from "../ExportProgress";
+import RippleArrivalSignal from "./RippleArrivalSignal";
+import ResultsBottomSheet from "./ResultsBottomSheet";
+
 export default function GmapsView() {
   // ─── Search Form State ───────────────────────────────────
   const [keywords, setKeywords] = useSessionState("gmaps-keywords", []);
   const [location, setLocation] = useSessionState("gmaps-location", "");
   const [limit, setLimit] = useSessionState("gmaps-limit", 100);
 
-  // Clamp limit to 200 if loaded value from session storage exceeds it
   useEffect(() => {
     if (limit > 200) {
       setLimit(200);
@@ -51,13 +35,15 @@ export default function GmapsView() {
   const [searchSuccess, setSearchSuccess] = useState(null);
   const [resultData, setResultData] = useSessionState("gmaps-results", null);
   const [currentRunId, setCurrentRunId] = useSessionState("gmaps-runid", null);
+  
+  // ─── Results UI State ────────────────────────────────────
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   // ─── Past Runs State ─────────────────────────────────────
   const [runs, setRuns] = useState([]);
   const [loadingRuns, setLoadingRuns] = useState(false);
   const [isExportingCsv, setIsExportingCsv] = useState(false);
 
-  // Load past runs on mount
   useEffect(() => {
     loadRuns();
   }, []);
@@ -90,11 +76,11 @@ export default function GmapsView() {
     setSearchSuccess(null);
     setResultData(null);
     setCurrentRunId(null);
+    setIsSheetOpen(false);
 
     try {
       const result = await gmapsSearch({ keywords, location: location.trim(), limit });
 
-      // The backend may return results in different formats — handle arrays or objects with rows
       let rows = [];
       let runId = null;
 
@@ -107,7 +93,6 @@ export default function GmapsView() {
         rows = result.data;
         runId = result.run_id || result.id || null;
       } else if (result.run_id || result.id) {
-        // Backend returned just a run_id — fetch the actual data
         runId = result.run_id || result.id;
         const runData = await gmapsGetRun(runId);
         rows = Array.isArray(runData) ? runData : (runData.rows || runData.data || []);
@@ -116,8 +101,6 @@ export default function GmapsView() {
       setResultData(rows);
       setCurrentRunId(runId);
       setSearchSuccess(`Found ${rows.length} businesses!`);
-
-      // Refresh runs list
       loadRuns();
     } catch (err) {
       setSearchError(err.message || "Search failed. Please try again.");
@@ -178,149 +161,78 @@ export default function GmapsView() {
     }
   };
 
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
-    <div className="rw-main-content" style={{ width: "100%" }}>
+    <div className="rw-main-content w-full relative min-h-screen">
       {/* Page header */}
-      <div style={{ marginBottom: 32, animation: "rw-fadeInUp 0.3s ease-out" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
-          <span style={{ fontSize: 28 }}>🗺️</span>
-          <h1
-            style={{
-              fontSize: 24,
-              fontWeight: 700,
-              color: "var(--rw-text)",
-              margin: 0,
-              fontFamily: "var(--font-oswald), system-ui",
-              letterSpacing: "0.01em",
-            }}
-          >
+      <div className="mb-8 animate-[rw-fadeInUp_0.3s_ease-out]">
+        <div className="flex items-center gap-3 mb-1">
+          <div className="w-10 h-10 bg-gradient-to-br from-brand-sky/10 to-brand-cyan/10 rounded-xl flex items-center justify-center border border-brand-sky/20 shadow-sm text-brand-blue">
+            <Map className="w-5 h-5" />
+          </div>
+          <h1 className="text-2xl font-bold text-brand-dark m-0 tracking-tight font-display">
             Google Maps Search
           </h1>
         </div>
-        <p style={{ fontSize: 14, color: "var(--rw-text-muted)", margin: 0, marginLeft: 38 }}>
+        <p className="text-sm text-gray-500 m-0 ml-14">
           Find local businesses, analyze opportunities, and export enriched contacts
         </p>
       </div>
 
       {/* Alerts */}
       {searchError && (
-        <div
-          className="rw-animate-fade-in-up"
-          style={{
-            padding: "12px 16px",
-            marginBottom: 20,
-            background: "#fee2e2",
-            border: "1px solid #fecaca",
-            borderRadius: "var(--rw-radius-md)",
-            color: "#991b1b",
-            fontSize: 14,
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-          }}
-        >
+        <div className="animate-[rw-fadeInUp_0.3s_ease-out] p-4 mb-6 bg-red-50 border border-red-200 rounded-xl text-red-800 text-sm flex items-center gap-2">
           <span>❌</span>
           {searchError}
         </div>
       )}
 
       {searchSuccess && !isSearching && (
-        <div
-          className="rw-animate-fade-in-up"
-          style={{
-            padding: "12px 16px",
-            marginBottom: 20,
-            background: "#d1fae5",
-            border: "1px solid #a7f3d0",
-            borderRadius: "var(--rw-radius-md)",
-            color: "#065f46",
-            fontSize: 14,
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-          }}
-        >
+        <div className="animate-[rw-fadeInUp_0.3s_ease-out] p-4 mb-6 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-sm flex items-center gap-2">
           <span>✅</span>
           {searchSuccess}
         </div>
       )}
 
-      {/* ── Search Form ───────────────────────────────────── */}
-      <div className="rw-section">
-        <div className="rw-section-title">Search Parameters</div>
-
-        <div className="rw-field-row">
-          <div className="rw-field" style={{ flex: 2 }}>
-            <TagInput
-              label="Business Keywords"
-              hint="e.g. dentist, plumber, restaurant"
-              tags={keywords}
-              onChange={setKeywords}
-              placeholder="Type keyword and press Enter..."
-            />
-          </div>
-          <div className="rw-field" style={{ flex: 1 }}>
-            <label className="rw-label">Location</label>
-            <input
-              type="text"
-              className="rw-input"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              placeholder="e.g. Manchester, UK"
-            />
+      {/* ── ZONE 1: Search Form & Globe ───────────────────────────────────── */}
+      <div className="mb-8 grid grid-cols-1 lg:grid-cols-[55%_45%] gap-6 items-stretch">
+        <div className="flex flex-col">
+          <SearchParametersCard 
+            keywords={keywords}
+            setKeywords={setKeywords}
+            location={location}
+            setLocation={setLocation}
+            limit={limit}
+            setLimit={setLimit}
+            isSearching={isSearching}
+            onSearch={handleSearch}
+          />
+          <div className="mt-4">
+            <ExportProgress isActive={isSearching} logType="gmaps" />
           </div>
         </div>
-
-        <SliderInput
-          label="Max Results"
-          hint="Maximum number of places to crawl"
-          value={limit}
-          onChange={setLimit}
-          min={10}
-          max={200}
-          step={10}
-        />
-      </div>
-
-      {/* ── Search Button ─────────────────────────────────── */}
-      <div className="rw-section">
-        <button
-          type="button"
-          className="rw-btn-export"
-          onClick={handleSearch}
-          disabled={isSearching}
-        >
-          {isSearching ? (
-            <>
-              <div className="rw-spinner" />
-              <span>Searching Google Maps...</span>
-            </>
-          ) : (
-            <>
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <circle cx="9" cy="9" r="6" stroke="currentColor" strokeWidth="2" />
-                <path d="M14 14L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              </svg>
-              <span>Search Local Businesses</span>
-            </>
-          )}
-        </button>
-
-        {/* Progress logs */}
-        <ExportProgress isActive={isSearching} totalResults={limit} logType="gmaps" />
+        <div className="flex flex-col min-h-[500px]">
+          <GlobeVisualization 
+            status={isSearching ? "scanning" : (resultData?.length > 0 ? "complete" : "idle")}
+            targetLocation={location}
+            resultCount={resultData?.length || 0}
+          />
+        </div>
       </div>
 
       {/* ── Past Runs ─────────────────────────────────────── */}
-      {runs.length > 0 && (
-        <div className="rw-section">
-          <div className="rw-section-title">Past Runs</div>
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: 8,
-            }}
-          >
+      {runs.length > 0 && !isSearching && (!resultData || resultData.length === 0) && (
+        <div className="mb-8 animate-[rw-fadeInUp_0.4s_ease-out]">
+          <div className="flex items-center gap-2.5 mb-4">
+            <div className="w-1 h-3.5 bg-gray-300 rounded-full" />
+            <h3 className="text-[12px] font-bold uppercase tracking-[0.05em] text-gray-500 m-0 leading-none">
+              Past Searches
+            </h3>
+          </div>
+          <div className="flex flex-wrap gap-2">
             {runs.map((run) => {
               const runId = run.run_id || run.id || run;
               const isActive = currentRunId === runId;
@@ -329,22 +241,13 @@ export default function GmapsView() {
                   key={runId}
                   type="button"
                   onClick={() => handleLoadRun(runId)}
-                  style={{
-                    padding: "8px 16px",
-                    borderRadius: "var(--rw-radius-md)",
-                    border: isActive
-                      ? "1.5px solid var(--rw-bright-blue)"
-                      : "1px solid var(--rw-border)",
-                    background: isActive
-                      ? "rgba(48, 143, 239, 0.08)"
-                      : "var(--rw-surface)",
-                    color: isActive ? "var(--rw-bright-blue)" : "var(--rw-text-secondary)",
-                    fontSize: 13,
-                    fontWeight: isActive ? 600 : 400,
-                    cursor: "pointer",
-                    transition: "all 0.2s ease",
-                    fontFamily: "inherit",
-                  }}
+                  className={`
+                    px-4 py-2 rounded-xl text-[13px] transition-all font-medium border
+                    ${isActive 
+                      ? "border-brand-sky bg-brand-sky/10 text-brand-blue shadow-sm" 
+                      : "border-gray-200 bg-white text-gray-500 hover:border-brand-sky/30 hover:bg-gray-50"
+                    }
+                  `}
                 >
                   {run.created_at
                     ? `${new Date(run.created_at).toLocaleDateString()} — ${run.total_results || "?"} results`
@@ -356,32 +259,18 @@ export default function GmapsView() {
         </div>
       )}
 
-      {/* ── Results Table ─────────────────────────────────── */}
-      {resultData && resultData.length > 0 && (
-        <div className="rw-section" style={{ marginTop: 8, animation: "rw-fadeInUp 0.4s ease-out both" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-            <div className="rw-section-title" style={{ marginBottom: 0 }}>
-              Results ({resultData.length} businesses)
-            </div>
-
-              <div style={{ display: "flex", gap: 8 }}>
-                <button
-                  type="button"
-                  className="rw-btn rw-btn-secondary"
-                  onClick={handleExportCsv}
-                  disabled={isExportingCsv}
-                  style={{ padding: "8px 14px", fontSize: 13 }}
-                >
-                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style={{ marginRight: 6 }}>
-                    <path d="M14 11V14H2V11M8 3V11M8 11L4 7M8 11L12 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                  {isExportingCsv ? "Exporting..." : "CSV"}
-                </button>
-              </div>
-          </div>
-
-          <ResultsTable data={resultData} />
-        </div>
+      {/* ── Results Delivery System ───────────────────────────────────── */}
+      {resultData && resultData.length > 0 && !isSearching && (
+        <>
+          <RippleArrivalSignal isActive={true} />
+          <ResultsBottomSheet 
+            isOpen={isSheetOpen} 
+            onOpen={() => setIsSheetOpen(true)}
+            onClose={() => setIsSheetOpen(false)} 
+            onExport={handleExportCsv}
+            data={resultData} 
+          />
+        </>
       )}
     </div>
   );

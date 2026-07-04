@@ -1,0 +1,111 @@
+"use client";
+
+import { motion } from "framer-motion";
+import { Search, MapPin, Loader2 } from "lucide-react";
+import TagInput from "../inputs/TagInput";
+import SliderInput from "../inputs/SliderInput";
+
+export default function SearchParametersCard({
+  keywords,
+  setKeywords,
+  location,
+  setLocation,
+  limit,
+  setLimit,
+  isSearching,
+  onSearch,
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-white rounded-2xl p-6 lg:p-7 border border-brand-blue/10 shadow-[0_4px_20px_rgba(2,61,187,0.06)] relative z-10"
+    >
+      <div className="flex items-center gap-2.5 mb-6 pb-3 border-b border-brand-blue/5">
+        <div className="w-1 h-3.5 bg-gradient-to-b from-brand-blue to-brand-cyan rounded-full" />
+        <h2 className="text-[12px] font-bold uppercase tracking-[0.05em] text-brand-blue m-0 leading-none">
+          Search Parameters
+        </h2>
+      </div>
+
+      <div className="flex flex-col lg:flex-row gap-6 mb-6">
+        <div className="flex-1">
+          <TagInput
+            label="Business Keywords"
+            hint="e.g. dentist, restaurant"
+            tags={keywords}
+            onChange={setKeywords}
+            placeholder="Type keyword and press Enter..."
+            icon={Search}
+          />
+        </div>
+
+        <div className="flex-1 relative group">
+          <label className="text-[13px] font-semibold text-brand-dark block mb-1.5 uppercase tracking-wide">
+            Location
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-3.5 flex items-center z-10 text-brand-sky/60 group-focus-within:text-brand-sky transition-colors">
+              <MapPin className="w-4 h-4" />
+            </div>
+            <input
+              type="text"
+              className="w-full pl-10 pr-4 py-2.5 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-sky focus:ring-4 focus:ring-brand-sky/10 transition-all hover:border-brand-sky/40 text-brand-dark font-medium"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              placeholder="e.g. Manchester, UK"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="mb-8">
+        <SliderInput
+          label="Max Results"
+          hint="Maximum number of places to crawl"
+          value={limit}
+          onChange={setLimit}
+          min={10}
+          max={200}
+          step={10}
+        />
+      </div>
+
+      <div className="flex justify-end">
+        <motion.button
+          type="button"
+          onClick={onSearch}
+          disabled={isSearching}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          animate={
+            isSearching
+              ? { scale: 1 }
+              : { boxShadow: ["0 0 0px rgba(48,143,239,0)", "0 0 20px rgba(48,143,239,0.4)", "0 0 0px rgba(48,143,239,0)"] }
+          }
+          transition={isSearching ? {} : { duration: 2, repeat: Infinity }}
+          className={`
+            relative px-8 py-3.5 rounded-xl text-white font-bold text-[15px] tracking-wide flex items-center justify-center gap-2 overflow-hidden transition-all duration-300 min-w-[200px]
+            ${
+              isSearching
+                ? "bg-brand-sky shadow-inner pointer-events-none"
+                : "bg-gradient-to-r from-brand-blue to-brand-cyan shadow-[0_4px_20px_rgba(48,143,239,0.3)] hover:shadow-[0_8px_30px_rgba(48,143,239,0.5)]"
+            }
+          `}
+        >
+          {isSearching ? (
+            <>
+              <Loader2 className="w-5 h-5 animate-spin" />
+              <span>Searching...</span>
+            </>
+          ) : (
+            <>
+              <Search className="w-5 h-5" />
+              <span>Search Local Businesses</span>
+            </>
+          )}
+        </motion.button>
+      </div>
+    </motion.div>
+  );
+}

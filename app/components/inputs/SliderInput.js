@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
+import { motion, useAnimationControls } from "framer-motion";
 
 export default function SliderInput({
   label,
@@ -15,6 +16,7 @@ export default function SliderInput({
   const trackRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
   const [inputValue, setInputValue] = useState(value.toString());
+  const controls = useAnimationControls();
 
   useEffect(() => {
     if (!isDragging) {
@@ -41,11 +43,13 @@ export default function SliderInput({
   const handleMouseDown = (e) => {
     e.preventDefault();
     setIsDragging(true);
+    controls.start("dragging");
     updateValue(e.clientX);
 
     const handleMouseMove = (e) => updateValue(e.clientX);
     const handleMouseUp = () => {
       setIsDragging(false);
+      controls.start("idle");
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
     };
@@ -56,6 +60,7 @@ export default function SliderInput({
 
   const handleTouchStart = (e) => {
     setIsDragging(true);
+    controls.start("dragging");
     updateValue(e.touches[0].clientX);
 
     const handleTouchMove = (e) => {
@@ -64,6 +69,7 @@ export default function SliderInput({
     };
     const handleTouchEnd = () => {
       setIsDragging(false);
+      controls.start("idle");
       document.removeEventListener("touchmove", handleTouchMove);
       document.removeEventListener("touchend", handleTouchEnd);
     };
@@ -72,36 +78,18 @@ export default function SliderInput({
     document.addEventListener("touchend", handleTouchEnd);
   };
 
-  const displayValue = formatValue ? formatValue(value) : value.toLocaleString();
-
   return (
-    <div className="rw-field">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
-        <label className="rw-label" style={{ marginBottom: 0 }}>
+    <div className="rw-field mb-6">
+      <div className="flex justify-between items-baseline mb-4">
+        <label className="text-[13px] font-semibold text-brand-dark block uppercase tracking-wide m-0">
           {label}
-          {hint && <span className="rw-label-hint">{hint}</span>}
+          {hint && <span className="text-[12px] font-normal text-gray-400 ml-2 normal-case">{hint}</span>}
         </label>
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+        <div className="flex items-center gap-1.5">
           <button
             type="button"
             onClick={() => onChange(Math.max(min, value - step))}
-            style={{
-              width: 26,
-              height: 26,
-              borderRadius: 6,
-              border: "1px solid var(--rw-border)",
-              background: "var(--rw-surface)",
-              color: "var(--rw-text-secondary)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              cursor: "pointer",
-              fontSize: 16,
-              lineHeight: 1,
-              transition: "all 0.15s ease",
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.background = "var(--rw-surface-hover)"}
-            onMouseLeave={(e) => e.currentTarget.style.background = "var(--rw-surface)"}
+            className="w-7 h-7 rounded-md border border-gray-200 bg-white text-gray-400 hover:bg-gray-50 hover:text-gray-600 flex items-center justify-center text-lg leading-none transition-colors"
           >
             -
           </button>
@@ -121,43 +109,12 @@ export default function SliderInput({
                 e.target.blur();
               }
             }}
-            style={{
-              fontSize: 18,
-              fontWeight: 700,
-              color: "var(--rw-deep-blue)",
-              fontVariantNumeric: "tabular-nums",
-              width: 70,
-              textAlign: "center",
-              border: "1px solid transparent",
-              borderRadius: 6,
-              padding: "2px 0",
-              background: "transparent",
-              transition: "all 0.15s ease",
-              outline: "none",
-            }}
-            onFocus={(e) => e.currentTarget.style.border = "1px solid var(--rw-border)"}
-            onBlurCapture={(e) => e.currentTarget.style.border = "1px solid transparent"}
+            className="text-lg font-bold text-brand-blue tabular-nums w-16 text-center bg-transparent border border-transparent rounded-md focus:border-brand-sky/30 focus:outline-none transition-colors"
           />
           <button
             type="button"
             onClick={() => onChange(Math.min(max, value + step))}
-            style={{
-              width: 26,
-              height: 26,
-              borderRadius: 6,
-              border: "1px solid var(--rw-border)",
-              background: "var(--rw-surface)",
-              color: "var(--rw-text-secondary)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              cursor: "pointer",
-              fontSize: 16,
-              lineHeight: 1,
-              transition: "all 0.15s ease",
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.background = "var(--rw-surface-hover)"}
-            onMouseLeave={(e) => e.currentTarget.style.background = "var(--rw-surface)"}
+            className="w-7 h-7 rounded-md border border-gray-200 bg-white text-gray-400 hover:bg-gray-50 hover:text-gray-600 flex items-center justify-center text-lg leading-none transition-colors"
           >
             +
           </button>
@@ -166,7 +123,7 @@ export default function SliderInput({
 
       <div
         ref={trackRef}
-        className="rw-slider-track"
+        className="relative w-full h-2 rounded-full bg-gray-100 cursor-pointer"
         onMouseDown={handleMouseDown}
         onTouchStart={handleTouchStart}
         role="slider"
@@ -183,22 +140,37 @@ export default function SliderInput({
           }
         }}
       >
-        <div className="rw-slider-fill" style={{ width: `${percentage}%` }} />
-        <div
-          className="rw-slider-thumb"
-          style={{ left: `${percentage}%` }}
+        <div 
+          className="absolute top-0 left-0 h-full rounded-full bg-gradient-to-r from-brand-blue to-brand-amber transition-all duration-100 ease-out" 
+          style={{ width: `${percentage}%` }} 
         />
+        <motion.div
+          animate={controls}
+          variants={{
+            idle: { scale: 1, boxShadow: "0 2px 4px rgba(2,61,187,0.15)" },
+            dragging: { scale: 1.25, boxShadow: "0 0 0 6px rgba(48,143,239,0.15), 0 4px 12px rgba(2,61,187,0.2)" }
+          }}
+          initial="idle"
+          transition={{ type: "spring", stiffness: 500, damping: 25 }}
+          className="absolute top-1/2 w-[18px] h-[18px] rounded-full bg-white border-2 border-brand-blue -translate-x-1/2 -translate-y-1/2 flex items-center justify-center"
+          style={{ left: `${percentage}%`, zIndex: 10 }}
+        >
+          {isDragging && (
+            <motion.div
+              initial={{ opacity: 0, y: 10, scale: 0.8 }}
+              animate={{ opacity: 1, y: -30, scale: 1 }}
+              exit={{ opacity: 0, y: 10, scale: 0.8 }}
+              transition={{ type: "spring", stiffness: 400, damping: 20 }}
+              className="absolute whitespace-nowrap bg-brand-dark text-white text-[11px] font-bold px-2 py-1 rounded-md shadow-lg pointer-events-none"
+            >
+              {value}
+              <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-brand-dark" />
+            </motion.div>
+          )}
+        </motion.div>
       </div>
 
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          marginTop: 6,
-          fontSize: 11,
-          color: "var(--rw-text-muted)",
-        }}
-      >
+      <div className="flex justify-between mt-2 text-[11px] font-medium text-gray-400">
         <span>{min.toLocaleString()}</span>
         <span>{max.toLocaleString()}</span>
       </div>

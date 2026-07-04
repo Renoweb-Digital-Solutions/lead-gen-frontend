@@ -11,7 +11,18 @@ import CompanyStep from "./steps/CompanyStep";
 import JobsStep from "./steps/JobsStep";
 import ScoringStep from "./steps/ScoringStep";
 import ExportStep from "./steps/ExportStep";
+import LiveContextSidebar from "./LiveContextSidebar";
 import { useFormState } from "../hooks/useFormState";
+import { AnimatePresence, motion } from "framer-motion";
+import { Users, Building2, Briefcase, Zap, Rocket } from "lucide-react";
+
+const ICON_MAP = {
+  Users: <Users className="w-8 h-8 text-brand-blue" />,
+  Building2: <Building2 className="w-8 h-8 text-brand-blue" />,
+  Briefcase: <Briefcase className="w-8 h-8 text-brand-blue" />,
+  Zap: <Zap className="w-8 h-8 text-brand-blue" />,
+  Rocket: <Rocket className="w-8 h-8 text-brand-blue" />,
+};
 import { useSessionState } from "../hooks/useSessionState";
 import { exportLeads, downloadBlob } from "../lib/api";
 import { STEPS } from "../lib/constants";
@@ -231,7 +242,7 @@ export default function LeadGenApp() {
                 marginBottom: 4,
               }}
             >
-              <span style={{ fontSize: 28 }}>{STEPS[activeStep].icon}</span>
+              <span>{ICON_MAP[STEPS[activeStep].iconName]}</span>
               <h1
                 style={{
                   fontSize: 24,
@@ -302,13 +313,27 @@ export default function LeadGenApp() {
 
           {/* Step content */}
           <div
-            key={activeStep}
-            className={
-              direction === "forward" ? "rw-step-enter" : "rw-step-enter-reverse"
-            }
-            style={{ position: "relative", zIndex: 10 }}
+            className="w-full relative z-10"
           >
-            {renderStep()}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeStep}
+                initial={{ opacity: 0, x: direction === "forward" ? 20 : -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: direction === "forward" ? -20 : 20 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+                className={activeStep < 4 ? "grid grid-cols-1 lg:grid-cols-[65%_1fr] gap-8" : "w-full"}
+              >
+                <div className="w-full">
+                  {renderStep()}
+                </div>
+                {activeStep < 4 && (
+                  <div className="hidden lg:block relative">
+                    <LiveContextSidebar formState={formState} activeStep={activeStep} />
+                  </div>
+                )}
+              </motion.div>
+            </AnimatePresence>
           </div>
 
           {/* Navigation buttons */}
@@ -344,30 +369,7 @@ export default function LeadGenApp() {
               Back
             </button>
 
-            {/* Step indicators */}
-            <div style={{ display: "flex", gap: 6 }}>
-              {STEPS.map((_, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => goToStep(i)}
-                  style={{
-                    width: i === activeStep ? 24 : 8,
-                    height: 8,
-                    borderRadius: "var(--rw-radius-full)",
-                    border: "none",
-                    background:
-                      i === activeStep
-                        ? "var(--rw-bright-blue)"
-                        : "var(--rw-border)",
-                    cursor: "pointer",
-                    transition: "all 0.3s ease",
-                    padding: 0,
-                  }}
-                  aria-label={`Go to step ${i + 1}`}
-                />
-              ))}
-            </div>
+
 
             {activeStep < STEPS.length - 1 ? (
               <button
