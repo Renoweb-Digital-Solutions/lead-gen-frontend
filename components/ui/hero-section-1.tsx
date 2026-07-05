@@ -4,6 +4,9 @@ import { ArrowRight, ChevronRight, Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { AnimatedGroup } from '@/components/ui/animated-group'
 import { cn } from '@/lib/utils'
+import AuthModal from '@/app/components/AuthModal'
+import { useAuth } from '@/app/lib/AuthContext'
+import { useRouter } from 'next/navigation'
 
 const transitionVariants = {
     item: {
@@ -26,9 +29,23 @@ const transitionVariants = {
 }
 
 export function HeroSection() {
+    const [authModalOpen, setAuthModalOpen] = React.useState(false);
+    const { token } = useAuth();
+    const router = useRouter();
+
+    const handleStartBuilding = (e) => {
+        e.preventDefault();
+        if (token) {
+            router.push('/dashboard');
+        } else {
+            setAuthModalOpen(true);
+        }
+    };
+
     return (
         <>
-            <HeroHeader />
+            <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
+            <HeroHeader onLoginClick={() => setAuthModalOpen(true)} />
             <main className="overflow-hidden">
                 <div
                     aria-hidden
@@ -122,12 +139,10 @@ export function HeroSection() {
                                         key={1}
                                         className="bg-foreground/10 rounded-[14px] border p-0.5">
                                         <Button
-                                            asChild
                                             size="lg"
+                                            onClick={handleStartBuilding}
                                             className="rounded-xl px-5 text-base bg-[#023dbb] text-white hover:bg-[#023dbb]/90">
-                                            <Link href="/dashboard">
-                                                <span className="text-nowrap">Start Building</span>
-                                            </Link>
+                                            <span className="text-nowrap">Start Building</span>
                                         </Button>
                                     </div>
                                     <Button
@@ -239,9 +254,10 @@ const brandNames = [
     "Wayne Ent", "Massive Dynamic"
 ];
 
-const HeroHeader = () => {
+const HeroHeader = ({ onLoginClick }) => {
     const [menuState, setMenuState] = React.useState(false)
     const [isScrolled, setIsScrolled] = React.useState(false)
+    const { token } = useAuth();
 
     React.useEffect(() => {
         const handleScroll = () => {
@@ -303,31 +319,38 @@ const HeroHeader = () => {
                                 </ul>
                             </div>
                             <div className="flex w-full flex-col space-y-3 sm:flex-row sm:gap-3 sm:space-y-0 md:w-fit">
-                                <Button
-                                    asChild
-                                    variant="outline"
-                                    size="sm"
-                                    className={cn(isScrolled && 'lg:hidden')}>
-                                    <Link href="">
-                                        <span>Login</span>
-                                    </Link>
-                                </Button>
-                                <Button
-                                    asChild
-                                    size="sm"
-                                    className={cn(isScrolled && 'lg:hidden')}>
-                                    <Link href="">
-                                        <span>Sign Up</span>
-                                    </Link>
-                                </Button>
-                                <Button
-                                    asChild
-                                    size="sm"
-                                    className={cn(isScrolled ? 'lg:inline-flex' : 'hidden', 'bg-[#023dbb] text-white hover:bg-[#023dbb]/90')}>
-                                    <Link href="">
-                                        <span>Get Started</span>
-                                    </Link>
-                                </Button>
+                                {token ? (
+                                    <Button
+                                        asChild
+                                        size="sm"
+                                        className={cn(isScrolled ? 'lg:inline-flex' : 'hidden', 'bg-[#023dbb] text-white hover:bg-[#023dbb]/90')}>
+                                        <Link href="/dashboard">
+                                            <span>Dashboard</span>
+                                        </Link>
+                                    </Button>
+                                ) : (
+                                    <>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={onLoginClick}
+                                            className={cn(isScrolled && 'lg:hidden')}>
+                                            <span>Login</span>
+                                        </Button>
+                                        <Button
+                                            size="sm"
+                                            onClick={onLoginClick}
+                                            className={cn(isScrolled && 'lg:hidden')}>
+                                            <span>Sign Up</span>
+                                        </Button>
+                                        <Button
+                                            size="sm"
+                                            onClick={onLoginClick}
+                                            className={cn(isScrolled ? 'lg:inline-flex' : 'hidden', 'bg-[#023dbb] text-white hover:bg-[#023dbb]/90')}>
+                                            <span>Get Started</span>
+                                        </Button>
+                                    </>
+                                )}
                             </div>
                         </div>
                     </div>

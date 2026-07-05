@@ -5,6 +5,59 @@ if (!BASE_URL) {
 }
 
 /**
+ * Helper to automatically attach the Authorization token.
+ */
+async function fetchWithAuth(endpoint, options = {}) {
+  const token = typeof window !== 'undefined' ? localStorage.getItem("renoweb_jwt") : null;
+  const headers = {
+    ...options.headers,
+  };
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  const res = await fetch(`${BASE_URL}${endpoint}`, {
+    ...options,
+    headers,
+  });
+
+  return res;
+}
+
+export async function apiLogin(email, password) {
+  const res = await fetch(`${BASE_URL}/auth/token`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    // FastAPI OAuth2PasswordRequestForm requires form data
+    body: new URLSearchParams({
+      username: email,
+      password: password,
+    }),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Login failed: ${text}`);
+  }
+  return res.json();
+}
+
+export async function apiSignup(email, password) {
+  const res = await fetch(`${BASE_URL}/auth/create-user`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username: email, password }),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Signup failed: ${text}`);
+  }
+  return res.json();
+}
+
+
+/**
  * Function: checkHealth
  * 
  * WHAT IT DOES: 
@@ -84,30 +137,25 @@ function buildRequestBody(formState, defaultFilename = "summary.csv") {
 }
 
 /**
- * Function: exportLeads
+ * Function: startPipelineJob
  * 
  * WHAT IT DOES:
- * Acts as the primary API caller to start the lead generation pipeline on the backend.
- * It looks up the correct endpoint based on the requested format, builds the payload via `buildRequestBody`,
- * and makes a POST request to the API. It handles parsing the response either as a ZIP (blob) or CSV.
+ * Acts as the primary API caller to start the lead generation pipeline on the backend via the new Async flow.
+ * It builds the payload via `buildRequestBody`, and makes a POST request to `/jobs/pipeline/start`.
  * 
  * WHERE IT IS USED:
- * - e:\WORK\Renoweb\lead-gen\app\components\LeadGenApp.js (called when clicking Generate Leads in the ExportStep)
- * 
- * ARGUMENTS:
- * - `formState` (Object): The complete state tree managed by `useFormState`.
- * 
- * RETURNS:
- * - Promise resolving to an Object: `{ blob: Blob, filename: String, type: String }`
+ * - e:\WORK\Renoweb\lead-gen\app\components\steps\ExportStep.js
  */
-export async function exportLeads(formState) {
+export async function startPipelineJob(formState) {
   const { EXPORT_FORMATS } = await import("./constants");
   const format = EXPORT_FORMATS.find((f) => f.id === formState.exportFormat);
   if (!format) throw new Error("Unknown export format");
 
   const body = buildRequestBody(formState, format.defaultFilename);
+  // Add format specific fields if backend needs it, or adjust based on API spec.
+  // The backend uses PipelineExportRequest
 
-  const res = await fetch(`${BASE_URL}${format.endpoint}`, {
+  const res = await fetchWithAuth("/jobs/pipeline/start", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
@@ -115,20 +163,12 @@ export async function exportLeads(formState) {
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`Export failed: ${res.status} — ${text}`);
+    throw new Error(`Pipeline start failed: ${res.status} — ${text}`);
   }
 
-  // ZIP comes as binary, CSVs as text
-  if (formState.exportFormat === "bundle") {
-    return { blob: await res.blob(), filename: formState.filename || format.defaultFilename || "bundle.zip", type: "zip" };
-  }
-
-  return {
-    blob: await res.blob(),
-    filename: formState.filename || format.defaultFilename || "export.csv",
-    type: "csv",
-  };
+  return res.json(); // returns { job_id, ws_url, status_url, cancel_url, downloads }
 }
+
 
 /**
  * Function: downloadBlob
@@ -225,6 +265,36 @@ export async function gmapsSearch({ keywords, location, limit }) {
 }
 
 /**
+ * Function: suggestKeywords
+ */
+export async function suggestKeywords(company_name, company_description) {
+  const res = await fetchWithAuth(`/gmaps/suggest-keywords`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ company_name, company_description }),
+  });
+  if (!res.ok) throw new Error("Failed to suggest keywords");
+  return res.json();
+}
+
+/**
+ * Function: gmapsBulkSearch
+ */
+export async function gmapsBulkSearch({ keywords, location, limit }) {
+  const res = await fetchWithAuth(`/gmaps/bulk-search`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      keywords,
+      location,
+      limit_per_keyword: limit
+    }),
+  });
+  if (!res.ok) throw new Error("Failed to start GMaps bulk search");
+  return res.json();
+}
+
+/**
  * Function: gmapsGetRuns
  *
  * WHAT IT DOES:
@@ -236,7 +306,7 @@ export async function gmapsSearch({ keywords, location, limit }) {
  * RETURNS: Promise<Array> — List of run objects.
  */
 export async function gmapsGetRuns() {
-  const res = await fetch(`${BASE_URL}/gmaps/runs`);
+  const res = await fetchWithAuth(`/gmaps/runs`);
   if (!res.ok) throw new Error("Failed to fetch GMaps runs");
   return res.json();
 }
@@ -256,7 +326,7 @@ export async function gmapsGetRuns() {
  * RETURNS: Promise<Object> — Run data including rows.
  */
 export async function gmapsGetRun(runId) {
-  const res = await fetch(`${BASE_URL}/gmaps/runs/${runId}`);
+  const res = await fetchWithAuth(`/gmaps/runs/${runId}`);
   if (!res.ok) throw new Error(`Failed to fetch GMaps run ${runId}`);
   return res.json();
 }
@@ -276,7 +346,7 @@ export async function gmapsGetRun(runId) {
  * RETURNS: Promise<{ blob: Blob, filename: string }>
  */
 export async function gmapsExportCsv(runId) {
-  const res = await fetch(`${BASE_URL}/gmaps/runs/${runId}/export.csv`);
+  const res = await fetchWithAuth(`/gmaps/runs/${runId}/export.csv`);
   if (!res.ok) throw new Error("Failed to export GMaps CSV");
   return { blob: await res.blob(), filename: `gmaps_${runId}.csv` };
 }

@@ -247,7 +247,7 @@ export default function ResultsTable({ data }) {
             color: rgba(255, 255, 255, 0.8) !important;
           }
 
-          .ag-icon {
+          .ag-header .ag-icon {
             color: rgba(255, 255, 255, 0.8) !important;
           }
           

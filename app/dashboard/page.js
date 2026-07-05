@@ -1,5 +1,10 @@
 import LeadGenApp from "../components/LeadGenApp";
+import AuthWrapper from "../components/AuthWrapper";
 
 export default function DashboardPage() {
-  return <LeadGenApp />;
+  return (
+    <AuthWrapper>
+      <LeadGenApp />
+    </AuthWrapper>
+  );
 }

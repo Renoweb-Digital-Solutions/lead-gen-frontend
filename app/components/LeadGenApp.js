@@ -24,7 +24,7 @@ const ICON_MAP = {
   Rocket: <Rocket className="w-8 h-8 text-brand-blue" />,
 };
 import { useSessionState } from "../hooks/useSessionState";
-import { exportLeads, downloadBlob } from "../lib/api";
+import { startPipelineJob, downloadBlob } from "../lib/api";
 import { STEPS } from "../lib/constants";
 
 /**
@@ -55,6 +55,14 @@ export default function LeadGenApp() {
   const [exportResults, setExportResults] = useState({});
   const [direction, setDirection] = useState("forward");
   const contentRef = useRef(null);
+  const wsRef = useRef(null);
+
+  const handleCancelExport = () => {
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify({ type: "cancel" }));
+      setIsExporting(false);
+    }
+  };
 
   const goToStep = (index) => {
     setDirection(index > activeStep ? "forward" : "backward");
@@ -103,66 +111,100 @@ export default function LeadGenApp() {
         success: null,
         data: null,
         file: null,
+        progress: { percent: 0, message: "Initializing...", status: "running" }
       }
     }));
 
     try {
-      const result = await exportLeads(formState);
+      const jobData = await startPipelineJob(formState);
+      const wsAbsoluteUrl = jobData.ws_url.startsWith('ws') 
+        ? jobData.ws_url 
+        : `${process.env.NEXT_PUBLIC_API_URL.replace('http', 'ws')}${jobData.ws_url}`;
       
-      // Store the file details for manual download
-      const fileObj = { blob: result.blob, filename: result.filename };
+      const ws = new WebSocket(wsAbsoluteUrl);
       
-      if (result.type === "csv") {
-        // Parse CSV to show in table
-        const text = await result.blob.text();
-        Papa.parse(text, {
-          header: true,
-          skipEmptyLines: true,
-          complete: (parsedResult) => {
+      // Store the ws connection to allow cancellation
+      wsRef.current = ws;
+
+      ws.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          
+          setExportResults(prev => {
+            const current = prev[format] || {};
+            return {
+              ...prev,
+              [format]: {
+                ...current,
+                progress: { 
+                  percent: msg.percent || current.progress?.percent || 0, 
+                  message: msg.message || current.progress?.message || "Running...", 
+                  status: msg.status || current.progress?.status || "running" 
+                }
+              }
+            };
+          });
+
+          if (msg.status === "completed") {
+            ws.close();
+            // Trigger downloads
+            if (jobData.downloads) {
+              Object.values(jobData.downloads).forEach((url) => {
+                // simple window.open or fetch+download for URLs
+                window.open(`${process.env.NEXT_PUBLIC_API_URL}${url}`, '_blank');
+              });
+            }
+            
             setExportResults(prev => ({
               ...prev,
               [format]: {
-                data: parsedResult.data,
-                file: fileObj,
-                success: `Successfully generated ${parsedResult.data.length} records!`,
+                ...prev[format],
+                success: `Successfully completed pipeline! Downloads started.`,
                 error: null
               }
             }));
-          },
-          error: (error) => {
+            setIsExporting(false);
+          } else if (msg.status === "failed") {
+            ws.close();
             setExportResults(prev => ({
               ...prev,
               [format]: {
-                data: null,
-                file: fileObj,
-                success: `Successfully generated ${result.filename}!`,
-                error: "Failed to parse results for preview."
+                ...prev[format],
+                error: msg.error || "Pipeline failed.",
+                success: null
               }
             }));
+            setIsExporting(false);
           }
-        });
-      } else {
-        // For ZIP or other formats
+        } catch (e) {
+          console.error("Failed to parse WS message", e);
+        }
+      };
+
+      ws.onerror = (error) => {
         setExportResults(prev => ({
           ...prev,
           [format]: {
-            data: null,
-            file: fileObj,
-            success: `Successfully generated ${result.filename}! (Preview not available for bundles)`,
-            error: null
+            ...prev[format],
+            error: "WebSocket error occurred.",
           }
         }));
-      }
+        setIsExporting(false);
+      };
+
+      ws.onclose = () => {
+        setIsExporting(false);
+      };
+      
     } catch (err) {
       setExportResults(prev => ({
         ...prev,
         [format]: {
           ...prev[format],
-          error: err.message || "Export failed. Please try again.",
+          error: err.message || "Pipeline failed to start.",
           success: null
         }
       }));
-    } finally {
       setIsExporting(false);
     }
   };
@@ -190,6 +232,8 @@ export default function LeadGenApp() {
             isExporting={isExporting}
             exportData={currentExportState.data || null}
             exportResultFile={currentExportState.file || null}
+            progressState={currentExportState.progress}
+            onCancel={handleCancelExport}
             onDownload={() => {
               if (currentExportState.file) {
                 downloadBlob(currentExportState.file.blob, currentExportState.file.filename);

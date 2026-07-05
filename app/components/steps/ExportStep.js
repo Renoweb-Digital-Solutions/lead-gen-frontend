@@ -100,7 +100,9 @@ export default function ExportStep({
   isExporting,
   exportData,
   exportResultFile,
+  progressState,
   onDownload,
+  onCancel,
 }) {
   const [showPipelineOptions, setShowPipelineOptions] = useState(false);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -221,6 +223,7 @@ export default function ExportStep({
               <ExportProgress
                 isActive={isExporting}
                 totalResults={formState.totalResults}
+                progressState={progressState}
               />
             </motion.div>
           )}
@@ -303,12 +306,12 @@ export default function ExportStep({
                   <motion.div 
                     className="absolute top-0 left-0 h-full bg-brand-blue/30"
                     initial={{ width: "0%" }}
-                    animate={{ width: "100%" }}
-                    transition={{ duration: 10, ease: "linear" }}
+                    animate={{ width: progressState ? `${progressState.percent}%` : "10%" }}
+                    transition={{ duration: 0.5, ease: "linear" }}
                   />
                   <span className="relative z-10 flex items-center gap-2">
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Generating...
+                    {progressState ? progressState.message : "Generating..."}
                   </span>
                 </>
               ) : (
@@ -321,6 +324,15 @@ export default function ExportStep({
                 </>
               )}
             </button>
+            {isExporting && (
+              <button
+                type="button"
+                onClick={onCancel}
+                className="mt-2 text-sm text-red-500 hover:text-red-600 font-semibold flex items-center justify-center gap-1.5 transition-colors"
+              >
+                <span>Cancel Operation</span>
+              </button>
+            )}
           </div>
         </div>
       </div>

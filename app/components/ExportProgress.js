@@ -67,7 +67,7 @@ function formatElapsed(seconds) {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
-export default function ExportProgress({ isActive, totalResults = 1000, logType = "apollo" }) {
+export default function ExportProgress({ isActive, totalResults = 1000, logType = "apollo", progressState }) {
   const [logs, setLogs] = useState([]);
   const [elapsed, setElapsed] = useState(0);
   const nextIndexRef = useRef(0);
@@ -103,36 +103,21 @@ export default function ExportProgress({ isActive, totalResults = 1000, logType 
     return () => clearInterval(timer);
   }, [isActive]);
 
-  // Add a new log message
-  const addLogMessage = useCallback(() => {
-    const idx = nextIndexRef.current % MESSAGES.length;
-    const msg = MESSAGES[idx];
-    nextIndexRef.current += 1;
-
-    setLogs((prev) => [
-      ...prev,
-      { ...msg, time: formatElapsed(elapsedRef.current) },
-    ]);
-  }, []);
-
-  // Log message rotation — every 15–20s
+  // If we receive a progressState message, add it to the logs
   useEffect(() => {
-    if (!isActive) return;
-
-    let timeout;
-
-    const scheduleNext = () => {
-      const delay = (Math.floor(Math.random() * 6) + 15) * 1000;
-      timeout = setTimeout(() => {
-        addLogMessage();
-        scheduleNext();
-      }, delay);
-    };
-
-    scheduleNext();
-
-    return () => clearTimeout(timeout);
-  }, [isActive, addLogMessage]);
+    if (!isActive || !progressState?.message) return;
+    
+    setLogs((prev) => {
+      // Avoid duplicate messages in a row
+      if (prev.length > 0 && prev[prev.length - 1].text === progressState.message) {
+        return prev;
+      }
+      return [
+        ...prev,
+        { icon: "⚡", text: progressState.message, time: formatElapsed(elapsedRef.current) },
+      ];
+    });
+  }, [progressState?.message, isActive]);
 
   // Auto-scroll to bottom when new log appears
   useEffect(() => {
@@ -261,9 +246,9 @@ export default function ExportProgress({ isActive, totalResults = 1000, logType 
             top: 0,
             left: 0,
             height: "100%",
-            width: "40%",
-            background: "linear-gradient(90deg, transparent, #308fef, #60a5fa, transparent)",
-            animation: "rw-shimmer 2s ease-in-out infinite",
+            width: progressState ? `${progressState.percent}%` : "0%",
+            background: "linear-gradient(90deg, #308fef, #60a5fa)",
+            transition: "width 0.5s ease-out",
           }}
         />
       </div>

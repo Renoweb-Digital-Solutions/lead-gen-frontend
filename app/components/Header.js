@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { checkHealth } from "../lib/api";
-import { Target, Map, Trash2, Activity } from "lucide-react";
+import { Target, Map, Trash2, Activity, LogOut } from "lucide-react";
+import { useAuth } from "../lib/AuthContext";
+import { useRouter } from "next/navigation";
 
 /**
  * Component: Header
@@ -29,6 +31,13 @@ const MODULES = [
 
 export default function Header({ onClearAll, activeModule, onModuleChange }) {
   const [health, setHealth] = useState(null);
+  const { logout } = useAuth();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    logout();
+    router.push("/");
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -53,7 +62,11 @@ export default function Header({ onClearAll, activeModule, onModuleChange }) {
       {/* Left: Logo + Module Tabs */}
       <div style={{ display: "flex", alignItems: "center", gap: 0, height: "100%" }}>
         {/* Logo */}
-        <div style={{ display: "flex", alignItems: "center", gap: 3, marginRight: 24 }}>
+        <div 
+          onClick={() => router.push('/')}
+          className="cursor-pointer transition-opacity hover:opacity-80"
+          style={{ display: "flex", alignItems: "center", gap: 3, marginRight: 24 }}
+        >
           <div
             style={{
               display: "flex",
@@ -167,6 +180,23 @@ export default function Header({ onClearAll, activeModule, onModuleChange }) {
         >
           <Trash2 className="w-4 h-4" />
           <span className="rw-hide-mobile font-medium">{activeModule === "gmaps" ? "Clear GMaps Data" : "Clear Pipeline"}</span>
+        </button>
+
+        {/* Divider */}
+        <div style={{ width: 1, height: 24, background: "var(--rw-border)", margin: "0 4px" }} />
+
+        {/* Logout button */}
+        <button
+          type="button"
+          className="rw-btn rw-btn-ghost hover:bg-gray-50"
+          onClick={handleLogout}
+          style={{
+            color: "var(--rw-text-muted)",
+            fontSize: 13,
+          }}
+        >
+          <LogOut className="w-4 h-4" />
+          <span className="rw-hide-mobile font-medium">Logout</span>
         </button>
       </div>
     </header>

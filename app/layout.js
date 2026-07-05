@@ -20,11 +20,17 @@ export const metadata = {
     "Generate, score, and export qualified leads with Renoweb's intelligent lead generation pipeline.",
 };
 
+import ClientProviders from "./ClientProviders";
+
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${inter.variable} ${oswald.variable}`} data-scroll-behavior="smooth">
       <head />
-      <body>{children}</body>
+      <body>
+        <ClientProviders>
+          {children}
+        </ClientProviders>
+      </body>
     </html>
   );
 }

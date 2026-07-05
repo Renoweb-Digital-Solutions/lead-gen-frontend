@@ -507,26 +507,35 @@ body {
 .rw-tag {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
-  font-size: 12px;
-  font-weight: 500;
-  border-radius: var(--rw-radius-full);
-  background: rgba(48, 143, 239, 0.08);
+  gap: 6px;
+  padding: 4px 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+  border-radius: 8px;
+  background: var(--rw-surface);
+  border: 1px solid rgba(48, 143, 239, 0.2);
+  box-shadow: 0 2px 4px rgba(2, 61, 187, 0.04);
   color: var(--rw-deep-blue);
   animation: rw-tagIn 0.25s var(--rw-transition-spring);
+  transition: all 0.2s ease;
+}
+
+.rw-tag:hover {
+  border-color: rgba(48, 143, 239, 0.5);
+  box-shadow: 0 2px 8px rgba(48, 143, 239, 0.1);
+  transform: translateY(-1px);
 }
 
 .rw-tag button {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
   border: none;
-  background: transparent;
-  color: var(--rw-text-muted);
+  background: rgba(48, 143, 239, 0.08);
+  color: var(--rw-bright-blue);
   font-size: 14px;
   cursor: pointer;
   transition: all var(--rw-transition-fast);
@@ -535,8 +544,8 @@ body {
 }
 
 .rw-tag button:hover {
-  background: rgba(239, 68, 68, 0.1);
-  color: var(--rw-error);
+  background: var(--rw-error);
+  color: white;
 }
 
 /* ── Slider ──────────────────────────────────────────────── */

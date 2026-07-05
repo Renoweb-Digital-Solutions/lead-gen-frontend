@@ -24,7 +24,7 @@ export default function SliderInput({
     }
   }, [value, isDragging]);
 
-  const percentage = ((value - min) / (max - min)) * 100;
+  const percentage = Math.max(0, Math.min(100, ((value - min) / (max - min)) * 100));
 
   const updateValue = useCallback(
     (clientX) => {

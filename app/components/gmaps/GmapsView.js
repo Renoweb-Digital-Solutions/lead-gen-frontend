@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import {
-  gmapsSearch,
+  suggestKeywords,
+  gmapsBulkSearch,
   gmapsGetRuns,
   gmapsGetRun,
   gmapsExportCsv,
@@ -21,16 +22,19 @@ export default function GmapsView() {
   // ─── Search Form State ───────────────────────────────────
   const [keywords, setKeywords] = useSessionState("gmaps-keywords", []);
   const [location, setLocation] = useSessionState("gmaps-location", "");
-  const [limit, setLimit] = useSessionState("gmaps-limit", 100);
+  const [limit, setLimit] = useSessionState("gmaps-limit", 50);
+  const [companyName, setCompanyName] = useSessionState("gmaps-company-name", "");
+  const [companyDescription, setCompanyDescription] = useSessionState("gmaps-company-desc", "");
 
   useEffect(() => {
-    if (limit > 200) {
-      setLimit(200);
+    if (limit > 50) {
+      setLimit(50);
     }
   }, [limit, setLimit]);
 
   // ─── Search State ────────────────────────────────────────
   const [isSearching, setIsSearching] = useState(false);
+  const [isSuggesting, setIsSuggesting] = useState(false);
   const [searchError, setSearchError] = useState(null);
   const [searchSuccess, setSearchSuccess] = useState(null);
   const [resultData, setResultData] = useSessionState("gmaps-results", null);
@@ -60,6 +64,38 @@ export default function GmapsView() {
     }
   };
 
+  const handleSuggestKeywords = async () => {
+    if (!companyName.trim() || !companyDescription.trim()) {
+      setSearchError("Please enter both Company Name and Description to suggest keywords.");
+      return;
+    }
+    
+    setIsSuggesting(true);
+    setSearchError(null);
+    setSearchSuccess(null);
+    
+    try {
+      const data = await suggestKeywords(companyName.trim(), companyDescription.trim());
+      if (data.keywords && Array.isArray(data.keywords)) {
+        // Clean up keywords by removing placeholders like "[city]" or "in [city]"
+        const cleanedKeywords = data.keywords.map(kw => 
+          kw.replace(/\s*in\s*\[city\]/gi, '')
+            .replace(/\s*\[city\]/gi, '')
+            .replace(/\s*in\s*city/gi, '')
+            .trim()
+        );
+        setKeywords(cleanedKeywords);
+        setSearchSuccess("Keywords generated successfully!");
+      } else {
+        setSearchError("Failed to parse suggested keywords.");
+      }
+    } catch (err) {
+      setSearchError(err.message || "Failed to suggest keywords.");
+    } finally {
+      setIsSuggesting(false);
+    }
+  };
+
   // ─── Search Handler ──────────────────────────────────────
   const handleSearch = async () => {
     if (keywords.length === 0) {
@@ -79,13 +115,16 @@ export default function GmapsView() {
     setIsSheetOpen(false);
 
     try {
-      const result = await gmapsSearch({ keywords, location: location.trim(), limit });
+      const result = await gmapsBulkSearch({ keywords, location: location.trim(), limit });
 
       let rows = [];
       let runId = null;
 
       if (Array.isArray(result)) {
         rows = result;
+      } else if (result.leads && Array.isArray(result.leads)) {
+        rows = result.leads;
+        runId = result.run_id || result.id || null;
       } else if (result.rows && Array.isArray(result.rows)) {
         rows = result.rows;
         runId = result.run_id || result.id || null;
@@ -95,7 +134,7 @@ export default function GmapsView() {
       } else if (result.run_id || result.id) {
         runId = result.run_id || result.id;
         const runData = await gmapsGetRun(runId);
-        rows = Array.isArray(runData) ? runData : (runData.rows || runData.data || []);
+        rows = Array.isArray(runData) ? runData : (runData.rows || runData.data || runData.leads || []);
       }
 
       setResultData(rows);
@@ -207,8 +246,14 @@ export default function GmapsView() {
             setLocation={setLocation}
             limit={limit}
             setLimit={setLimit}
+            companyName={companyName}
+            setCompanyName={setCompanyName}
+            companyDescription={companyDescription}
+            setCompanyDescription={setCompanyDescription}
             isSearching={isSearching}
+            isSuggesting={isSuggesting}
             onSearch={handleSearch}
+            onSuggestKeywords={handleSuggestKeywords}
           />
           <div className="mt-4">
             <ExportProgress isActive={isSearching} logType="gmaps" />
