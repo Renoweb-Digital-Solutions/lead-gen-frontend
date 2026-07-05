@@ -1,5 +1,5 @@
-import LeadGenApp from "./components/LeadGenApp";
+import LandingPage from "./components/landing/LandingPage";
 
 export default function Home() {
-  return <LeadGenApp />;
+  return <LandingPage />;
 }

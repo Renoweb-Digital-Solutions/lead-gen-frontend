@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import RadioCards from "../inputs/RadioCards";
-import ResultsTable from "../ResultsTable";
+import ExportBottomSheet from "./ExportBottomSheet";
 import ExportProgress from "../ExportProgress";
 import Toggle from "../inputs/Toggle";
 import { EXPORT_FORMATS } from "../../lib/constants";
@@ -103,6 +103,13 @@ export default function ExportStep({
   onDownload,
 }) {
   const [showPipelineOptions, setShowPipelineOptions] = useState(false);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+
+  useEffect(() => {
+    if (exportData || exportResultFile) {
+      setIsSheetOpen(true);
+    }
+  }, [exportData, exportResultFile]);
 
   return (
     <motion.div
@@ -220,46 +227,7 @@ export default function ExportStep({
 
           {/* ── Results Table Preview ───────────────────────────── */}
           <AnimatePresence mode="wait">
-            {exportData || exportResultFile || formState.exportFormat === "bundle" ? (
-              <motion.div 
-                key="results"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-white rounded-2xl p-6 lg:p-7 border border-brand-blue/10 shadow-[0_4px_24px_rgba(2,61,187,0.08)] mt-4"
-              >
-                <div className="flex justify-between items-center mb-6">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-1 h-3.5 bg-gradient-to-b from-brand-blue to-brand-cyan rounded-full" />
-                    <h2 className="text-[12px] font-bold uppercase tracking-[0.05em] text-brand-blue m-0 leading-none">
-                      {formState.exportFormat === "bundle" 
-                        ? "Bundle Export Ready" 
-                        : `Preview: ${EXPORT_FORMATS.find((f) => f.id === formState.exportFormat)?.label || "Data"}`}
-                    </h2>
-                  </div>
-                  
-                  {exportResultFile && (
-                    <button
-                      type="button"
-                      className="flex items-center gap-2 px-4 py-2 bg-brand-blue text-white text-sm font-semibold rounded-lg hover:bg-brand-sky transition-colors shadow-md"
-                      onClick={onDownload}
-                    >
-                      <Download className="w-4 h-4" />
-                      Download {exportResultFile.filename}
-                    </button>
-                  )}
-                </div>
-                
-                {formState.exportFormat === "bundle" ? (
-                  <div className="p-10 text-center bg-gray-50 rounded-xl border border-dashed border-brand-blue/20 flex flex-col items-center">
-                    <Database className="w-12 h-12 text-brand-sky mb-4" />
-                    <div className="font-semibold text-brand-dark mb-1">Bundle processing complete</div>
-                    <div className="text-sm text-gray-500">Preview is not available for ZIP bundles. Click download to view contents.</div>
-                  </div>
-                ) : (
-                  <ResultsTable data={exportData} />
-                )}
-              </motion.div>
-            ) : isExporting ? (
+            {isExporting ? (
               <motion.div 
                 key="loading"
                 initial={{ opacity: 0, y: 20 }}
@@ -276,6 +244,16 @@ export default function ExportStep({
               </motion.div>
             ) : null}
           </AnimatePresence>
+
+          <ExportBottomSheet 
+            isOpen={isSheetOpen}
+            onOpen={() => setIsSheetOpen(true)}
+            onClose={() => setIsSheetOpen(false)}
+            data={exportData}
+            exportResultFile={exportResultFile}
+            formState={formState}
+            onDownload={onDownload}
+          />
 
         </div>
 

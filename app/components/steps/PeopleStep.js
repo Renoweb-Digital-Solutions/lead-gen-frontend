@@ -64,7 +64,7 @@ export default function PeopleStep({ formState, updateField }) {
       </Card>
 
       {/* ── Email & LinkedIn ────────────────────────────────── */}
-      <Card title="Contact Data Requirements" zIndex={10}>
+      <Card title="Contact Data Requirements" zIndex={55}>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           <SearchableDropdown
             label="Email Status"

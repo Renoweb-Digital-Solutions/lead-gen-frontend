@@ -141,7 +141,7 @@ export default function SliderInput({
         }}
       >
         <div 
-          className="absolute top-0 left-0 h-full rounded-full bg-gradient-to-r from-brand-blue to-brand-amber transition-all duration-100 ease-out" 
+          className={`absolute top-0 left-0 h-full rounded-full bg-gradient-to-r from-brand-blue to-brand-amber ${!isDragging ? 'transition-all duration-100 ease-out' : ''}`} 
           style={{ width: `${percentage}%` }} 
         />
         <motion.div

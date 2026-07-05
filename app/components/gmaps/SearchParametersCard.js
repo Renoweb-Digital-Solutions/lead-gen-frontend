@@ -66,8 +66,8 @@ export default function SearchParametersCard({
           value={limit}
           onChange={setLimit}
           min={10}
-          max={200}
-          step={10}
+          max={50}
+          step={1}
         />
       </div>
 
@@ -86,10 +86,9 @@ export default function SearchParametersCard({
           transition={isSearching ? {} : { duration: 2, repeat: Infinity }}
           className={`
             relative px-8 py-3.5 rounded-xl text-white font-bold text-[15px] tracking-wide flex items-center justify-center gap-2 overflow-hidden transition-all duration-300 min-w-[200px]
-            ${
-              isSearching
-                ? "bg-brand-sky shadow-inner pointer-events-none"
-                : "bg-gradient-to-r from-brand-blue to-brand-cyan shadow-[0_4px_20px_rgba(48,143,239,0.3)] hover:shadow-[0_8px_30px_rgba(48,143,239,0.5)]"
+            ${isSearching
+              ? "bg-brand-sky shadow-inner pointer-events-none"
+              : "bg-gradient-to-r from-brand-blue to-brand-cyan shadow-[0_4px_20px_rgba(48,143,239,0.3)] hover:shadow-[0_8px_30px_rgba(48,143,239,0.5)]"
             }
           `}
         >
