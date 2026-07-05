@@ -33,7 +33,7 @@ export function HeroSection() {
     const { token } = useAuth();
     const router = useRouter();
 
-    const handleStartBuilding = (e) => {
+    const handleStartBuilding = (e: React.MouseEvent) => {
         e.preventDefault();
         if (token) {
             router.push('/dashboard');
