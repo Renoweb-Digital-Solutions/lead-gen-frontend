@@ -59,7 +59,7 @@ export default function JobsStep({ formState, updateField }) {
               value={formState.jobsRows}
               onChange={(val) => updateField("jobsRows", val)}
               min={10}
-              max={5000}
+              max={1000}
               step={10}
             />
           </Card>

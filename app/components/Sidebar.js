@@ -25,8 +25,37 @@ export default function Sidebar({
   onClearAll,
   isMobileOnly
 }) {
-  const { logout } = useAuth();
+  const { logout, token } = useAuth();
   const router = useRouter();
+
+  let userEmail = "admin@renoweb.com";
+  let userName = "Noah Smith";
+  
+  if (token) {
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      const payload = JSON.parse(jsonPayload);
+      
+      userEmail = payload.email || payload.sub || userEmail;
+      
+      if (payload.name) {
+        userName = payload.name;
+      } else if (payload.username) {
+        userName = payload.username;
+      } else {
+        const namePart = userEmail.split('@')[0];
+        userName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
+      }
+    } catch (e) {
+      console.error("Failed to parse JWT", e);
+    }
+  }
+
+  const avatarLetter = userName ? userName.charAt(0).toUpperCase() : "U";
   return (
     <>
       {/* Mobile overlay */}
@@ -165,11 +194,11 @@ export default function Sidebar({
       <div className="rw-sidebar-footer relative z-10 mt-auto pt-6 pb-2">
         <div className="flex items-center gap-3 mb-5 p-2.5 rounded-xl border border-transparent hover:border-brand-blue/10 hover:bg-white hover:shadow-sm transition-all cursor-pointer">
           <div className="w-9 h-9 rounded-full bg-gradient-to-br from-brand-blue to-brand-cyan text-white flex items-center justify-center font-bold text-[14px] shadow-[0_2px_10px_rgba(2,61,187,0.2)] shrink-0">
-            N
+            {avatarLetter}
           </div>
           <div className="flex flex-col min-w-0">
-            <span className="text-[13px] font-bold text-brand-dark truncate leading-tight">Noah Smith</span>
-            <span className="text-[11px] text-gray-500 truncate mt-0.5">noah@renoweb.com</span>
+            <span className="text-[13px] font-bold text-brand-dark truncate leading-tight">{userName}</span>
+            <span className="text-[11px] text-gray-500 truncate mt-0.5">{userEmail}</span>
           </div>
         </div>
         <div className="text-[10px] text-brand-blue/50 font-bold tracking-[0.1em] uppercase px-2.5">
