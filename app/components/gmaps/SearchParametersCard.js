@@ -133,7 +133,7 @@ export default function SearchParametersCard({
           value={limit}
           onChange={setLimit}
           min={10}
-          max={50}
+          max={300}
           step={1}
         />
       </div>
