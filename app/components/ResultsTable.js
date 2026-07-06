@@ -113,15 +113,13 @@ function UrlCellRenderer(params) {
   );
 }
 
-export default function ResultsTable({ data }) {
+export default function ResultsTable({ data, hideEmptyColumns = false, excludeColumns = [] }) {
   const [colDefs, setColDefs] = useState([]);
 
   // Generate column definitions dynamically based on the first row of data.
   // Detects email/phone/linkedin/website columns and assigns clickable cell renderers.
   useMemo(() => {
     if (data && data.length > 0) {
-      const firstRow = data[0];
-      
       const TARGET_COLUMNS = [
         "firstName", "lastName", "first_name", "last_name", "name", "email", "company", "companyName", "role", "seniority",
         "title", "categoryName", "address", "city", "state", "countryCode", "website",
@@ -131,7 +129,28 @@ export default function ResultsTable({ data }) {
         "identifier_coverage", "coverage_count", "confidence", "url", "placeId", "domain"
       ];
       
-      const availableKeys = Object.keys(firstRow);
+      let availableKeys = [];
+
+      if (hideEmptyColumns) {
+        const validKeys = new Set();
+        data.forEach(row => {
+          if (!row) return;
+          Object.entries(row).forEach(([key, value]) => {
+            if (value === null || value === undefined || value === "") return;
+            if (Array.isArray(value) && value.length === 0) return;
+            if (typeof value === "object" && !Array.isArray(value) && Object.keys(value).length === 0) return;
+            validKeys.add(key);
+          });
+        });
+        availableKeys = Array.from(validKeys);
+      } else {
+        const firstRow = data[0];
+        availableKeys = Object.keys(firstRow);
+      }
+      
+      // Filter out explicitly excluded columns
+      availableKeys = availableKeys.filter(key => !excludeColumns.includes(key));
+
       
       // Keys from TARGET_COLUMNS that are present (for preferred ordering)
       const orderedKeys = TARGET_COLUMNS.filter((key) => availableKeys.includes(key));

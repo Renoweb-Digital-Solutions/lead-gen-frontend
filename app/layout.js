@@ -15,7 +15,7 @@ const oswald = Oswald({
 });
 
 export const metadata = {
-  title: "Renoweb Lead Gen Tool",
+  title: "Simpleads",
   description:
     "Generate, score, and export qualified leads with Renoweb's intelligent lead generation pipeline.",
 };

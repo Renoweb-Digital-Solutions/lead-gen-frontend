@@ -8,7 +8,7 @@ import ResultsTable from "../ResultsTable";
 
 export default function ResultsBottomSheet({ isOpen, onOpen, onClose, onExport, data }) {
   // Height of the bottom sheet (vh)
-  const SHEET_HEIGHT_VH = 85; 
+  const SHEET_HEIGHT_VH = 85;
   const [sheetHeightPx, setSheetHeightPx] = useState(800);
 
   useEffect(() => {
@@ -18,9 +18,9 @@ export default function ResultsBottomSheet({ isOpen, onOpen, onClose, onExport, 
   const closedY = sheetHeightPx * 0.90; // 10% visible
 
   // Spring for the Y position of the sheet
-  const [{ y }, api] = useSpring(() => ({ 
+  const [{ y }, api] = useSpring(() => ({
     y: closedY,
-    config: { tension: 280, friction: 32 } 
+    config: { tension: 280, friction: 32 }
   }));
 
   // Spring for backdrop opacity
@@ -34,7 +34,7 @@ export default function ResultsBottomSheet({ isOpen, onOpen, onClose, onExport, 
     if (isOpen) {
       api.start({ y: 0 });
       backdropApi.start({ opacity: 1 });
-      document.body.style.overflow = 'hidden'; 
+      document.body.style.overflow = 'hidden';
     } else {
       api.start({ y: closedY });
       backdropApi.start({ opacity: 0 });
@@ -55,9 +55,9 @@ export default function ResultsBottomSheet({ isOpen, onOpen, onClose, onExport, 
     } else {
       // Finger released. Determine if we should close or snap back.
       const shouldClose = oy > sheetHeightPx * 0.3 || (vy > 0.5 && dy > 0);
-      
+
       if (shouldClose) {
-        onClose(); 
+        onClose();
       } else {
         if (onOpen) onOpen(); // Set parent state to open
         api.start({ y: 0, immediate: false });
@@ -83,20 +83,20 @@ export default function ResultsBottomSheet({ isOpen, onOpen, onClose, onExport, 
 
       {/* Sheet */}
       <animated.div
-        style={{ 
+        style={{
           y,
           height: `${SHEET_HEIGHT_VH}vh`
         }}
         className="fixed bottom-0 left-0 right-0 z-[110] bg-white rounded-t-[32px] shadow-[0_-10px_40px_rgba(2,61,187,0.1)] flex flex-col will-change-transform"
       >
-        <div 
-          {...bind()} 
+        <div
+          {...bind()}
           onClick={() => { if (!isOpen && onOpen) onOpen(); }}
           className="relative w-full pt-3 pb-3 flex flex-col items-center justify-center cursor-grab active:cursor-grabbing touch-none group hover:bg-brand-sky/[0.02] transition-colors rounded-t-[32px]"
         >
           {/* Main Grip Handle */}
           <div className="flex items-center justify-center w-16 h-1.5 rounded-full bg-gray-200 group-hover:bg-brand-sky/40 transition-colors mb-2" />
-          
+
           {/* Subtle icon/hint visible mainly when closed */}
           {!isOpen && (
             <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.15em] text-brand-blue/60 group-hover:text-brand-blue transition-colors">
@@ -116,16 +116,16 @@ export default function ResultsBottomSheet({ isOpen, onOpen, onClose, onExport, 
               {data?.length || 0} local businesses ready for export
             </p>
           </div>
-          
+
           <div className="flex items-center gap-4">
-            <button 
+            <button
               onClick={onExport}
               className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-brand-blue to-brand-sky text-white rounded-xl font-bold text-[13px] hover:shadow-lg hover:shadow-brand-sky/20 transition-all duration-300"
             >
               <Download className="w-4 h-4" />
               Export to CSV
             </button>
-            <button 
+            <button
               onClick={onClose}
               className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 hover:text-brand-dark transition-colors"
             >
@@ -138,7 +138,18 @@ export default function ResultsBottomSheet({ isOpen, onOpen, onClose, onExport, 
         <div className="flex-1 overflow-auto p-6 bg-var(--rw-bg, #f5f7fb)">
           {/* We wrap ResultsTable to ensure it takes up height and scrolls internally if needed */}
           <div className="h-full bg-white rounded-2xl shadow-sm border border-brand-blue/5">
-            <ResultsTable data={data} />
+            <ResultsTable
+              data={data}
+              hideEmptyColumns={true}
+              excludeColumns={[
+                'isAdvertisement', 'imageUrl', 'kgmid', 'sourceKeyword', 'source_keyword',
+                'additionalInfo', 'description', 'reviewsDistribution', 'additionalOptions', 'additional_options',
+                'IsAdvertisement', 'ImageUrl', 'Kgmid', 'SourceKeyword',
+                'AdditionalInfo', 'Description', 'ReviewsDistribution', 'AdditionalOptions', 'AdditionalOpeningHours',
+                'fid', 'Fid', 'cid', 'Cid', 'scrapedAt', 'ScrapedAt', 'scraped_at',
+                'searchString', 'SearchString', 'search_string'
+              ]}
+            />
           </div>
         </div>
       </animated.div>
