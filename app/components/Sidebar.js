@@ -1,7 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Users, Building2, Briefcase, Zap, Rocket, Check } from "lucide-react";
+import { Users, Building2, Briefcase, Zap, Rocket, Check, Target, Map, Trash2, LogOut, X } from "lucide-react";
+import { useAuth } from "../lib/AuthContext";
+import { useRouter } from "next/navigation";
 import { STEPS } from "../lib/constants";
 
 const ICON_MAP = {
@@ -12,9 +14,29 @@ const ICON_MAP = {
   Rocket: Rocket,
 };
 
-export default function Sidebar({ activeStep, onStepChange, completedSteps = {} }) {
+export default function Sidebar({ 
+  activeStep, 
+  onStepChange, 
+  completedSteps = {}, 
+  isOpen, 
+  onClose,
+  activeModule,
+  onModuleChange,
+  onClearAll,
+  isMobileOnly
+}) {
+  const { logout } = useAuth();
+  const router = useRouter();
   return (
-    <nav className="rw-sidebar relative">
+    <>
+      {/* Mobile overlay */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/40 z-40 md:hidden backdrop-blur-sm"
+          onClick={onClose}
+        />
+      )}
+      <nav className={`rw-sidebar relative ${isOpen ? "open" : ""}`}>
       {/* Glass shimmer overlay */}
       <div
         className="absolute inset-0 pointer-events-none"
@@ -24,7 +46,53 @@ export default function Sidebar({ activeStep, onStepChange, completedSteps = {} 
       />
 
       <div className="rw-sidebar-steps px-6 pt-4 pb-8 flex flex-col relative z-10">
-        {STEPS.map((step, index) => {
+        {/* Mobile Header (Logo + Close Button) */}
+        <div className="md:hidden flex items-center justify-between mb-6 pb-4 border-b border-gray-200/50">
+          <div
+            className="flex items-center gap-1 font-[800] text-[20px] tracking-[-0.02em] cursor-pointer"
+            onClick={() => { router.push('/'); onClose?.(); }}
+          >
+            <span style={{ color: "var(--rw-deep-blue)" }}>RENO</span>
+            <span style={{ color: "var(--rw-bright-blue)" }}>WEB</span>
+          </div>
+          <button 
+            onClick={onClose}
+            className="p-2 text-gray-500 hover:bg-gray-100 rounded-md transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Mobile Top Navigation */}
+        <div className="md:hidden flex flex-col gap-1 mb-6 pb-6 border-b border-gray-200">
+          <button 
+             onClick={() => { onModuleChange?.('leadgen'); onClose?.(); }}
+             className={`flex items-center gap-3 p-3 rounded-xl transition-all ${activeModule === 'leadgen' ? 'bg-blue-50 text-brand-blue font-bold shadow-sm' : 'text-gray-500 hover:bg-gray-50 font-medium'}`}
+          >
+             <Target className="w-5 h-5" />
+             <span className="text-[14px]">Lead Gen Pipeline</span>
+          </button>
+          <button 
+             onClick={() => { onModuleChange?.('gmaps'); onClose?.(); }}
+             className={`flex items-center gap-3 p-3 rounded-xl transition-all ${activeModule === 'gmaps' ? 'bg-blue-50 text-brand-blue font-bold shadow-sm' : 'text-gray-500 hover:bg-gray-50 font-medium'}`}
+          >
+             <Map className="w-5 h-5" />
+             <span className="text-[14px]">Google Maps</span>
+          </button>
+          
+          <div className="h-px w-full bg-gray-200/60 my-2" />
+          
+          <button 
+             onClick={() => { onClearAll?.(); onClose?.(); }}
+             className="flex items-center gap-3 p-3 rounded-xl transition-colors text-red-500 hover:bg-red-50 font-medium"
+          >
+             <Trash2 className="w-5 h-5" />
+             <span className="text-[14px]">Clear Data</span>
+          </button>
+        </div>
+
+        {/* Steps for Lead Gen */}
+        {activeModule === 'leadgen' && STEPS.map((step, index) => {
           const isActive = activeStep === index;
           const isCompleted = completedSteps[step.id] || index < activeStep; // Auto-complete previous steps
           const Icon = ICON_MAP[step.iconName];
@@ -111,5 +179,6 @@ export default function Sidebar({ activeStep, onStepChange, completedSteps = {} 
         </div>
       </div>
     </nav>
+    </>
   );
 }

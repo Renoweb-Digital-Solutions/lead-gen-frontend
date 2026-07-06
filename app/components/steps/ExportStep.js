@@ -132,23 +132,28 @@ export default function ExportStep({
             <RadioCards
               options={EXPORT_FORMATS}
               value={formState.exportFormat}
-              onChange={(val) => updateField("exportFormat", val)}
+              onChange={(val) => {
+                updateField("exportFormat", val);
+                updateField("filename", "");
+              }}
             />
           </Card>
 
           {/* ── Output Settings ─────────────────────────────────── */}
           <Card title="Output Settings">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div className="rw-field">
-                <label className="text-[13px] font-semibold text-brand-dark block mb-1.5 uppercase tracking-wide">Filename</label>
-                <input
-                  type="text"
-                  className="w-full px-3.5 py-2.5 text-sm bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-brand-sky focus:ring-2 focus:ring-brand-sky/20 transition-all"
-                  value={formState.filename}
-                  onChange={(e) => updateField("filename", e.target.value)}
-                  placeholder={EXPORT_FORMATS.find((f) => f.id === formState.exportFormat)?.defaultFilename || "export.csv"}
-                />
-              </div>
+              {formState.exportFormat !== "bundle" && (
+                <div className="rw-field">
+                  <label className="text-[13px] font-semibold text-brand-dark block mb-1.5 uppercase tracking-wide">Filename</label>
+                  <input
+                    type="text"
+                    className="w-full px-3.5 py-2.5 text-sm bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-brand-sky focus:ring-2 focus:ring-brand-sky/20 transition-all"
+                    value={formState.filename}
+                    onChange={(e) => updateField("filename", e.target.value)}
+                    placeholder={EXPORT_FORMATS.find((f) => f.id === formState.exportFormat)?.defaultFilename || "export.csv"}
+                  />
+                </div>
+              )}
               <div className="rw-field">
                 <label className="text-[13px] font-semibold text-brand-dark block mb-1.5 uppercase tracking-wide">
                   Limit Items

@@ -4,6 +4,8 @@ if (!BASE_URL) {
   console.warn("Warning: NEXT_PUBLIC_API_URL is not defined in the environment variables.");
 }
 
+import { EXPORT_FORMATS } from "./constants";
+
 /**
  * Helper to automatically attach the Authorization token.
  */
@@ -147,7 +149,6 @@ function buildRequestBody(formState, defaultFilename = "summary.csv") {
  * - e:\WORK\Renoweb\lead-gen\app\components\steps\ExportStep.js
  */
 export async function startPipelineJob(formState) {
-  const { EXPORT_FORMATS } = await import("./constants");
   const format = EXPORT_FORMATS.find((f) => f.id === formState.exportFormat);
   if (!format) throw new Error("Unknown export format");
 

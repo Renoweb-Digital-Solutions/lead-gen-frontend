@@ -372,7 +372,7 @@ export const DEFAULT_FORM_STATE = {
 
   // Export
   exportFormat: "bundle",
-  filename: "summary.csv",
+  filename: "",
   limitItems: null,
   strictOutputSchema: true,
   resetProgress: true,

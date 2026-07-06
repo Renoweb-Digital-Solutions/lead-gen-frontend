@@ -58,7 +58,7 @@ export default function PeopleStep({ formState, updateField }) {
           value={formState.totalResults}
           onChange={(val) => updateField("totalResults", val)}
           min={10}
-          max={5000}
+          max={1000}
           step={10}
         />
       </Card>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { checkHealth } from "../lib/api";
-import { Target, Map, Trash2, Activity, LogOut } from "lucide-react";
+import { Target, Map, Trash2, Activity, LogOut, Menu } from "lucide-react";
 import { useAuth } from "../lib/AuthContext";
 import { useRouter } from "next/navigation";
 
@@ -29,7 +29,7 @@ const MODULES = [
   { id: "gmaps", label: "Google Maps", icon: Map },
 ];
 
-export default function Header({ onClearAll, activeModule, onModuleChange }) {
+export default function Header({ onClearAll, activeModule, onModuleChange, onToggleSidebar }) {
   const [health, setHealth] = useState(null);
   const { logout } = useAuth();
   const router = useRouter();
@@ -61,6 +61,15 @@ export default function Header({ onClearAll, activeModule, onModuleChange }) {
     <header className="rw-header shadow-sm border-b border-brand-blue/10 bg-white/90 backdrop-blur-md">
       {/* Left: Logo + Module Tabs */}
       <div style={{ display: "flex", alignItems: "center", gap: 0, height: "100%" }}>
+        {/* Hamburger (Mobile Only) */}
+        <button
+          className="md:hidden mr-3 text-brand-dark p-2 hover:bg-gray-100 rounded-md transition-colors"
+          onClick={onToggleSidebar}
+          aria-label="Toggle menu"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+
         {/* Logo */}
         <div 
           onClick={() => router.push('/')}
@@ -93,7 +102,7 @@ export default function Header({ onClearAll, activeModule, onModuleChange }) {
         />
 
         {/* Module Tabs */}
-        <nav style={{ display: "flex", alignItems: "center", gap: 0, height: "100%" }}>
+        <nav className="hidden md:flex items-center gap-0 h-full">
           {MODULES.map((mod) => {
             const isActive = activeModule === mod.id;
             const Icon = mod.icon;
@@ -143,7 +152,9 @@ export default function Header({ onClearAll, activeModule, onModuleChange }) {
       </div>
 
       {/* Right side */}
-      <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+      <div className="flex items-center gap-2 md:gap-4">
+        {/* Desktop-only items */}
+        <div className="hidden md:flex items-center gap-4">
         {/* Health status */}
         <div
           style={{
@@ -165,7 +176,7 @@ export default function Header({ onClearAll, activeModule, onModuleChange }) {
               <div className="absolute inset-0 rounded-full bg-red-400 animate-ping opacity-75" />
             )}
           </div>
-          <span className="rw-hide-mobile font-medium">{health?.ok ? "API Online" : "API Offline"}</span>
+          <span className="font-medium">{health?.ok ? "API Online" : "API Offline"}</span>
         </div>
 
         {/* Clear Data button */}
@@ -182,21 +193,20 @@ export default function Header({ onClearAll, activeModule, onModuleChange }) {
           <span className="rw-hide-mobile font-medium">{activeModule === "gmaps" ? "Clear GMaps Data" : "Clear Pipeline"}</span>
         </button>
 
-        {/* Divider */}
-        <div style={{ width: 1, height: 24, background: "var(--rw-border)", margin: "0 4px" }} />
+        </div>
 
-        {/* Logout button */}
+        {/* Logout button (Visible on all screens) */}
         <button
           type="button"
-          className="rw-btn rw-btn-ghost hover:bg-gray-50"
+          className="rw-btn rw-btn-ghost hover:bg-gray-50 p-2 md:px-3 md:py-2"
           onClick={handleLogout}
           style={{
             color: "var(--rw-text-muted)",
-            fontSize: 13,
           }}
+          title="Logout"
         >
-          <LogOut className="w-4 h-4" />
-          <span className="rw-hide-mobile font-medium">Logout</span>
+          <LogOut className="w-5 h-5 md:w-4 md:h-4 text-gray-500 hover:text-gray-700" />
+          <span className="hidden md:inline font-medium text-[13px]">Logout</span>
         </button>
       </div>
     </header>

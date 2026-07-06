@@ -265,7 +265,7 @@ export default function ResultsTable({ data }) {
         pagination={true}
         paginationPageSize={10}
         paginationPageSizeSelector={[10, 25, 50, 100]}
-        rowSelection="multiple"
+        rowSelection={{ mode: 'multiRow' }}
       />
     </div>
   );

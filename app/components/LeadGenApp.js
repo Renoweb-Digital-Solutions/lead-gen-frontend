@@ -54,6 +54,7 @@ export default function LeadGenApp() {
   const [isExporting, setIsExporting] = useState(false);
   const [exportResults, setExportResults] = useState({});
   const [direction, setDirection] = useState("forward");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const contentRef = useRef(null);
   const wsRef = useRef(null);
 
@@ -67,6 +68,7 @@ export default function LeadGenApp() {
   const goToStep = (index) => {
     setDirection(index > activeStep ? "forward" : "backward");
     setActiveStep(index);
+    setSidebarOpen(false); // Close sidebar on mobile when navigating
     // State is intentionally persisted when navigating between steps
     // Scroll to top of content area
     if (contentRef.current) {
@@ -147,23 +149,68 @@ export default function LeadGenApp() {
 
           if (msg.status === "completed") {
             ws.close();
-            // Trigger downloads
-            if (jobData.downloads) {
-              Object.values(jobData.downloads).forEach((url) => {
-                // simple window.open or fetch+download for URLs
-                window.open(`${process.env.NEXT_PUBLIC_API_URL}${url}`, '_blank');
-              });
-            }
             
-            setExportResults(prev => ({
-              ...prev,
-              [format]: {
-                ...prev[format],
-                success: `Successfully completed pipeline! Downloads started.`,
-                error: null
-              }
-            }));
-            setIsExporting(false);
+            let parsedData = msg.data || msg.result || msg.results || null;
+            let resultFile = null;
+
+            const completeExport = () => {
+              setExportResults(prev => ({
+                ...prev,
+                [format]: {
+                  ...prev[format],
+                  success: `Successfully completed pipeline! Downloads ready.`,
+                  error: null,
+                  data: parsedData,
+                  file: resultFile
+                }
+              }));
+              setIsExporting(false);
+            };
+
+            if (!parsedData && jobData.downloads && Object.keys(jobData.downloads).length > 0) {
+              // Find the URL that matches the selected format, fallback to finding by string include
+              const urlPaths = Object.values(jobData.downloads);
+              const fileUrlPath = jobData.downloads[format] || urlPaths.find(url => url.includes(format)) || urlPaths[0];
+              const fileUrl = `${process.env.NEXT_PUBLIC_API_URL}${fileUrlPath}`;
+              
+              fetch(fileUrl, {
+                headers: { "Authorization": `Bearer ${localStorage.getItem("renoweb_jwt")}` }
+              })
+              .then(res => res.blob())
+              .then(blob => {
+                const ext = format === "bundle" ? ".zip" : ".csv";
+                let finalName = formState.filename || `${format}${ext}`;
+                if (!finalName.endsWith(ext)) {
+                  // Replace any incorrect extension with the correct one
+                  finalName = finalName.replace(/\.[^/.]+$/, "") + ext;
+                }
+                resultFile = { blob, filename: finalName };
+                
+                if (format !== "bundle") {
+                  return blob.text().then(text => {
+                    Papa.parse(text, {
+                      header: true,
+                      skipEmptyLines: true,
+                      complete: (results) => {
+                        parsedData = results.data;
+                        completeExport();
+                      },
+                      error: () => {
+                        completeExport();
+                      }
+                    });
+                  });
+                } else {
+                  completeExport();
+                }
+              })
+              .catch(err => {
+                console.error("Failed to fetch export file:", err);
+                completeExport();
+              });
+            } else {
+              completeExport();
+            }
           } else if (msg.status === "failed") {
             ws.close();
             setExportResults(prev => ({
@@ -197,6 +244,7 @@ export default function LeadGenApp() {
       };
       
     } catch (err) {
+      console.error("Pipeline error in handleExport:", err);
       setExportResults(prev => ({
         ...prev,
         [format]: {
@@ -252,10 +300,24 @@ export default function LeadGenApp() {
         onClearAll={() => setShowClearModal(true)}
         activeModule={activeModule}
         onModuleChange={setActiveModule}
+        onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
       />
 
       {/* ── Google Maps Module ─────────────────────────── */}
       <div className="rw-main-layout" style={{ display: activeModule === "gmaps" ? "flex" : "none" }}>
+        {/* Render sidebar for mobile only in GMaps view so the hamburger menu works */}
+        <div className="md:hidden block">
+          <Sidebar
+            activeStep={0}
+            onStepChange={()=>{}}
+            isOpen={sidebarOpen}
+            onClose={() => setSidebarOpen(false)}
+            activeModule={activeModule}
+            onModuleChange={setActiveModule}
+            onClearAll={() => setShowClearModal(true)}
+            isMobileOnly={true}
+          />
+        </div>
         <GmapsView />
       </div>
 
@@ -264,6 +326,11 @@ export default function LeadGenApp() {
         <Sidebar
           activeStep={activeStep}
           onStepChange={goToStep}
+          isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+          activeModule={activeModule}
+          onModuleChange={setActiveModule}
+          onClearAll={() => setShowClearModal(true)}
         />
 
         {/* Main content area */}

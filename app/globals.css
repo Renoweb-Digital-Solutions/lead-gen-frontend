@@ -1082,31 +1082,33 @@ body {
     overflow-y: visible; /* Prevent double scrollbars on mobile */
   }
   
-  /* Sidebar becomes a horizontal scrollable bar on mobile */
+  /* Sidebar becomes an off-canvas drawer on mobile */
   .rw-sidebar {
-    width: 100%;
-    min-height: auto;
-    padding: 12px 0;
-    border-right: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.5);
-    box-shadow: 0 4px 12px rgba(48, 143, 239, 0.06);
-    flex-direction: row;
-    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 280px;
+    z-index: 50;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    flex-direction: column;
+    padding: 24px 0;
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 10px 0 30px rgba(2, 61, 187, 0.15);
+  }
+  
+  .rw-sidebar.open {
+    transform: translateX(0);
   }
   
   .rw-sidebar-steps {
     display: flex;
-    flex-direction: row;
-    overflow-x: auto;
+    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
     padding: 0 12px;
-    gap: 8px;
-    /* Hide scrollbar for a cleaner look */
-    scrollbar-width: none; 
-    -ms-overflow-style: none;
-  }
-  
-  .rw-sidebar-steps::-webkit-scrollbar {
-    display: none;
+    gap: 4px;
   }
   
   .rw-sidebar-footer {
