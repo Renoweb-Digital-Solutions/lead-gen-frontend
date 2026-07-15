@@ -113,6 +113,63 @@ function UrlCellRenderer(params) {
   );
 }
 
+/**
+ * Smart fallback renderer that checks cell values dynamically.
+ * Linkifies URLs, phone numbers, and emails even if column name didn't match.
+ */
+function SmartFallbackRenderer(params) {
+  let value = params.value;
+  if (value === null || value === undefined) return null;
+  
+  if (typeof value === "boolean") {
+    return value ? "Yes" : "No";
+  }
+  if (value === "true") return "Yes";
+  if (value === "false") return "No";
+
+  if (typeof value === "object") {
+    if (Object.keys(value).length === 0) return null;
+    try {
+      value = JSON.stringify(value);
+    } catch (e) {
+      value = String(value);
+    }
+  }
+  
+  const strVal = String(value).trim();
+  
+  // Check if URL
+  if (strVal.startsWith("http://") || strVal.startsWith("https://")) {
+    return (
+      <a href={strVal} target="_blank" rel="noopener noreferrer" style={linkStyle} title={`Open ${strVal}`}>
+        {strVal}
+      </a>
+    );
+  }
+  
+  // Check if Email
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (emailRegex.test(strVal)) {
+    return (
+      <a href={`mailto:${strVal}`} style={linkStyle} title={`Email ${strVal}`}>
+        {strVal}
+      </a>
+    );
+  }
+
+  // Check if Phone (basic regex for + digits spaces hyphens parentheses)
+  const phoneRegex = /^\+?[\d\s\-\(\)]{7,20}$/;
+  if (phoneRegex.test(strVal) && strVal.replace(/[^\d]/g, '').length >= 7) {
+    return (
+      <a href={`tel:${strVal}`} style={linkStyle} title={`Call ${strVal}`}>
+        {strVal}
+      </a>
+    );
+  }
+
+  return strVal;
+}
+
 export default function ResultsTable({ data, hideEmptyColumns = false, excludeColumns = [] }) {
   const [colDefs, setColDefs] = useState([]);
 
@@ -136,7 +193,8 @@ export default function ResultsTable({ data, hideEmptyColumns = false, excludeCo
         data.forEach(row => {
           if (!row) return;
           Object.entries(row).forEach(([key, value]) => {
-            if (value === null || value === undefined || value === "") return;
+            if (value === null || value === undefined) return;
+            if (typeof value === "string" && (value.trim() === "" || value.trim().toUpperCase() === "N/A" || value.trim().toUpperCase() === "NONE")) return;
             if (Array.isArray(value) && value.length === 0) return;
             if (typeof value === "object" && !Array.isArray(value) && Object.keys(value).length === 0) return;
             validKeys.add(key);
@@ -206,6 +264,8 @@ export default function ResultsTable({ data, hideEmptyColumns = false, excludeCo
             colDef.cellRenderer = PhoneCellRenderer;
           } else if (linkType === "url") {
             colDef.cellRenderer = UrlCellRenderer;
+          } else {
+            colDef.cellRenderer = SmartFallbackRenderer;
           }
 
           return colDef;

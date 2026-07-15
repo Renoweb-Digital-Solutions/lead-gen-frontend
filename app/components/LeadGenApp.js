@@ -5,6 +5,8 @@ import Papa from "papaparse";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
 import GmapsView from "./gmaps/GmapsView";
+import YoutubeView from "./youtube/YoutubeView";
+import B2BView from "./b2b/B2BView";
 import Modal from "./Modal";
 import PeopleStep from "./steps/PeopleStep";
 import CompanyStep from "./steps/CompanyStep";
@@ -91,6 +93,25 @@ export default function LeadGenApp() {
       sessionStorage.removeItem("gmaps-limit");
       sessionStorage.removeItem("gmaps-results");
       sessionStorage.removeItem("gmaps-runid");
+      window.location.reload();
+      return;
+    }
+
+    if (activeModule === "youtube") {
+      sessionStorage.removeItem("youtube-keywords");
+      sessionStorage.removeItem("youtube-max-channels");
+      sessionStorage.removeItem("youtube-min-subs");
+      sessionStorage.removeItem("youtube-results");
+      window.location.reload();
+      return;
+    }
+
+    if (activeModule === "b2b") {
+      sessionStorage.removeItem("b2b-directory");
+      sessionStorage.removeItem("b2b-keywords");
+      sessionStorage.removeItem("b2b-location");
+      sessionStorage.removeItem("b2b-max-results");
+      sessionStorage.removeItem("b2b-results");
       window.location.reload();
       return;
     }
@@ -319,6 +340,40 @@ export default function LeadGenApp() {
           />
         </div>
         <GmapsView />
+      </div>
+
+      {/* ── YouTube Module ─────────────────────────────── */}
+      <div className="rw-main-layout" style={{ display: activeModule === "youtube" ? "flex" : "none" }}>
+        <div className="md:hidden block">
+          <Sidebar
+            activeStep={0}
+            onStepChange={()=>{}}
+            isOpen={sidebarOpen}
+            onClose={() => setSidebarOpen(false)}
+            activeModule={activeModule}
+            onModuleChange={setActiveModule}
+            onClearAll={() => setShowClearModal(true)}
+            isMobileOnly={true}
+          />
+        </div>
+        <YoutubeView />
+      </div>
+
+      {/* ── B2B Module ─────────────────────────────────── */}
+      <div className="rw-main-layout" style={{ display: activeModule === "b2b" ? "flex" : "none" }}>
+        <div className="md:hidden block">
+          <Sidebar
+            activeStep={0}
+            onStepChange={()=>{}}
+            isOpen={sidebarOpen}
+            onClose={() => setSidebarOpen(false)}
+            activeModule={activeModule}
+            onModuleChange={setActiveModule}
+            onClearAll={() => setShowClearModal(true)}
+            isMobileOnly={true}
+          />
+        </div>
+        <B2BView />
       </div>
 
       {/* ── Lead Gen Pipeline ───────────────────────────── */}

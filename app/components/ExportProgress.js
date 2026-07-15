@@ -61,6 +61,34 @@ const LOG_MESSAGES_GMAPS = [
   { icon: "🧭", text: "Recalibrating the compass..." },
 ];
 
+const LOG_MESSAGES_YOUTUBE = [
+  { icon: "📺", text: "Tuning into YouTube APIs..." },
+  { icon: "📡", text: "Scanning for high-signal channels..." },
+  { icon: "👀", text: "Reviewing subscriber counts and engagement metrics..." },
+  { icon: "🔗", text: "Extracting social links and about page details..." },
+  { icon: "📧", text: "Hunting for public business email addresses..." },
+  { icon: "🎥", text: "Checking latest video activity..." },
+  { icon: "🧹", text: "Filtering out inactive channels..." },
+  { icon: "📊", text: "Compiling channel statistics..." },
+  { icon: "⚡", text: "Bypassing rate limits safely..." },
+  { icon: "🎯", text: "Identifying niche-specific creators..." },
+  { icon: "🗂️", text: "Organizing extracted channel data..." }
+];
+
+const LOG_MESSAGES_B2B = [
+  { icon: "🏢", text: "Connecting to B2B directory servers..." },
+  { icon: "🔍", text: "Searching for specific business categories..." },
+  { icon: "📍", text: "Filtering results by geographic location..." },
+  { icon: "📞", text: "Extracting contact numbers and hotlines..." },
+  { icon: "🌐", text: "Resolving business website URLs..." },
+  { icon: "📧", text: "Scraping listed email addresses..." },
+  { icon: "🧹", text: "Deduplicating business listings..." },
+  { icon: "⭐", text: "Pulling company ratings and reviews..." },
+  { icon: "⚡", text: "Parsing unstructured listing data..." },
+  { icon: "📦", text: "Structuring data into exportable formats..." },
+  { icon: "🗂️", text: "Finalizing B2B lead generation pipeline..." }
+];
+
 function formatElapsed(seconds) {
   const m = Math.floor(seconds / 60);
   const s = seconds % 60;
@@ -74,10 +102,13 @@ export default function ExportProgress({ isActive, totalResults = 1000, logType 
   const elapsedRef = useRef(0);
   const logEndRef = useRef(null);
 
-  const MESSAGES = logType === "gmaps" ? LOG_MESSAGES_GMAPS : LOG_MESSAGES_APOLLO;
+  const MESSAGES = logType === "gmaps" ? LOG_MESSAGES_GMAPS 
+    : logType === "youtube" ? LOG_MESSAGES_YOUTUBE
+    : logType === "b2b" ? LOG_MESSAGES_B2B
+    : LOG_MESSAGES_APOLLO;
 
-  // Estimate: ~1.5s per lead for Apollo, fixed 5m for GMaps
-  const estimatedMinutes = logType === "gmaps"
+  // Estimate: fixed 5m for GMaps/YouTube/B2B
+  const estimatedMinutes = ["gmaps", "youtube", "b2b"].includes(logType)
     ? 5
     : Math.max(2, Math.ceil((totalResults * 1.5) / 60));
 
@@ -102,6 +133,23 @@ export default function ExportProgress({ isActive, totalResults = 1000, logType 
 
     return () => clearInterval(timer);
   }, [isActive]);
+
+  // Casual messages every 15 seconds
+  useEffect(() => {
+    if (!isActive) return;
+
+    const msgTimer = setInterval(() => {
+      const idx = nextIndexRef.current % MESSAGES.length;
+      const msg = MESSAGES[idx];
+      setLogs((prev) => [
+        ...prev,
+        { icon: msg.icon, text: msg.text, time: formatElapsed(elapsedRef.current) },
+      ]);
+      nextIndexRef.current += 1;
+    }, 15000); // 15 seconds
+
+    return () => clearInterval(msgTimer);
+  }, [isActive, MESSAGES]);
 
   // If we receive a progressState message, add it to the logs
   useEffect(() => {

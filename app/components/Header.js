@@ -27,6 +27,8 @@ import { useRouter } from "next/navigation";
 const MODULES = [
   { id: "leadgen", label: "Lead Gen Pipeline", icon: Target },
   { id: "gmaps", label: "Google Maps", icon: Map },
+  { id: "youtube", label: "YouTube Scraper", icon: Activity },
+  { id: "b2b", label: "B2B Scraper", icon: Menu }, // using existing imports for icons
 ];
 
 export default function Header({ onClearAll, activeModule, onModuleChange, onToggleSidebar }) {
@@ -190,7 +192,12 @@ export default function Header({ onClearAll, activeModule, onModuleChange, onTog
           }}
         >
           <Trash2 className="w-4 h-4" />
-          <span className="rw-hide-mobile font-medium">{activeModule === "gmaps" ? "Clear GMaps Data" : "Clear Pipeline"}</span>
+          <span className="rw-hide-mobile font-medium">
+            {activeModule === "gmaps" ? "Clear GMaps Data" : 
+             activeModule === "youtube" ? "Clear YouTube Data" :
+             activeModule === "b2b" ? "Clear B2B Data" :
+             "Clear Pipeline"}
+          </span>
         </button>
 
         </div>

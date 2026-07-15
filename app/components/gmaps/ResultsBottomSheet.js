@@ -6,7 +6,7 @@ import { useDrag } from "@use-gesture/react";
 import { X, Download, GripHorizontal } from "lucide-react";
 import ResultsTable from "../ResultsTable";
 
-export default function ResultsBottomSheet({ isOpen, onOpen, onClose, onExport, data }) {
+export default function ResultsBottomSheet({ isOpen, onOpen, onClose, onExport, data, extraExcludeColumns = [], subtitle }) {
   // Height of the bottom sheet (vh)
   const SHEET_HEIGHT_VH = 85;
   const [sheetHeightPx, setSheetHeightPx] = useState(800);
@@ -113,7 +113,7 @@ export default function ResultsBottomSheet({ isOpen, onOpen, onClose, onExport, 
               Search Results
             </h2>
             <p className="text-[13px] font-medium text-gray-500">
-              {data?.length || 0} local businesses ready for export
+              {subtitle || `${data?.length || 0} local businesses ready for export`}
             </p>
           </div>
 
@@ -147,7 +147,9 @@ export default function ResultsBottomSheet({ isOpen, onOpen, onClose, onExport, 
                 'IsAdvertisement', 'ImageUrl', 'Kgmid', 'SourceKeyword',
                 'AdditionalInfo', 'Description', 'ReviewsDistribution', 'AdditionalOptions', 'AdditionalOpeningHours',
                 'fid', 'Fid', 'cid', 'Cid', 'scrapedAt', 'ScrapedAt', 'scraped_at',
-                'searchString', 'SearchString', 'search_string'
+                'searchString', 'SearchString', 'search_string',
+                'photos_count', 'photosCount', 'thumbnail', 'Thumbnail',
+                ...extraExcludeColumns
               ]}
             />
           </div>

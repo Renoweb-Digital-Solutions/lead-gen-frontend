@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Users, Building2, Briefcase, Zap, Rocket, Check, Target, Map, Trash2, LogOut, X } from "lucide-react";
+import { Users, Building2, Briefcase, Zap, Rocket, Check, Target, Map, Trash2, LogOut, X, Activity, Menu } from "lucide-react";
 import { useAuth } from "../lib/AuthContext";
 import { useRouter } from "next/navigation";
 import { STEPS } from "../lib/constants";
@@ -107,6 +107,20 @@ export default function Sidebar({
           >
              <Map className="w-5 h-5" />
              <span className="text-[14px]">Google Maps</span>
+          </button>
+          <button 
+             onClick={() => { onModuleChange?.('youtube'); onClose?.(); }}
+             className={`flex items-center gap-3 p-3 rounded-xl transition-all ${activeModule === 'youtube' ? 'bg-blue-50 text-brand-blue font-bold shadow-sm' : 'text-gray-500 hover:bg-gray-50 font-medium'}`}
+          >
+             <Activity className="w-5 h-5" />
+             <span className="text-[14px]">YouTube Scraper</span>
+          </button>
+          <button 
+             onClick={() => { onModuleChange?.('b2b'); onClose?.(); }}
+             className={`flex items-center gap-3 p-3 rounded-xl transition-all ${activeModule === 'b2b' ? 'bg-blue-50 text-brand-blue font-bold shadow-sm' : 'text-gray-500 hover:bg-gray-50 font-medium'}`}
+          >
+             <Menu className="w-5 h-5" />
+             <span className="text-[14px]">B2B Scraper</span>
           </button>
           
           <div className="h-px w-full bg-gray-200/60 my-2" />

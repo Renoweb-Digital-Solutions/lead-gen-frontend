@@ -351,3 +351,59 @@ export async function gmapsExportCsv(runId) {
   if (!res.ok) throw new Error("Failed to export GMaps CSV");
   return { blob: await res.blob(), filename: `gmaps_${runId}.csv` };
 }
+
+// ═══════════════════════════════════════════════════════════
+// NEW SCRAPERS API FUNCTIONS (YouTube & B2B)
+// ═══════════════════════════════════════════════════════════
+
+export async function fetchYoutubeLeads(params, signal) {
+  const res = await fetchWithAuth(`/api/v1/fetch-leads`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(params),
+    signal
+  });
+
+  if (!res.ok) {
+    let errorDetail = "Failed to fetch YouTube leads";
+    try {
+      const errData = await res.json();
+      errorDetail = errData.detail || errData.error || errorDetail;
+    } catch {
+      // Fallback if not json
+      const text = await res.text();
+      if (text) errorDetail = text;
+    }
+    const err = new Error(errorDetail);
+    err.status = res.status;
+    throw err;
+  }
+
+  return res.json();
+}
+
+export async function fetchB2BLeads(params, signal) {
+  const res = await fetchWithAuth(`/api/v1/fetch-b2b-leads`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(params),
+    signal
+  });
+
+  if (!res.ok) {
+    let errorDetail = "Failed to fetch B2B leads";
+    try {
+      const errData = await res.json();
+      errorDetail = errData.detail || errData.error || errorDetail;
+    } catch {
+      // Fallback if not json
+      const text = await res.text();
+      if (text) errorDetail = text;
+    }
+    const err = new Error(errorDetail);
+    err.status = res.status;
+    throw err;
+  }
+
+  return res.json();
+}

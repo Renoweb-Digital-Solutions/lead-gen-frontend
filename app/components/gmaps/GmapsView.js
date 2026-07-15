@@ -10,8 +10,8 @@ import {
   downloadBlob,
 } from "../../lib/api";
 import { useSessionState } from "../../hooks/useSessionState";
-import { Map } from "lucide-react";
-
+import { Map, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import SearchParametersCard from "./SearchParametersCard";
 import GlobeVisualization from "./GlobeVisualization";
 import ExportProgress from "../ExportProgress";
@@ -222,19 +222,53 @@ export default function GmapsView() {
       </div>
 
       {/* Alerts */}
-      {searchError && (
-        <div className="animate-[rw-fadeInUp_0.3s_ease-out] p-4 mb-6 bg-red-50 border border-red-200 rounded-xl text-red-800 text-sm flex items-center gap-2">
-          <span>❌</span>
-          {searchError}
-        </div>
-      )}
+      <AnimatePresence>
+        {searchError && (
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="mb-6 p-4 bg-red-50/80 backdrop-blur border border-red-200 rounded-xl shadow-sm flex items-start gap-3 relative"
+          >
+            <div className="mt-0.5 bg-red-100 text-red-600 p-1 rounded-full shrink-0">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </div>
+            <div className="pr-6">
+              <h4 className="text-sm font-bold text-red-800 m-0">Error</h4>
+              <p className="text-sm text-red-700 mt-1 mb-0">{searchError}</p>
+            </div>
+            <button 
+              onClick={() => setSearchError(null)}
+              className="absolute top-4 right-4 text-red-400 hover:text-red-700 transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </motion.div>
+        )}
 
-      {searchSuccess && !isSearching && (
-        <div className="animate-[rw-fadeInUp_0.3s_ease-out] p-4 mb-6 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-sm flex items-center gap-2">
-          <span>✅</span>
-          {searchSuccess}
-        </div>
-      )}
+        {searchSuccess && !isSearching && (
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="mb-6 p-4 bg-emerald-50/80 backdrop-blur border border-emerald-200 rounded-xl shadow-sm flex items-start gap-3 relative"
+          >
+             <div className="mt-0.5 bg-emerald-100 text-emerald-600 p-1 rounded-full shrink-0">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div className="pr-6">
+              <h4 className="text-sm font-bold text-emerald-800 m-0">Success</h4>
+              <p className="text-sm text-emerald-700 mt-1 mb-0">{searchSuccess}</p>
+            </div>
+            <button 
+              onClick={() => setSearchSuccess(null)}
+              className="absolute top-4 right-4 text-emerald-400 hover:text-emerald-700 transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ── ZONE 1: Search Form & Globe ───────────────────────────────────── */}
       <div className="mb-8 grid grid-cols-1 lg:grid-cols-[55%_45%] gap-6 items-stretch">
