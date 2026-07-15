@@ -51,7 +51,20 @@ export default function YoutubeView() {
       clearTimeout(timeoutId);
 
       // Assuming API returns { data: [...] } or just an array
-      const rows = Array.isArray(result) ? result : (result.data || []);
+      let rows = Array.isArray(result) ? result : (result.data || []);
+      
+      // Flatten socialLinks for YouTube
+      rows = rows.map(row => {
+        const newRow = { ...row };
+        if (newRow.socialLinks) {
+          Object.entries(newRow.socialLinks).forEach(([key, value]) => {
+            newRow[`${key}`] = value;
+          });
+          delete newRow.socialLinks;
+        }
+        return newRow;
+      });
+
       setResultData(rows);
       setSuccessMsg(`Found ${rows.length} YouTube leads!`);
     } catch (err) {
@@ -334,7 +347,8 @@ export default function YoutubeView() {
             onOpen={() => setIsSheetOpen(true)}
             onClose={() => setIsSheetOpen(false)} 
             onExport={handleExportCsv}
-            data={resultData} 
+            data={resultData}
+            extraExcludeColumns={["channelId", "thumbnailUrl", "ChannelId", "ThumbnailUrl"]}
           />
         </>
       )}

@@ -57,13 +57,41 @@ const linkStyle = {
   transition: "color 0.15s ease",
 };
 
+
+
+/**
+ * Extracts a readable string from complex values (like arrays of objects).
+ */
+function extractStringValue(val, hint) {
+  if (val === null || val === undefined) return "";
+  if (typeof val === "string" || typeof val === "number" || typeof val === "boolean") return String(val);
+  
+  if (Array.isArray(val)) {
+    return val.map(v => extractStringValue(v, hint)).filter(Boolean).join(", ");
+  }
+  
+  if (typeof val === "object") {
+    if (hint && val[hint]) return String(val[hint]);
+    if (val.value) return String(val.value);
+    if (val.email) return String(val.email);
+    if (val.phone) return String(val.phone);
+    if (val.url) return String(val.url);
+    if (val.link) return String(val.link);
+    try { return JSON.stringify(val); } catch(e) { return String(val); }
+  }
+  
+  return String(val);
+}
+
 /**
  * Cell renderer for email fields — opens mailto: link
  */
 function EmailCellRenderer(params) {
   let value = params.value;
   if (!value || (Array.isArray(value) && value.length === 0)) return null;
-  if (Array.isArray(value)) value = value.join(", ");
+  
+  value = extractStringValue(value, "email");
+  if (!value) return null;
   
   return (
     <a href={`mailto:${value}`} style={linkStyle} title={`Email ${value}`}>
@@ -78,7 +106,9 @@ function EmailCellRenderer(params) {
 function PhoneCellRenderer(params) {
   let value = params.value;
   if (!value || (Array.isArray(value) && value.length === 0)) return null;
-  if (Array.isArray(value)) value = value.join(", ");
+  
+  value = extractStringValue(value, "phone");
+  if (!value) return null;
   
   return (
     <a href={`tel:${value}`} style={linkStyle} title={`Call ${value}`}>
@@ -95,9 +125,11 @@ function UrlCellRenderer(params) {
   let value = params.value;
   if (!value || (Array.isArray(value) && value.length === 0)) return null;
   
+  value = extractStringValue(value, "url");
+  if (!value) return null;
+  
   // If multiple URLs, we'll just link the first one but show all
-  const firstUrl = Array.isArray(value) ? value[0] : value;
-  const displayValue = Array.isArray(value) ? value.join(", ") : value;
+  const firstUrl = value.split(",")[0].trim();
   
   const href = firstUrl.startsWith("http") ? firstUrl : `https://${firstUrl}`;
   return (
@@ -108,7 +140,7 @@ function UrlCellRenderer(params) {
       style={linkStyle}
       title={`Open ${firstUrl}`}
     >
-      {displayValue}
+      {value}
     </a>
   );
 }
@@ -121,6 +153,9 @@ function SmartFallbackRenderer(params) {
   let value = params.value;
   if (value === null || value === undefined) return null;
   
+  const fieldName = params.colDef?.field?.toLowerCase() || "";
+  const isMetric = fieldName.includes("count") || fieldName.includes("score") || fieldName.includes("rank");
+
   if (typeof value === "boolean") {
     return value ? "Yes" : "No";
   }
@@ -158,8 +193,9 @@ function SmartFallbackRenderer(params) {
   }
 
   // Check if Phone (basic regex for + digits spaces hyphens parentheses)
+  // Skip metric columns to prevent false positives like 'subscriberCount'
   const phoneRegex = /^\+?[\d\s\-\(\)]{7,20}$/;
-  if (phoneRegex.test(strVal) && strVal.replace(/[^\d]/g, '').length >= 7) {
+  if (!isMetric && phoneRegex.test(strVal) && strVal.replace(/[^\d]/g, '').length >= 7) {
     return (
       <a href={`tel:${strVal}`} style={linkStyle} title={`Call ${strVal}`}>
         {strVal}
@@ -178,9 +214,9 @@ export default function ResultsTable({ data, hideEmptyColumns = false, excludeCo
   useMemo(() => {
     if (data && data.length > 0) {
       const TARGET_COLUMNS = [
-        "firstName", "lastName", "first_name", "last_name", "name", "email", "company", "companyName", "role", "seniority",
+        "channelName", "channelHandle", "firstName", "lastName", "first_name", "last_name", "name", "email", "emails", "company", "companyName", "role", "seniority",
         "title", "categoryName", "address", "city", "state", "countryCode", "website",
-        "phone", "emails", "linkedIns", "facebooks", "instagrams", "socials",
+        "phone", "facebook", "instagram", "twitter", "x", "linkedIns", "facebooks", "instagrams", "socials",
         "totalScore", "reviewsCount", "rank", "website_status", "opportunity_score",
         "opportunity_tier", "opportunity_reason", "opportunity_signals",
         "identifier_coverage", "coverage_count", "confidence", "url", "placeId", "domain"
