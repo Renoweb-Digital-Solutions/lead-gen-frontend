@@ -6,6 +6,7 @@ import Header from "./Header";
 import Sidebar from "./Sidebar";
 import GmapsView from "./gmaps/GmapsView";
 import YoutubeView from "./youtube/YoutubeView";
+import InstagramView from "./instagram/InstagramView";
 import B2BView from "./b2b/B2BView";
 import Modal from "./Modal";
 import PeopleStep from "./steps/PeopleStep";
@@ -102,6 +103,15 @@ export default function LeadGenApp() {
       sessionStorage.removeItem("youtube-max-channels");
       sessionStorage.removeItem("youtube-min-subs");
       sessionStorage.removeItem("youtube-results");
+      window.location.reload();
+      return;
+    }
+
+    if (activeModule === "instagram") {
+      sessionStorage.removeItem("instagram-source-type");
+      sessionStorage.removeItem("instagram-target");
+      sessionStorage.removeItem("instagram-max-items");
+      sessionStorage.removeItem("instagram-results");
       window.location.reload();
       return;
     }
@@ -357,6 +367,23 @@ export default function LeadGenApp() {
           />
         </div>
         <YoutubeView />
+      </div>
+
+      {/* ── Instagram Module ─────────────────────────────── */}
+      <div className="rw-main-layout" style={{ display: activeModule === "instagram" ? "flex" : "none" }}>
+        <div className="md:hidden block">
+          <Sidebar
+            activeStep={0}
+            onStepChange={()=>{}}
+            isOpen={sidebarOpen}
+            onClose={() => setSidebarOpen(false)}
+            activeModule={activeModule}
+            onModuleChange={setActiveModule}
+            onClearAll={() => setShowClearModal(true)}
+            isMobileOnly={true}
+          />
+        </div>
+        <InstagramView />
       </div>
 
       {/* ── B2B Module ─────────────────────────────────── */}

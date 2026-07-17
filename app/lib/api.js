@@ -357,7 +357,7 @@ export async function gmapsExportCsv(runId) {
 // ═══════════════════════════════════════════════════════════
 
 export async function fetchYoutubeLeads(params, signal) {
-  const res = await fetchWithAuth(`/api/v1/fetch-leads`, {
+  const res = await fetchWithAuth(`/yt_leads`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(params),
@@ -366,6 +366,32 @@ export async function fetchYoutubeLeads(params, signal) {
 
   if (!res.ok) {
     let errorDetail = "Failed to fetch YouTube leads";
+    try {
+      const errData = await res.json();
+      errorDetail = errData.detail || errData.error || errorDetail;
+    } catch {
+      // Fallback if not json
+      const text = await res.text();
+      if (text) errorDetail = text;
+    }
+    const err = new Error(errorDetail);
+    err.status = res.status;
+    throw err;
+  }
+
+  return res.json();
+}
+
+export async function extractInstagramLeads(params, signal) {
+  const res = await fetchWithAuth(`/api/v1/extract-leads`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(params),
+    signal
+  });
+
+  if (!res.ok) {
+    let errorDetail = "Failed to extract Instagram leads";
     try {
       const errData = await res.json();
       errorDetail = errData.detail || errData.error || errorDetail;

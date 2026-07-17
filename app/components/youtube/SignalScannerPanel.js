@@ -13,11 +13,13 @@ export default function SignalScannerPanel({ status, channelCount }) {
   // Handle fake "results arriving" pop-in
   useEffect(() => {
     if (status === "complete" && channelCount > 0) {
+      setDisplayedAvatars([]);
       let count = 0;
       const maxToDisplay = Math.min(channelCount, 12); // Show up to 12 placeholders
       const interval = setInterval(() => {
         if (count < maxToDisplay) {
-          setDisplayedAvatars((prev) => [...prev, count]);
+          const uniqueKey = `avatar-${Date.now()}-${count}`;
+          setDisplayedAvatars((prev) => [...prev, uniqueKey]);
           count++;
         } else {
           clearInterval(interval);
@@ -31,11 +33,11 @@ export default function SignalScannerPanel({ status, channelCount }) {
   }, [status, channelCount]);
 
   return (
-    <div className="w-full h-full min-h-[500px] bg-white rounded-2xl relative overflow-hidden shadow-[0_4px_15px_rgba(2,61,187,0.12)] border border-brand-blue/10 flex flex-col p-6">
+    <div className="w-full h-full min-h-[500px] bg-white rounded-2xl relative overflow-hidden shadow-[0_4px_15px_rgba(220,38,38,0.12)] border border-red-600/10 flex flex-col p-6">
       {/* ── Overlay UI / Status Panel ── */}
       <div className="absolute top-6 left-6 z-10 pointer-events-none">
         <h3 className="text-brand-dark font-display font-semibold tracking-wide text-lg flex items-center gap-2 drop-shadow-sm">
-          <Activity className="w-5 h-5 text-brand-cyan" />
+          <Activity className="w-5 h-5 text-red-500" />
           Signal Scanner
         </h3>
 
@@ -48,8 +50,8 @@ export default function SignalScannerPanel({ status, channelCount }) {
               exit={{ opacity: 0, x: -10 }}
               className="mt-3 flex items-center gap-2"
             >
-              <div className="w-2 h-2 rounded-full bg-brand-cyan/50 animate-[rw-pulse_2s_infinite]" />
-              <p className="text-[#4ec8ef]/70 text-xs uppercase tracking-wider font-semibold m-0">
+              <div className="w-2 h-2 rounded-full bg-red-500/50 animate-[rw-pulse_2s_infinite]" />
+              <p className="text-red-500/70 text-xs uppercase tracking-wider font-semibold m-0">
                 MONITORING CHANNELS...
               </p>
             </motion.div>
@@ -61,14 +63,14 @@ export default function SignalScannerPanel({ status, channelCount }) {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              className="mt-3 bg-white/90 backdrop-blur-md border border-brand-blue/20 rounded-xl p-4 inline-block shadow-[0_4px_20px_rgba(48,143,239,0.15)] pointer-events-auto"
+              className="mt-3 bg-white/90 backdrop-blur-md border border-red-600/20 rounded-xl p-4 inline-block shadow-[0_4px_20px_rgba(220,38,38,0.15)] pointer-events-auto"
             >
-              <div className="text-[#4ec8ef] text-[10px] uppercase tracking-[0.2em] font-bold mb-1.5 flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-brand-cyan animate-pulse" />
+              <div className="text-red-500 text-[10px] uppercase tracking-[0.2em] font-bold mb-1.5 flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
                 SCANNING FOR CHANNELS...
               </div>
               <div className="text-brand-dark text-3xl font-bold font-display tabular-nums leading-none flex items-baseline gap-2">
-                <Loader2 className="w-6 h-6 animate-spin text-brand-blue" />
+                <Loader2 className="w-6 h-6 animate-spin text-red-600" />
                 <span className="text-sm text-gray-500 font-sans font-medium tracking-normal">Searching network</span>
               </div>
             </motion.div>
@@ -115,7 +117,7 @@ export default function SignalScannerPanel({ status, channelCount }) {
               <motion.div
                 animate={{ x: ["-10%", "110%"] }}
                 transition={{ duration: 1.5, ease: "linear", repeat: Infinity }}
-                className="h-full w-1.5 bg-brand-cyan/80 blur-[1px] absolute top-0 bottom-0 shadow-[0_0_15px_rgba(78,200,239,0.8)]"
+                className="h-full w-1.5 bg-red-500/80 blur-[1px] absolute top-0 bottom-0 shadow-[0_0_15px_rgba(239,68,68,0.8)]"
               />
             </motion.div>
           )}
@@ -145,7 +147,7 @@ export default function SignalScannerPanel({ status, channelCount }) {
             return (
               <motion.div
                 key={i}
-                className="flex-1 rounded-t-sm bg-gradient-to-t from-brand-blue to-brand-cyan opacity-80"
+                className="flex-1 rounded-t-sm bg-gradient-to-t from-red-600 to-red-400 opacity-80"
                 animate={{ height: currentHeight }}
                 transition={{
                   duration: currentDuration,
@@ -170,8 +172,8 @@ export default function SignalScannerPanel({ status, channelCount }) {
                 transition={{ type: "spring", stiffness: 200, damping: 15 }}
                 className="relative group"
               >
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-sky/20 to-brand-cyan/20 border border-brand-sky/40 flex items-center justify-center overflow-hidden">
-                  <Activity className="w-4 h-4 text-brand-blue opacity-50" />
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-red-500/20 to-orange-500/20 border border-red-500/40 flex items-center justify-center overflow-hidden">
+                  <Activity className="w-4 h-4 text-red-600 opacity-50" />
                 </div>
                 {/* Fake subscriber count badge */}
                 <div className="absolute -bottom-2 -right-2 bg-brand-dark text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full border border-white shadow-sm">

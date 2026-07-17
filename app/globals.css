@@ -548,6 +548,30 @@ body {
   color: white;
 }
 
+/* ── Red Theme Tag ───────────────────────────────────────── */
+.rw-tag-red {
+  background: var(--rw-surface);
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  box-shadow: 0 2px 4px rgba(220, 38, 38, 0.04);
+  color: #b91c1c; /* text-red-700 */
+}
+
+.rw-tag-red:hover {
+  border-color: rgba(220, 38, 38, 0.5);
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.1);
+  transform: translateY(-1px);
+}
+
+.rw-tag-red button {
+  background: rgba(220, 38, 38, 0.08);
+  color: #ef4444; /* text-red-500 */
+}
+
+.rw-tag-red button:hover {
+  background: #dc2626;
+  color: white;
+}
+
 /* ── Slider ──────────────────────────────────────────────── */
 .rw-slider-track {
   width: 100%;

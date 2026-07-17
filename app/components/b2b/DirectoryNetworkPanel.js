@@ -6,7 +6,6 @@ import { Network, Building, BookOpen, Loader2 } from "lucide-react";
 
 const DIR_META = {
   yellowpages: { name: "Yellow Pages", color: "#eab308", icon: BookOpen, glow: "rgba(234, 179, 8, 0.4)" },
-  justdial: { name: "Justdial", color: "#ea580c", icon: Building, glow: "rgba(234, 88, 12, 0.4)" },
   indiamart: { name: "IndiaMART", color: "#2563eb", icon: Building, glow: "rgba(37, 99, 235, 0.4)" },
 };
 

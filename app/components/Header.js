@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { checkHealth } from "../lib/api";
-import { Target, Map, Trash2, Activity, LogOut, Menu } from "lucide-react";
+import { Target, Map, Trash2, Activity, LogOut, Menu, Camera } from "lucide-react";
 import { useAuth } from "../lib/AuthContext";
 import { useRouter } from "next/navigation";
 
@@ -28,6 +28,7 @@ const MODULES = [
   { id: "leadgen", label: "Lead Gen Pipeline", icon: Target },
   { id: "gmaps", label: "Google Maps", icon: Map },
   { id: "youtube", label: "YouTube Scraper", icon: Activity },
+  { id: "instagram", label: "Instagram Scraper", icon: Camera },
   { id: "b2b", label: "B2B Scraper", icon: Menu }, // using existing imports for icons
 ];
 
@@ -195,6 +196,7 @@ export default function Header({ onClearAll, activeModule, onModuleChange, onTog
           <span className="rw-hide-mobile font-medium">
             {activeModule === "gmaps" ? "Clear GMaps Data" : 
              activeModule === "youtube" ? "Clear YouTube Data" :
+             activeModule === "instagram" ? "Clear Instagram Data" :
              activeModule === "b2b" ? "Clear B2B Data" :
              "Clear Pipeline"}
           </span>

@@ -13,7 +13,6 @@ import { useSessionState } from "../../hooks/useSessionState";
 
 const DIRECTORIES = [
   { id: "yellowpages", label: "Yellow Pages (US)", icon: BookOpen, color: "text-yellow-600", bg: "bg-yellow-100", border: "border-yellow-200" },
-  { id: "justdial", label: "Justdial (India)", icon: Building, color: "text-orange-600", bg: "bg-orange-100", border: "border-orange-200" },
   { id: "indiamart", label: "IndiaMART (B2B)", icon: Building, color: "text-blue-600", bg: "bg-blue-100", border: "border-blue-200" }
 ];
 
@@ -202,7 +201,7 @@ export default function B2BView() {
           <label className="text-[13px] font-semibold text-brand-dark block mb-3 uppercase tracking-wide">
             Select Data Source Directory
           </label>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {DIRECTORIES.map((dir) => {
               const isActive = directory === dir.id;
               const Icon = dir.icon;

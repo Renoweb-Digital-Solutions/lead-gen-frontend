@@ -9,7 +9,16 @@ export default function TagInput({
   onChange,
   placeholder = "Type and press Enter...",
   icon: Icon,
+  theme = "blue",
 }) {
+  const isRed = theme === "red";
+  const containerClasses = isRed 
+    ? "focus-within:border-red-500 focus-within:ring-red-500/10 hover:border-red-500/40"
+    : "focus-within:border-brand-sky focus-within:ring-brand-sky/10 hover:border-brand-sky/40";
+  const iconClasses = isRed 
+    ? "group-focus-within:text-red-500" 
+    : "group-focus-within:text-brand-sky";
+
   const [inputValue, setInputValue] = useState("");
   const inputRef = useRef(null);
 
@@ -70,15 +79,15 @@ export default function TagInput({
 
       <div
         onClick={() => inputRef.current?.focus()}
-        className="group flex flex-wrap items-center gap-1.5 p-2 min-h-[42px] bg-white border-1.5 border-gray-200 rounded-xl cursor-text transition-all focus-within:border-brand-sky focus-within:ring-4 focus-within:ring-brand-sky/10 hover:border-brand-sky/40"
+        className={`group flex flex-wrap items-center gap-1.5 p-2 min-h-[42px] bg-white border-1.5 border-gray-200 rounded-xl cursor-text transition-all focus-within:ring-4 ${containerClasses}`}
       >
         {Icon && (
-          <div className="pl-1.5 pr-1 text-gray-400 group-focus-within:text-brand-sky transition-colors flex items-center h-full">
+          <div className={`pl-1.5 pr-1 text-gray-400 transition-colors flex items-center h-full ${iconClasses}`}>
             <Icon className="w-4 h-4" />
           </div>
         )}
         {tags.map((tag) => (
-          <span key={tag} className="rw-tag">
+          <span key={tag} className={`rw-tag ${isRed ? 'rw-tag-red' : ''}`}>
             {tag}
             <button
               type="button"

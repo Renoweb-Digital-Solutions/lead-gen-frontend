@@ -6,16 +6,16 @@ import { Search, Loader2, Video, Users, Mail, Link as LinkIcon, Download, X } fr
 import TagInput from "../inputs/TagInput";
 import SignalScannerPanel from "./SignalScannerPanel";
 import ExportProgress from "../ExportProgress";
-import ResultsBottomSheet from "../gmaps/ResultsBottomSheet";
+import YoutubeResultsBottomSheet from "./YoutubeResultsBottomSheet";
 import RippleArrivalSignal from "../gmaps/RippleArrivalSignal";
 import { fetchYoutubeLeads } from "../../lib/api";
 import { useSessionState } from "../../hooks/useSessionState";
 
 export default function YoutubeView() {
   // ─── Search Form State ───────────────────────────────────
-  const [keywords, setKeywords] = useSessionState("youtube-keywords", []);
-  const [maxChannels, setMaxChannels] = useSessionState("youtube-max-channels", 10);
-  const [minSubscribers, setMinSubscribers] = useSessionState("youtube-min-subs", 2000000);
+  const [keyword, setKeyword] = useSessionState("youtube-keyword", "");
+  const [maxEmails, setMaxEmails] = useSessionState("youtube-max-emails", 20);
+  const [customDomain, setCustomDomain] = useSessionState("youtube-custom-domain", "@gmail.com,@yahoo.com");
 
   // ─── Search State ────────────────────────────────────────
   const [isSearching, setIsSearching] = useState(false);
@@ -26,8 +26,8 @@ export default function YoutubeView() {
 
   // ─── Search Handler ──────────────────────────────────────
   const handleSearch = async () => {
-    if (keywords.length === 0) {
-      setErrorMsg("Please add at least one keyword (e.g. 'tech reviews', 'gaming')");
+    if (!keyword.trim()) {
+      setErrorMsg("Please add a target keyword (e.g. 'tech reviews', 'gaming')");
       return;
     }
 
@@ -43,9 +43,9 @@ export default function YoutubeView() {
       const timeoutId = setTimeout(() => controller.abort(), 300000); // 5 minutes
 
       const result = await fetchYoutubeLeads({
-        searchKeywords: keywords,
-        maxChannelsPerKeyword: Number(maxChannels),
-        minSubscribers: Number(minSubscribers)
+        keywords: [keyword.trim()],
+        max_emails: Number(maxEmails),
+        custom_domains: customDomain.split(",").map(d => d.trim())
       }, controller.signal);
 
       clearTimeout(timeoutId);
@@ -188,52 +188,67 @@ export default function YoutubeView() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-2xl p-6 lg:p-7 border border-brand-blue/10 shadow-[0_4px_20px_rgba(2,61,187,0.06)] h-full"
+            className="bg-white rounded-2xl p-6 lg:p-7 border border-red-600/10 shadow-[0_4px_20px_rgba(220,38,38,0.06)] h-full"
           >
-            <div className="flex items-center gap-2.5 mb-6 pb-3 border-b border-brand-blue/5">
-              <div className="w-1 h-3.5 bg-gradient-to-b from-brand-blue to-brand-cyan rounded-full" />
-              <h2 className="text-[12px] font-bold uppercase tracking-[0.05em] text-brand-blue m-0 leading-none">
+            <div className="flex items-center gap-2.5 mb-6 pb-3 border-b border-red-600/5">
+              <div className="w-1 h-3.5 bg-gradient-to-b from-red-600 to-red-500 rounded-full" />
+              <h2 className="text-[12px] font-bold uppercase tracking-[0.05em] text-red-600 m-0 leading-none">
                 Search Parameters
               </h2>
             </div>
 
         <div className="flex flex-col lg:flex-row gap-6 mb-6">
-          <div className="flex-[2]">
-            <TagInput
-              label="Target Keywords"
-              hint="Press enter to add multiple keywords"
-              tags={keywords}
-              onChange={setKeywords}
-              placeholder="e.g. tech reviews, vloggers..."
-              icon={Search}
-            />
+          <div className="flex-[1.5] relative group">
+            <label className="text-[13px] font-semibold text-brand-dark block mb-1.5 uppercase tracking-wide">
+              Target Keyword
+            </label>
+            <div className="relative flex items-center">
+              <div className="absolute left-4 text-gray-400 group-focus-within:text-red-500 transition-colors pointer-events-none">
+                <Search className="w-4 h-4" />
+              </div>
+              <input
+                type="text"
+                placeholder="e.g. vloggers"
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+                className="w-full pl-11 pr-4 py-3 text-[14px] bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-red-500 focus:ring-4 focus:ring-red-500/10 transition-all hover:border-red-500/40 text-brand-dark font-medium shadow-sm"
+              />
+            </div>
+          </div>
+
+          <div className="flex-[1.5] relative group">
+            <label className="text-[13px] font-semibold text-brand-dark block mb-1.5 uppercase tracking-wide">
+              Custom Domain
+            </label>
+            <div className="relative flex items-center">
+              <div className="absolute left-4 text-gray-400 group-focus-within:text-red-500 transition-colors pointer-events-none">
+                <Mail className="w-4 h-4" />
+              </div>
+              <select
+                value={customDomain}
+                onChange={(e) => setCustomDomain(e.target.value)}
+                className="w-full pl-11 pr-10 py-3 text-[14px] bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-red-500 focus:ring-4 focus:ring-red-500/10 transition-all hover:border-red-500/40 text-brand-dark font-medium shadow-sm appearance-none cursor-pointer"
+              >
+                <option value="@gmail.com,@yahoo.com">Both (@gmail & @yahoo)</option>
+                <option value="@gmail.com">Only @gmail.com</option>
+                <option value="@yahoo.com">Only @yahoo.com</option>
+              </select>
+              <div className="absolute right-4 pointer-events-none text-gray-400">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
+              </div>
+            </div>
           </div>
 
           <div className="flex-1 relative group">
             <label className="text-[13px] font-semibold text-brand-dark block mb-1.5 uppercase tracking-wide">
-              Max Channels / Keyword
+              Max Emails
             </label>
             <input
               type="number"
-              className="w-full px-4 py-2.5 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-sky focus:ring-4 focus:ring-brand-sky/10 transition-all hover:border-brand-sky/40 text-brand-dark font-medium"
-              value={maxChannels}
-              onChange={(e) => setMaxChannels(e.target.value)}
+              className="w-full px-4 py-3 text-[14px] bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-red-500 focus:ring-4 focus:ring-red-500/10 transition-all hover:border-red-500/40 text-brand-dark font-medium shadow-sm"
+              value={maxEmails}
+              onChange={(e) => setMaxEmails(e.target.value)}
               min={1}
-              max={100}
-            />
-          </div>
-
-          <div className="flex-1 relative group">
-            <label className="text-[13px] font-semibold text-brand-dark block mb-1.5 uppercase tracking-wide">
-              Min Subscribers
-            </label>
-            <input
-              type="number"
-              className="w-full px-4 py-2.5 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-sky focus:ring-4 focus:ring-brand-sky/10 transition-all hover:border-brand-sky/40 text-brand-dark font-medium"
-              value={minSubscribers}
-              onChange={(e) => setMinSubscribers(e.target.value)}
-              min={0}
-              step={10000}
             />
           </div>
         </div>
@@ -248,8 +263,8 @@ export default function YoutubeView() {
             className={`
               relative px-8 py-3.5 rounded-xl text-white font-bold text-[15px] tracking-wide flex items-center justify-center gap-2 overflow-hidden transition-all duration-300 min-w-[220px]
               ${isSearching
-                ? "bg-brand-sky shadow-inner pointer-events-none"
-                : "bg-gradient-to-r from-brand-blue to-brand-cyan shadow-[0_4px_20px_rgba(48,143,239,0.3)] hover:shadow-[0_8px_30px_rgba(48,143,239,0.5)]"
+                ? "bg-red-500 shadow-inner pointer-events-none"
+                : "bg-gradient-to-r from-red-600 to-red-500 shadow-[0_4px_20px_rgba(220,38,38,0.3)] hover:shadow-[0_8px_30px_rgba(220,38,38,0.5)]"
               }
             `}
           >
@@ -333,7 +348,7 @@ export default function YoutubeView() {
           </div>
           <h3 className="text-xl font-bold text-gray-700 mb-2">No channels found</h3>
           <p className="text-gray-500 max-w-md">
-            No leads were found for these parameters. Try broadening your keywords or lowering the minimum subscriber count.
+            No leads were found for these parameters. Try broadening your keywords or modifying custom domains.
           </p>
         </motion.div>
       )}
@@ -342,13 +357,12 @@ export default function YoutubeView() {
       {resultData && resultData.length > 0 && !isSearching && (
         <>
           <RippleArrivalSignal isActive={true} />
-          <ResultsBottomSheet 
+          <YoutubeResultsBottomSheet 
             isOpen={isSheetOpen} 
             onOpen={() => setIsSheetOpen(true)}
             onClose={() => setIsSheetOpen(false)} 
             onExport={handleExportCsv}
             data={resultData}
-            extraExcludeColumns={["channelId", "thumbnailUrl", "ChannelId", "ThumbnailUrl"]}
           />
         </>
       )}

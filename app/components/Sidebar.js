@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Users, Building2, Briefcase, Zap, Rocket, Check, Target, Map, Trash2, LogOut, X, Activity, Menu } from "lucide-react";
+import { Users, Building2, Briefcase, Zap, Rocket, Check, Target, Map, Trash2, LogOut, X, Activity, Menu, Camera } from "lucide-react";
 import { useAuth } from "../lib/AuthContext";
 import { useRouter } from "next/navigation";
 import { STEPS } from "../lib/constants";
@@ -114,6 +114,13 @@ export default function Sidebar({
           >
              <Activity className="w-5 h-5" />
              <span className="text-[14px]">YouTube Scraper</span>
+          </button>
+          <button 
+             onClick={() => { onModuleChange?.('instagram'); onClose?.(); }}
+             className={`flex items-center gap-3 p-3 rounded-xl transition-all ${activeModule === 'instagram' ? 'bg-blue-50 text-brand-blue font-bold shadow-sm' : 'text-gray-500 hover:bg-gray-50 font-medium'}`}
+          >
+             <Camera className="w-5 h-5" />
+             <span className="text-[14px]">Instagram Scraper</span>
           </button>
           <button 
              onClick={() => { onModuleChange?.('b2b'); onClose?.(); }}
