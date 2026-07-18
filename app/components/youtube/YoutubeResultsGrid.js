@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Users, Mail, Link as LinkIcon, ChevronLeft, ChevronRight, List, Copy, Check } from "lucide-react";
+import { Users, Mail, Link as LinkIcon, ChevronLeft, ChevronRight, List, Copy, Check, Video, Eye, MapPin } from "lucide-react";
 
 export default function YoutubeResultsGrid({ data }) {
   const [currentPage, setCurrentPage] = useState(1);
@@ -18,6 +18,9 @@ export default function YoutubeResultsGrid({ data }) {
   const getUrl = (row) => row.channel_url || "";
   const getBio = (row) => row.brief_bio || "";
   const getNiche = (row) => row.niche || "";
+  const getTotalVideos = (row) => Number(row.total_videos || 0);
+  const getTotalViews = (row) => Number(row.total_views || 0);
+  const getLocation = (row) => row.location || "";
 
   const sortedData = useMemo(() => {
     if (!data) return [];
@@ -33,6 +36,7 @@ export default function YoutubeResultsGrid({ data }) {
 
   const formatNumber = (num) => {
     if (!num && num !== 0) return "N/A";
+    if (num >= 1000000000) return (num / 1000000000).toFixed(1) + "B";
     if (num >= 1000000) return (num / 1000000).toFixed(1) + "M";
     if (num >= 1000) return (num / 1000).toFixed(1) + "K";
     return num.toString();
@@ -85,15 +89,23 @@ export default function YoutubeResultsGrid({ data }) {
               >
                 {/* Card Header (No Logo) */}
                 <div className="p-5 flex flex-col gap-2">
-                  <h3 className="text-lg font-bold text-gray-900 truncate tracking-tight" title={getTitle(channel)}>
-                    {getUrl(channel) ? (
-                      <a href={getUrl(channel)} target="_blank" rel="noopener noreferrer" className="hover:text-brand-blue hover:underline transition-colors">
-                        {getTitle(channel)}
-                      </a>
-                    ) : (
-                      getTitle(channel)
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="text-lg font-bold text-gray-900 truncate tracking-tight flex-1" title={getTitle(channel)}>
+                      {getUrl(channel) ? (
+                        <a href={getUrl(channel)} target="_blank" rel="noopener noreferrer" className="hover:text-brand-blue hover:underline transition-colors">
+                          {getTitle(channel)}
+                        </a>
+                      ) : (
+                        getTitle(channel)
+                      )}
+                    </h3>
+                    {getLocation(channel) && (
+                      <div className="flex items-center gap-1 text-[10px] font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded-md shrink-0" title={getLocation(channel)}>
+                        <MapPin className="w-3 h-3" />
+                        <span className="truncate max-w-[80px]">{getLocation(channel)}</span>
+                      </div>
                     )}
-                  </h3>
+                  </div>
                   <p className="text-xs text-gray-500 mt-1 line-clamp-3 leading-relaxed" title={getBio(channel)}>
                     {getBio(channel) || "No bio available."}
                   </p>
@@ -110,6 +122,16 @@ export default function YoutubeResultsGrid({ data }) {
                     <div className="bg-brand-cyan/5 p-1.5 rounded-full mb-0.5"><List className="w-3.5 h-3.5 text-brand-cyan" /></div>
                     <span className="text-[11px] uppercase tracking-wider text-gray-400 font-semibold">Niche</span>
                     <span className="text-sm font-bold text-gray-800 capitalize truncate w-full px-2" title={getNiche(channel)}>{getNiche(channel) || "N/A"}</span>
+                  </div>
+                  <div className="p-3 text-center flex flex-col items-center justify-center gap-1 bg-white">
+                    <div className="bg-emerald-500/5 p-1.5 rounded-full mb-0.5"><Video className="w-3.5 h-3.5 text-emerald-500" /></div>
+                    <span className="text-[11px] uppercase tracking-wider text-gray-400 font-semibold">Videos</span>
+                    <span className="text-sm font-bold text-gray-800">{formatNumber(getTotalVideos(channel))}</span>
+                  </div>
+                  <div className="p-3 text-center flex flex-col items-center justify-center gap-1 bg-white">
+                    <div className="bg-purple-500/5 p-1.5 rounded-full mb-0.5"><Eye className="w-3.5 h-3.5 text-purple-500" /></div>
+                    <span className="text-[11px] uppercase tracking-wider text-gray-400 font-semibold">Views</span>
+                    <span className="text-sm font-bold text-gray-800">{formatNumber(getTotalViews(channel))}</span>
                   </div>
                 </div>
 
