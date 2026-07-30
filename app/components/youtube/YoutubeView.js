@@ -8,7 +8,7 @@ import SignalScannerPanel from "./SignalScannerPanel";
 import ExportProgress from "../ExportProgress";
 import YoutubeResultsBottomSheet from "./YoutubeResultsBottomSheet";
 import RippleArrivalSignal from "../gmaps/RippleArrivalSignal";
-import { fetchYoutubeLeads, fetchYoutubeData } from "../../lib/api";
+import { fetchYoutubeLeads } from "../../lib/api";
 import { useSessionState } from "../../hooks/useSessionState";
 
 export default function YoutubeView() {
@@ -67,7 +67,7 @@ export default function YoutubeView() {
           if (msg.status === "completed") {
             ws.close();
             try {
-              const result = await fetchYoutubeData(jobData.job_id);
+              let result = msg.yt_data || [];
               let rows = Array.isArray(result) ? result : (result.data || []);
               
               // Flatten socialLinks for YouTube
@@ -85,7 +85,7 @@ export default function YoutubeView() {
               setResultData(rows);
               setSuccessMsg(`Found ${rows.length} YouTube leads!`);
             } catch (err) {
-              setErrorMsg(err.message || "Failed to fetch final YouTube leads.");
+              setErrorMsg(err.message || "Failed to process final YouTube leads.");
             } finally {
               setIsSearching(false);
             }
