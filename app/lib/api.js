@@ -382,6 +382,26 @@ export async function fetchYoutubeLeads(params, signal) {
   return res.json();
 }
 
+export async function fetchYoutubeData(jobId) {
+  const res = await fetchWithAuth(`/jobs/${jobId}/youtube-data`);
+  
+  if (!res.ok) {
+    let errorDetail = "Failed to fetch YouTube data";
+    try {
+      const errData = await res.json();
+      errorDetail = errData.detail || errData.error || errorDetail;
+    } catch {
+      const text = await res.text();
+      if (text) errorDetail = text;
+    }
+    const err = new Error(errorDetail);
+    err.status = res.status;
+    throw err;
+  }
+
+  return res.json();
+}
+
 export async function extractInstagramLeads(params, signal) {
   const res = await fetchWithAuth(`/api/v1/extract-leads`, {
     method: "POST",

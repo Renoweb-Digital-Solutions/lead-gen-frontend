@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Loader2, Video, Users, Mail, Link as LinkIcon, Download, X } from "lucide-react";
 import TagInput from "../inputs/TagInput";
@@ -8,7 +8,7 @@ import SignalScannerPanel from "./SignalScannerPanel";
 import ExportProgress from "../ExportProgress";
 import YoutubeResultsBottomSheet from "./YoutubeResultsBottomSheet";
 import RippleArrivalSignal from "../gmaps/RippleArrivalSignal";
-import { fetchYoutubeLeads } from "../../lib/api";
+import { fetchYoutubeLeads, fetchYoutubeData } from "../../lib/api";
 import { useSessionState } from "../../hooks/useSessionState";
 
 export default function YoutubeView() {
@@ -23,6 +23,15 @@ export default function YoutubeView() {
   const [successMsg, setSuccessMsg] = useState(null);
   const [resultData, setResultData] = useSessionState("youtube-results", null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const wsRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (wsRef.current) {
+        wsRef.current.close();
+      }
+    };
+  }, []);
 
   // ─── Search Handler ──────────────────────────────────────
   const handleSearch = async () => {
@@ -38,36 +47,74 @@ export default function YoutubeView() {
     setIsSheetOpen(false);
 
     try {
-      const result = await fetchYoutubeLeads({
+      const jobData = await fetchYoutubeLeads({
         keywords: [keyword.trim()],
         max_emails: Number(maxEmails),
         custom_domains: customDomain.split(",").map(d => d.trim())
       });
 
-      // Assuming API returns { data: [...] } or just an array
-      let rows = Array.isArray(result) ? result : (result.data || []);
+      const wsAbsoluteUrl = jobData.ws_url.startsWith('ws') 
+        ? jobData.ws_url 
+        : `${process.env.NEXT_PUBLIC_API_URL.replace('http', 'ws')}${jobData.ws_url}`;
       
-      // Flatten socialLinks for YouTube
-      rows = rows.map(row => {
-        const newRow = { ...row };
-        if (newRow.socialLinks) {
-          Object.entries(newRow.socialLinks).forEach(([key, value]) => {
-            newRow[`${key}`] = value;
-          });
-          delete newRow.socialLinks;
-        }
-        return newRow;
-      });
+      const ws = new WebSocket(wsAbsoluteUrl);
+      wsRef.current = ws;
 
-      setResultData(rows);
-      setSuccessMsg(`Found ${rows.length} YouTube leads!`);
+      ws.onmessage = async (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          
+          if (msg.status === "completed") {
+            ws.close();
+            try {
+              const result = await fetchYoutubeData(jobData.job_id);
+              let rows = Array.isArray(result) ? result : (result.data || []);
+              
+              // Flatten socialLinks for YouTube
+              rows = rows.map(row => {
+                const newRow = { ...row };
+                if (newRow.socialLinks) {
+                  Object.entries(newRow.socialLinks).forEach(([key, value]) => {
+                    newRow[`${key}`] = value;
+                  });
+                  delete newRow.socialLinks;
+                }
+                return newRow;
+              });
+
+              setResultData(rows);
+              setSuccessMsg(`Found ${rows.length} YouTube leads!`);
+            } catch (err) {
+              setErrorMsg(err.message || "Failed to fetch final YouTube leads.");
+            } finally {
+              setIsSearching(false);
+            }
+          } else if (msg.status === "failed") {
+            ws.close();
+            setErrorMsg(msg.message || msg.error || "YouTube search failed.");
+            setIsSearching(false);
+          } else if (msg.status === "cancelled") {
+            ws.close();
+            setErrorMsg("YouTube search was cancelled.");
+            setIsSearching(false);
+          }
+        } catch (e) {
+          console.error("Failed to parse WS message", e);
+        }
+      };
+
+      ws.onerror = () => {
+        ws.close();
+        setErrorMsg("WebSocket connection error occurred.");
+        setIsSearching(false);
+      };
+
     } catch (err) {
       if (err.message === "Failed to fetch") {
         setErrorMsg("We couldn't reach the search service right now. Please check your internet connection and try again in a moment.");
       } else {
-        setErrorMsg(err.message || "Failed to fetch YouTube leads. Please try again.");
+        setErrorMsg(err.message || "Failed to start YouTube scraper. Please try again.");
       }
-    } finally {
       setIsSearching(false);
     }
   };
