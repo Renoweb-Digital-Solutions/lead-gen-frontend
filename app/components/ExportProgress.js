@@ -107,9 +107,9 @@ export default function ExportProgress({ isActive, totalResults = 1000, logType 
     : logType === "b2b" ? LOG_MESSAGES_B2B
     : LOG_MESSAGES_APOLLO;
 
-  // Estimate: fixed 5m for GMaps/YouTube/B2B
-  const estimatedMinutes = ["gmaps", "youtube", "b2b"].includes(logType)
-    ? 5
+  // Estimate: fixed time for scrapers
+  const estimatedMinutes = logType === "youtube" ? 10
+    : ["gmaps", "b2b"].includes(logType) ? 5
     : Math.max(2, Math.ceil((totalResults * 1.5) / 60));
 
   // Reset everything when export starts

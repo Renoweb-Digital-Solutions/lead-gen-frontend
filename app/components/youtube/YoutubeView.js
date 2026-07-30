@@ -38,17 +38,11 @@ export default function YoutubeView() {
     setIsSheetOpen(false);
 
     try {
-      // Create an AbortController for a long timeout, fetchYoutubeLeads accepts a signal
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 300000); // 5 minutes
-
       const result = await fetchYoutubeLeads({
         keywords: [keyword.trim()],
         max_emails: Number(maxEmails),
         custom_domains: customDomain.split(",").map(d => d.trim())
-      }, controller.signal);
-
-      clearTimeout(timeoutId);
+      });
 
       // Assuming API returns { data: [...] } or just an array
       let rows = Array.isArray(result) ? result : (result.data || []);
@@ -68,9 +62,7 @@ export default function YoutubeView() {
       setResultData(rows);
       setSuccessMsg(`Found ${rows.length} YouTube leads!`);
     } catch (err) {
-      if (err.name === 'AbortError') {
-        setErrorMsg("Search timed out after 5 minutes. Please try a smaller query.");
-      } else if (err.message === "Failed to fetch") {
+      if (err.message === "Failed to fetch") {
         setErrorMsg("We couldn't reach the search service right now. Please check your internet connection and try again in a moment.");
       } else {
         setErrorMsg(err.message || "Failed to fetch YouTube leads. Please try again.");
@@ -271,7 +263,7 @@ export default function YoutubeView() {
             {isSearching ? (
               <>
                 <Loader2 className="w-5 h-5 animate-spin" />
-                <span>Extracting... (Up to 5 min)</span>
+                <span>Extracting... (Up to 10 min)</span>
               </>
             ) : (
               <>
