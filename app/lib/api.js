@@ -23,6 +23,12 @@ async function fetchWithAuth(endpoint, options = {}) {
     headers,
   });
 
+  // Auto-logout on token expiration (401 Unauthorized)
+  if (res.status === 401 && typeof window !== 'undefined') {
+    localStorage.removeItem("renoweb_jwt");
+    window.location.href = "/";
+  }
+
   return res;
 }
 
