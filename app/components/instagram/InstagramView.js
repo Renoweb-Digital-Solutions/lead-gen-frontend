@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, Camera, Link as LinkIcon, Hash, X } from "lucide-react";
 import ExportProgress from "../ExportProgress";
@@ -23,6 +23,15 @@ export default function InstagramView() {
   const [resultData, setResultData] = useSessionState("instagram-results", null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
+  const wsRef = useRef(null);
+
+  // Cleanup WebSocket on unmount
+  useEffect(() => {
+    return () => {
+      if (wsRef.current) wsRef.current.close();
+    };
+  }, []);
+
   // ─── Search Handler ──────────────────────────────────────
   const handleSearch = async () => {
     if (!target.trim()) {
@@ -37,46 +46,78 @@ export default function InstagramView() {
     setIsSheetOpen(false);
 
     try {
-      // Create an AbortController for a long timeout
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 300000); // 5 minutes
-
-      const result = await extractInstagramLeads({
+      const jobData = await extractInstagramLeads({
         source_type: sourceType,
         target: target.trim(),
         max_items: Number(maxItems)
-      }, controller.signal);
-
-      clearTimeout(timeoutId);
-
-      // Extract array from standard response structures
-      let rows = Array.isArray(result) ? result : (result.results || result.data || []);
-      
-      // Flatten nested structures for the grid
-      rows = rows.map(row => {
-        const flatRow = { ...row };
-        if (flatRow.contact_info) {
-          Object.entries(flatRow.contact_info).forEach(([k, v]) => flatRow[k] = v);
-          delete flatRow.contact_info;
-        }
-        if (flatRow.metrics) {
-          Object.entries(flatRow.metrics).forEach(([k, v]) => flatRow[k] = v);
-          delete flatRow.metrics;
-        }
-        return flatRow;
       });
+
+      const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+      const wsHost = process.env.NEXT_PUBLIC_API_URL 
+        ? process.env.NEXT_PUBLIC_API_URL.replace(/^https?:\/\//, "") 
+        : window.location.host;
+      const wsAbsoluteUrl = `${wsProtocol}//${wsHost}${jobData.ws_url}`;
       
-      setResultData(rows);
-      setSuccessMsg(`Extracted ${rows.length} Instagram leads!`);
+      const ws = new WebSocket(wsAbsoluteUrl);
+      wsRef.current = ws;
+
+      ws.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          
+          if (msg.status === "completed") {
+            ws.close();
+            try {
+              let result = msg.data || {};
+              let rows = Array.isArray(result) ? result : (result.dataset || result.results || result.data || []);
+              
+              // Flatten nested structures for the grid
+              rows = rows.map(row => {
+                const flatRow = { ...row };
+                if (flatRow.contact_info) {
+                  Object.entries(flatRow.contact_info).forEach(([k, v]) => flatRow[k] = v);
+                  delete flatRow.contact_info;
+                }
+                if (flatRow.metrics) {
+                  Object.entries(flatRow.metrics).forEach(([k, v]) => flatRow[k] = v);
+                  delete flatRow.metrics;
+                }
+                return flatRow;
+              });
+              
+              setResultData(rows);
+              setSuccessMsg(`Extracted ${rows.length} Instagram leads!`);
+            } catch (err) {
+              setErrorMsg(err.message || "Failed to process final Instagram leads.");
+            } finally {
+              setIsSearching(false);
+            }
+          } else if (msg.status === "failed") {
+            ws.close();
+            setErrorMsg(msg.message || msg.error || "Instagram search failed.");
+            setIsSearching(false);
+          } else if (msg.status === "cancelled") {
+            ws.close();
+            setErrorMsg("Job cancelled.");
+            setIsSearching(false);
+          }
+        } catch (err) {
+          console.error("WS Message Error:", err);
+        }
+      };
+
+      ws.onerror = () => {
+        ws.close();
+        setErrorMsg("WebSocket connection error occurred.");
+        setIsSearching(false);
+      };
+
     } catch (err) {
-      if (err.name === 'AbortError') {
-        setErrorMsg("Extraction timed out after 5 minutes. Please try a smaller query.");
-      } else if (err.message === "Failed to fetch") {
+      if (err.message === "Failed to fetch") {
         setErrorMsg("We couldn't reach the search service right now. Please check your internet connection and try again in a moment.");
       } else {
         setErrorMsg(err.message || "Failed to extract Instagram leads. Please try again.");
       }
-    } finally {
       setIsSearching(false);
     }
   };
@@ -239,13 +280,17 @@ export default function InstagramView() {
                     type="number"
                     value={maxItems}
                     onChange={(e) => setMaxItems(e.target.value)}
-                    min={1}
+                    onBlur={(e) => {
+                      const val = parseInt(e.target.value) || 50;
+                      if (val < 50) setMaxItems(50);
+                    }}
+                    min={50}
                     max={sourceType === "comments" ? 10000 : 500}
                     className="w-full pl-10 pr-4 py-3 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-sky focus:ring-4 focus:ring-brand-sky/10 transition-all hover:border-brand-sky/40 text-brand-dark font-medium"
                   />
                 </div>
                 {sourceType !== "comments" && (
-                  <span className="text-[11px] text-gray-500 ml-1">Maximum 500 for {sourceType}</span>
+                  <span className="text-[11px] text-gray-500 ml-1">Maximum 500 for {sourceType} (Minimum 50)</span>
                 )}
               </div>
             </div>

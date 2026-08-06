@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   suggestKeywords,
   gmapsBulkSearch,
@@ -96,6 +96,15 @@ export default function GmapsView() {
     }
   };
 
+  const wsRef = useRef(null);
+
+  // Cleanup WebSocket on unmount
+  useEffect(() => {
+    return () => {
+      if (wsRef.current) wsRef.current.close();
+    };
+  }, []);
+
   // ─── Search Handler ──────────────────────────────────────
   const handleSearch = async () => {
     if (keywords.length === 0) {
@@ -115,35 +124,58 @@ export default function GmapsView() {
     setIsSheetOpen(false);
 
     try {
-      const result = await gmapsBulkSearch({ keywords, location: location.trim(), limit });
+      const jobData = await gmapsBulkSearch({ keywords, location: location.trim(), limit });
 
-      let rows = [];
-      let runId = null;
+      const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+      const wsHost = process.env.NEXT_PUBLIC_API_URL 
+        ? process.env.NEXT_PUBLIC_API_URL.replace(/^https?:\/\//, "") 
+        : window.location.host;
+      const wsAbsoluteUrl = `${wsProtocol}//${wsHost}${jobData.ws_url}`;
+      
+      const ws = new WebSocket(wsAbsoluteUrl);
+      wsRef.current = ws;
 
-      if (Array.isArray(result)) {
-        rows = result;
-      } else if (result.leads && Array.isArray(result.leads)) {
-        rows = result.leads;
-        runId = result.run_id || result.id || null;
-      } else if (result.rows && Array.isArray(result.rows)) {
-        rows = result.rows;
-        runId = result.run_id || result.id || null;
-      } else if (result.data && Array.isArray(result.data)) {
-        rows = result.data;
-        runId = result.run_id || result.id || null;
-      } else if (result.run_id || result.id) {
-        runId = result.run_id || result.id;
-        const runData = await gmapsGetRun(runId);
-        rows = Array.isArray(runData) ? runData : (runData.rows || runData.data || runData.leads || []);
-      }
+      ws.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          
+          if (msg.status === "completed") {
+            ws.close();
+            try {
+              let rows = msg.data || [];
+              let runId = jobData.job_id;
+              
+              setResultData(rows);
+              setCurrentRunId(runId);
+              setSearchSuccess(`Found ${rows.length} businesses!`);
+              loadRuns();
+            } catch (err) {
+              setSearchError(err.message || "Failed to process final GMaps leads.");
+            } finally {
+              setIsSearching(false);
+            }
+          } else if (msg.status === "failed") {
+            ws.close();
+            setSearchError(msg.message || msg.error || "Google Maps search failed.");
+            setIsSearching(false);
+          } else if (msg.status === "cancelled") {
+            ws.close();
+            setSearchError("Job cancelled.");
+            setIsSearching(false);
+          }
+        } catch (err) {
+          console.error("WS Message Error:", err);
+        }
+      };
 
-      setResultData(rows);
-      setCurrentRunId(runId);
-      setSearchSuccess(`Found ${rows.length} businesses!`);
-      loadRuns();
+      ws.onerror = () => {
+        ws.close();
+        setSearchError("WebSocket connection error occurred.");
+        setIsSearching(false);
+      };
+
     } catch (err) {
       setSearchError(err.message || "Search failed. Please try again.");
-    } finally {
       setIsSearching(false);
     }
   };

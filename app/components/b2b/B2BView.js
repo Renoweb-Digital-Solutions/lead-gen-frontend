@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Loader2, Building, MapPin, Download, BookOpen, ExternalLink, Phone, Mail, X } from "lucide-react";
 import TagInput from "../inputs/TagInput";
@@ -34,6 +34,15 @@ export default function B2BView() {
   const [resultData, setResultData] = useSessionState("b2b-results", null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
+  const wsRef = useRef(null);
+
+  // Cleanup WebSocket on unmount
+  useEffect(() => {
+    return () => {
+      if (wsRef.current) wsRef.current.close();
+    };
+  }, []);
+
   // ─── Search Handler ──────────────────────────────────────
   const handleSearch = async () => {
     if (keywords.length === 0) {
@@ -53,30 +62,64 @@ export default function B2BView() {
     setCurrentPage(1);
 
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 300000); // 5 minutes
-
-      const result = await fetchB2BLeads({
+      const jobData = await fetchB2BLeads({
         targetDirectory: directory,
         searchKeywords: keywords,
         location: location.trim(),
         maxResultsPerKeyword: Number(maxResults)
-      }, controller.signal);
+      });
 
-      clearTimeout(timeoutId);
+      const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+      const wsHost = process.env.NEXT_PUBLIC_API_URL 
+        ? process.env.NEXT_PUBLIC_API_URL.replace(/^https?:\/\//, "") 
+        : window.location.host;
+      const wsAbsoluteUrl = `${wsProtocol}//${wsHost}${jobData.ws_url}`;
+      
+      const ws = new WebSocket(wsAbsoluteUrl);
+      wsRef.current = ws;
 
-      const rows = Array.isArray(result) ? result : (result.data || []);
-      setResultData(rows);
-      setSuccessMsg(`Found ${rows.length} B2B leads from ${directory}!`);
+      ws.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          
+          if (msg.status === "completed") {
+            ws.close();
+            try {
+              let result = msg.data || [];
+              const rows = Array.isArray(result) ? result : (result.data || []);
+              setResultData(rows);
+              setSuccessMsg(`Found ${rows.length} B2B leads from ${directory}!`);
+            } catch (err) {
+              setErrorMsg(err.message || "Failed to process final B2B leads.");
+            } finally {
+              setIsSearching(false);
+            }
+          } else if (msg.status === "failed") {
+            ws.close();
+            setErrorMsg(msg.message || msg.error || "B2B search failed.");
+            setIsSearching(false);
+          } else if (msg.status === "cancelled") {
+            ws.close();
+            setErrorMsg("Job cancelled.");
+            setIsSearching(false);
+          }
+        } catch (err) {
+          console.error("WS Message Error:", err);
+        }
+      };
+
+      ws.onerror = () => {
+        ws.close();
+        setErrorMsg("WebSocket connection error occurred.");
+        setIsSearching(false);
+      };
+
     } catch (err) {
-      if (err.name === 'AbortError') {
-        setErrorMsg("Search timed out after 5 minutes. Please try a smaller query.");
-      } else if (err.message === "Failed to fetch") {
+      if (err.message === "Failed to fetch") {
         setErrorMsg("We couldn't reach the search service right now. Please check your internet connection and try again in a moment.");
       } else {
         setErrorMsg(err.message || "Failed to fetch B2B leads. Please try again.");
       }
-    } finally {
       setIsSearching(false);
     }
   };

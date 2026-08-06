@@ -257,7 +257,7 @@ export async function gmapsSearch({ keywords, location, limit }) {
     allPlacesNoSearchAction: ""
   };
 
-  const res = await fetch(`${BASE_URL}/gmaps/search`, {
+  const res = await fetchWithAuth(`/gmaps/search-job`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
@@ -288,7 +288,7 @@ export async function suggestKeywords(company_name, company_description) {
  * Function: gmapsBulkSearch
  */
 export async function gmapsBulkSearch({ keywords, location, limit }) {
-  const res = await fetchWithAuth(`/gmaps/bulk-search`, {
+  const res = await fetchWithAuth(`/gmaps/bulk-search-job`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
