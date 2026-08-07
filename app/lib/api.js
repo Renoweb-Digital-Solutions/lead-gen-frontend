@@ -46,7 +46,12 @@ export async function apiLogin(email, password) {
   });
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`Login failed: ${text}`);
+    let errorDetail = text;
+    try {
+      const errData = JSON.parse(text);
+      errorDetail = errData.detail || text;
+    } catch (e) {}
+    throw new Error(errorDetail);
   }
   return res.json();
 }
@@ -59,7 +64,66 @@ export async function apiSignup(email, password) {
   });
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`Signup failed: ${text}`);
+    let errorDetail = text;
+    try {
+      const errData = JSON.parse(text);
+      errorDetail = errData.detail || text;
+    } catch (e) {}
+    throw new Error(errorDetail);
+  }
+  return res.json();
+}
+
+export async function apiForgotPassword(email) {
+  const res = await fetch(`${BASE_URL}/auth/forgot-password`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username: email }),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    let errorDetail = text;
+    try {
+      const errData = JSON.parse(text);
+      errorDetail = errData.detail || text;
+    } catch (e) {}
+    throw new Error(errorDetail);
+  }
+  return res.json();
+}
+
+export async function apiVerifyOtp(email, otp) {
+  const res = await fetch(`${BASE_URL}/auth/verify-otp`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username: email, otp }),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    let errorDetail = text;
+    try {
+      const errData = JSON.parse(text);
+      errorDetail = errData.detail || text;
+    } catch (e) {}
+    throw new Error(errorDetail);
+  }
+  return res.json();
+}
+
+export async function apiResetPassword(email, otp, newPassword) {
+  const res = await fetch(`${BASE_URL}/auth/reset-password`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username: email, otp, new_password: newPassword }),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    let errorDetail = text;
+    try {
+      const errData = JSON.parse(text);
+      errorDetail = errData.detail || text;
+    } catch (e) {}
+    throw new Error(errorDetail);
   }
   return res.json();
 }

@@ -47,10 +47,10 @@ export default function Footer() {
           <div>
             <h4 className="font-bold text-brand-dark mb-4 text-sm uppercase tracking-wider">Product</h4>
             <ul className="space-y-3 text-sm text-slate-500">
-              <li><Link href="#" className="hover:text-brand-blue transition-colors">Features</Link></li>
-              <li><Link href="#" className="hover:text-brand-blue transition-colors">Solutions</Link></li>
-              <li><Link href="#" className="hover:text-brand-blue transition-colors">Pricing</Link></li>
-              <li><Link href="#" className="hover:text-brand-blue transition-colors">Changelog</Link></li>
+              <li><Link href="/features" className="hover:text-brand-blue transition-colors">Features</Link></li>
+              <li><Link href="/solutions" className="hover:text-brand-blue transition-colors">Solutions</Link></li>
+              <li><Link href="/pricing" className="hover:text-brand-blue transition-colors">Pricing</Link></li>
+              <li><Link href="/changelog" className="hover:text-brand-blue transition-colors">Changelog</Link></li>
             </ul>
           </div>
 
@@ -70,7 +70,7 @@ export default function Footer() {
               <li><Link href="#" className="hover:text-brand-blue transition-colors">About</Link></li>
               <li><Link href="#" className="hover:text-brand-blue transition-colors">Careers</Link></li>
               <li><Link href="#" className="hover:text-brand-blue transition-colors">Legal</Link></li>
-              <li><Link href="#" className="hover:text-brand-blue transition-colors">Contact</Link></li>
+              <li><Link href="/contact" className="hover:text-brand-blue transition-colors">Contact</Link></li>
             </ul>
           </div>
         </div>

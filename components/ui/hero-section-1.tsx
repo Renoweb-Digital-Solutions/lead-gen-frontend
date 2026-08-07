@@ -142,7 +142,7 @@ export function HeroSection() {
                                             size="lg"
                                             onClick={handleStartBuilding}
                                             className="rounded-xl px-5 text-base bg-[#023dbb] text-white hover:bg-[#023dbb]/90">
-                                            <span className="text-nowrap">Start Building</span>
+                                            <span className="text-nowrap">Start Prospecting</span>
                                         </Button>
                                     </div>
                                     <Button
@@ -151,7 +151,7 @@ export function HeroSection() {
                                         size="lg"
                                         variant="ghost"
                                         className="h-10.5 rounded-xl px-5">
-                                        <Link href="">
+                                        <Link href="/contact">
                                             <span className="text-nowrap">Request a demo</span>
                                         </Link>
                                     </Button>
@@ -243,10 +243,10 @@ export function HeroSection() {
 }
 
 const menuItems = [
-    { name: 'Features', href: '' },
-    { name: 'Solutions', href: '' },
-    { name: 'Pricing', href: '' },
-    { name: 'Resources', href: '' },
+    { name: 'Features', href: '/features' },
+    { name: 'Solutions', href: '/solutions' },
+    { name: 'Pricing', href: '/pricing' },
+    { name: 'Changelog', href: '/changelog' },
 ]
 
 const brandNames = [
@@ -254,7 +254,7 @@ const brandNames = [
     "Wayne Ent", "Massive Dynamic"
 ];
 
-const HeroHeader = ({ onLoginClick }) => {
+export const HeroHeader = ({ onLoginClick }) => {
     const [menuState, setMenuState] = React.useState(false)
     const [isScrolled, setIsScrolled] = React.useState(false)
     const { token } = useAuth();
@@ -323,7 +323,7 @@ const HeroHeader = ({ onLoginClick }) => {
                                     <Button
                                         asChild
                                         size="sm"
-                                        className={cn(isScrolled ? 'lg:inline-flex' : 'hidden', 'bg-[#023dbb] text-white hover:bg-[#023dbb]/90')}>
+                                        className="bg-[#023dbb] text-white hover:bg-[#023dbb]/90">
                                         <Link href="/dashboard">
                                             <span>Dashboard</span>
                                         </Link>
