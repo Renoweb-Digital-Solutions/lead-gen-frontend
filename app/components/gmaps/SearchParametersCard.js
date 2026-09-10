@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Search, MapPin, Loader2 } from "lucide-react";
+import { Search, MapPin, Loader2, X } from "lucide-react";
 import TagInput from "../inputs/TagInput";
 import SliderInput from "../inputs/SliderInput";
 
@@ -20,6 +20,7 @@ export default function SearchParametersCard({
   isSuggesting,
   onSearch,
   onSuggestKeywords,
+  onAbort,
 }) {
   return (
     <motion.div
@@ -138,7 +139,19 @@ export default function SearchParametersCard({
         />
       </div>
 
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-3">
+        {isSearching && (
+          <motion.button
+            type="button"
+            onClick={onAbort}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="px-6 py-3.5 rounded-xl text-white font-bold text-[15px] tracking-wide flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 shadow-md transition-all duration-300"
+          >
+            <X className="w-5 h-5" />
+            <span>Abort</span>
+          </motion.button>
+        )}
         <motion.button
           type="button"
           onClick={onSearch}

@@ -55,7 +55,7 @@ export default function DirectoryNetworkPanel({ status, selectedDirectory, busin
           const randomLabel = LEAD_MESSAGES[Math.floor(Math.random() * LEAD_MESSAGES.length)];
           
           return [...prev, {
-            id: `scan-${count++}`,
+            id: `scan-${Date.now()}-${Math.random().toString(36).substring(7)}`,
             angle,
             distance,
             size: 8 + Math.random() * 8,

@@ -180,6 +180,13 @@ export default function GmapsView() {
     }
   };
 
+  const handleAbort = () => {
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify({ type: "abort" }));
+      setSearchError("Cancelling search... Please wait.");
+    }
+  };
+
   // ─── Load Past Run ───────────────────────────────────────
   const handleLoadRun = async (runId) => {
     setSearchError(null);
@@ -257,6 +264,7 @@ export default function GmapsView() {
       <AnimatePresence>
         {searchError && (
           <motion.div 
+            key="error-alert"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
@@ -280,6 +288,7 @@ export default function GmapsView() {
 
         {searchSuccess && !isSearching && (
           <motion.div 
+            key="success-alert"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
@@ -320,6 +329,7 @@ export default function GmapsView() {
             isSuggesting={isSuggesting}
             onSearch={handleSearch}
             onSuggestKeywords={handleSuggestKeywords}
+            onAbort={handleAbort}
           />
           <div className="mt-4">
             <ExportProgress isActive={isSearching} logType="gmaps" />

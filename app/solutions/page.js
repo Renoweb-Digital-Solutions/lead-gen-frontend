@@ -77,7 +77,7 @@ export default function SolutionsPage() {
             activeColor: 'bg-purple-50 text-purple-600 border-purple-200',
             gradientText: 'from-purple-600 to-fuchsia-600',
             benefits: ['Cross-niche targeting', 'Reduce software overhead', 'Infinite TAM generation'],
-            image: '/hero_dasboard.png'
+            image: '/features_images/lead-gen.png'
         }
     ];
 

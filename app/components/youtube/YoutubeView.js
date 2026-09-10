@@ -119,6 +119,13 @@ export default function YoutubeView() {
     }
   };
 
+  const handleAbort = () => {
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify({ type: "abort" }));
+      setErrorMsg("Cancelling search... Please wait.");
+    }
+  };
+
   const handleExportCsv = () => {
     if (!resultData || resultData.length === 0) return;
     try {
@@ -176,6 +183,7 @@ export default function YoutubeView() {
       <AnimatePresence>
         {errorMsg && (
           <motion.div 
+            key="error-alert"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
@@ -199,6 +207,7 @@ export default function YoutubeView() {
 
         {successMsg && !isSearching && (
           <motion.div 
+            key="success-alert"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
@@ -292,7 +301,19 @@ export default function YoutubeView() {
           </div>
         </div>
 
-        <div className="flex justify-end pt-4 border-t border-gray-100">
+        <div className="flex justify-end pt-4 border-t border-gray-100 gap-3">
+          {isSearching && (
+            <motion.button
+              type="button"
+              onClick={handleAbort}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="px-6 py-3.5 rounded-xl text-white font-bold text-[15px] tracking-wide flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 shadow-md transition-all duration-300"
+            >
+              <X className="w-5 h-5" />
+              <span>Abort</span>
+            </motion.button>
+          )}
           <motion.button
             type="button"
             onClick={handleSearch}
