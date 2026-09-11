@@ -148,8 +148,8 @@ export default function AdminDashboard() {
       <aside className="w-full md:w-64 bg-[#1a56db] text-white flex flex-col shadow-xl flex-shrink-0">
         <div className="p-6 border-b border-white/10 flex items-center justify-between md:block">
           <div className="flex items-center">
-            <span className="text-white font-black text-2xl tracking-tighter">FLAW</span>
-            <span className="text-[#308fef] font-black text-2xl tracking-tighter">DITS</span>
+            <span className="text-white font-black text-2xl tracking-tighter">SIMPLE</span>
+            <span className="text-[#308fef] font-black text-2xl tracking-tighter">ADS</span>
           </div>
           <span className="mt-1 md:inline-block hidden px-2 py-0.5 bg-white/20 rounded text-xs font-bold uppercase tracking-widest text-blue-100">
             Admin Panel
