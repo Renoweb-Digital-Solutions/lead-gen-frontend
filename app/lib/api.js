@@ -523,3 +523,76 @@ export async function fetchB2BLeads(params, signal) {
 
   return res.json();
 }
+
+// ═══════════════════════════════════════════════════════════
+// ADMIN DASHBOARD API FUNCTIONS
+// ═══════════════════════════════════════════════════════════
+
+export async function apiAdminLogin(email, password) {
+  // Uses the same login endpoint but we will check the is_admin flag
+  const data = await apiLogin(email, password);
+  
+  // To check if they are an admin, we can decode the JWT payload
+  // The token structure is header.payload.signature
+  try {
+    const payloadBase64 = data.access_token.split('.')[1];
+    const decodedJson = atob(payloadBase64);
+    const decoded = JSON.parse(decodedJson);
+    
+    if (!decoded.is_admin) {
+      throw new Error("Unauthorized. Only administrators can access this portal.");
+    }
+  } catch (e) {
+    if (e.message.includes("Unauthorized")) {
+      throw e;
+    }
+    // If decoding fails for some reason, we assume it's invalid
+    throw new Error("Invalid token format received.");
+  }
+  
+  return data;
+}
+
+export async function fetchAdminUsersAndRuns() {
+  const res = await fetchWithAuth(`/admin/users-runs`);
+  if (!res.ok) {
+    throw new Error("Failed to fetch admin dashboard data");
+  }
+  return res.json();
+}
+
+// ═══════════════════════════════════════════════════════════
+// SUPPORT TICKETS API FUNCTIONS
+// ═══════════════════════════════════════════════════════════
+
+export async function submitSupportTicket(title, type, description, sourcePage) {
+  const res = await fetchWithAuth(`/tickets/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ title, type, description, source_page: sourcePage }),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    let errorDetail = text;
+    try {
+      const errData = JSON.parse(text);
+      errorDetail = errData.detail || text;
+    } catch (e) {}
+    throw new Error(errorDetail);
+  }
+  return res.json();
+}
+
+export async function fetchMyTickets() {
+  const res = await fetchWithAuth(`/tickets/me`);
+  if (!res.ok) throw new Error("Failed to fetch your tickets");
+  return res.json();
+}
+
+export async function fetchAdminTickets() {
+  const res = await fetchWithAuth(`/admin/tickets`);
+  if (!res.ok) throw new Error("Failed to fetch platform tickets");
+  return res.json();
+}
+
+

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { checkHealth } from "../lib/api";
-import { Target, Map, Trash2, Activity, LogOut, Menu, Camera } from "lucide-react";
+import { Target, Map, Trash2, Activity, LogOut, Menu, Camera, User } from "lucide-react";
 import { useAuth } from "../lib/AuthContext";
 import { useRouter } from "next/navigation";
 
@@ -203,6 +203,20 @@ export default function Header({ onClearAll, activeModule, onModuleChange, onTog
         </button>
 
         </div>
+
+        {/* Profile button */}
+        <button
+          type="button"
+          className="rw-btn rw-btn-ghost hover:bg-blue-50 p-2 md:px-3 md:py-2"
+          onClick={() => router.push('/profile')}
+          style={{
+            color: "var(--rw-text-muted)",
+          }}
+          title="Profile"
+        >
+          <User className="w-5 h-5 md:w-4 md:h-4 text-[#023dbb] hover:text-[#308fef]" />
+          <span className="hidden md:inline font-bold text-[13px] text-[#023dbb]">Profile</span>
+        </button>
 
         {/* Logout button (Visible on all screens) */}
         <button
