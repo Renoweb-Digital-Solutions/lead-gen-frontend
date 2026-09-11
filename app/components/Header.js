@@ -89,8 +89,8 @@ export default function Header({ onClearAll, activeModule, onModuleChange, onTog
               letterSpacing: "-0.02em",
             }}
           >
-            <span style={{ color: "var(--rw-deep-blue)" }}>RENO</span>
-            <span style={{ color: "var(--rw-bright-blue)" }}>WEB</span>
+            <span style={{ color: "var(--rw-deep-blue)" }}>SIMPLE</span>
+            <span style={{ color: "var(--rw-bright-blue)" }}>ADS</span>
           </div>
         </div>
 
