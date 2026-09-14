@@ -67,7 +67,7 @@ export default function Header({ onClearAll, activeModule, onModuleChange, onTog
         {/* Hamburger (Mobile Only) */}
         <button
           className="md:hidden mr-3 text-brand-dark p-2 hover:bg-gray-100 rounded-md transition-colors"
-          onClick={onToggleSidebar}
+          onClick={onToggleSidebar ? onToggleSidebar : undefined}
           aria-label="Toggle menu"
         >
           <Menu className="w-5 h-5" />
@@ -113,7 +113,13 @@ export default function Header({ onClearAll, activeModule, onModuleChange, onTog
               <button
                 key={mod.id}
                 type="button"
-                onClick={() => onModuleChange(mod.id)}
+                onClick={() => {
+                  if (onModuleChange) {
+                    onModuleChange(mod.id);
+                  } else {
+                    router.push('/');
+                  }
+                }}
                 style={{
                   display: "flex",
                   alignItems: "center",
@@ -183,24 +189,26 @@ export default function Header({ onClearAll, activeModule, onModuleChange, onTog
         </div>
 
         {/* Clear Data button */}
-        <button
-          type="button"
-          className="rw-btn rw-btn-ghost hover:bg-red-50"
-          onClick={onClearAll}
-          style={{
-            color: "var(--rw-error)",
-            fontSize: 13,
-          }}
-        >
-          <Trash2 className="w-4 h-4" />
-          <span className="rw-hide-mobile font-medium">
-            {activeModule === "gmaps" ? "Clear GMaps Data" : 
-             activeModule === "youtube" ? "Clear YouTube Data" :
-             activeModule === "instagram" ? "Clear Instagram Data" :
-             activeModule === "b2b" ? "Clear B2B Data" :
-             "Clear Pipeline"}
-          </span>
-        </button>
+        {onClearAll && (
+          <button
+            type="button"
+            className="rw-btn rw-btn-ghost hover:bg-red-50"
+            onClick={onClearAll}
+            style={{
+              color: "var(--rw-error)",
+              fontSize: 13,
+            }}
+          >
+            <Trash2 className="w-4 h-4" />
+            <span className="rw-hide-mobile font-medium">
+              {activeModule === "gmaps" ? "Clear GMaps Data" : 
+               activeModule === "youtube" ? "Clear YouTube Data" :
+               activeModule === "instagram" ? "Clear Instagram Data" :
+               activeModule === "b2b" ? "Clear B2B Data" :
+               "Clear Pipeline"}
+            </span>
+          </button>
+        )}
 
         </div>
 

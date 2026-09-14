@@ -595,4 +595,24 @@ export async function fetchAdminTickets() {
   return res.json();
 }
 
+// ═══════════════════════════════════════════════════════════
+// ANALYTICS API FUNCTIONS
+// ═══════════════════════════════════════════════════════════
+
+export async function sendAnalyticsEvent(eventName, deviceId, payload = {}) {
+  const res = await fetchWithAuth(`/analytics/event`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ event_name: eventName, device_id: deviceId, payload }),
+  });
+  if (!res.ok) throw new Error("Failed to send analytics event");
+  return res.json();
+}
+
+export async function fetchAnalyticsSummary() {
+  const res = await fetchWithAuth(`/analytics/summary`);
+  if (!res.ok) throw new Error("Failed to fetch analytics summary");
+  return res.json();
+}
+
 

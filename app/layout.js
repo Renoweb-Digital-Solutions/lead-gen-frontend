@@ -21,15 +21,20 @@ export const metadata = {
 };
 
 import ClientProviders from "./ClientProviders";
+import BetaBanner from "./components/BetaBanner";
+import { AnalyticsProvider } from "./components/AnalyticsProvider";
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${inter.variable} ${oswald.variable}`} data-scroll-behavior="smooth">
       <head />
       <body>
-        <ClientProviders>
-          {children}
-        </ClientProviders>
+        <AnalyticsProvider>
+          <BetaBanner />
+          <ClientProviders>
+            {children}
+          </ClientProviders>
+        </AnalyticsProvider>
       </body>
     </html>
   );

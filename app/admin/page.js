@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { fetchAdminUsersAndRuns } from "../lib/api";
-import { LogOut, Users, Activity, CheckCircle, XCircle, AlertCircle, Calendar, ChevronDown, ChevronUp, MessageSquare, RefreshCw } from "lucide-react";
+import { fetchAdminUsersAndRuns, fetchAnalyticsSummary } from "../lib/api";
+import { LogOut, Users, Activity, CheckCircle, XCircle, AlertCircle, Calendar, ChevronDown, ChevronUp, MessageSquare, RefreshCw, BarChart3 } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 function UserRow({ user }) {
   const [expanded, setExpanded] = useState(false);
@@ -72,9 +73,10 @@ function UserRow({ user }) {
 }
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState("users"); // "users" or "tickets"
+  const [activeTab, setActiveTab] = useState("users"); // "users", "tickets", "analytics"
   const [users, setUsers] = useState([]);
   const [tickets, setTickets] = useState([]);
+  const [analytics, setAnalytics] = useState({ total_visitors: 0, top_events: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [refreshing, setRefreshing] = useState(false);
@@ -103,13 +105,15 @@ export default function AdminDashboard() {
         return;
       }
 
-      const [usersData, ticketsData] = await Promise.all([
+      const [usersData, ticketsData, analyticsData] = await Promise.all([
         fetchAdminUsersAndRuns(),
-        import("../lib/api").then(api => api.fetchAdminTickets())
+        import("../lib/api").then(api => api.fetchAdminTickets()),
+        fetchAnalyticsSummary().catch(() => ({ total_visitors: 0, top_events: [] }))
       ]);
       
       setUsers(usersData.users || []);
       setTickets(ticketsData.tickets || []);
+      setAnalytics(analyticsData || { total_visitors: 0, top_events: [] });
     } catch (err) {
       setError(err.message || "Failed to load dashboard data");
       if (err.message.toLowerCase().includes("unauthorized") || err.message.toLowerCase().includes("forbidden")) {
@@ -181,6 +185,16 @@ export default function AdminDashboard() {
               </span>
             )}
           </button>
+
+          <button
+            onClick={() => setActiveTab("analytics")}
+            className={`w-full flex items-center px-4 py-3 rounded-xl transition-all font-medium ${
+              activeTab === "analytics" ? "bg-white text-[#023dbb] shadow-md" : "text-blue-100 hover:bg-white/10"
+            }`}
+          >
+            <BarChart3 className="w-5 h-5 mr-3" />
+            Analytics
+          </button>
         </div>
 
         <div className="p-4 border-t border-white/10">
@@ -201,6 +215,8 @@ export default function AdminDashboard() {
             <h1 className="text-3xl font-bold text-gray-900 font-oswald tracking-wide flex items-center">
               {activeTab === "users" ? (
                 <><Activity className="w-7 h-7 mr-3 text-[#308fef]" /> Platform Activity</>
+              ) : activeTab === "analytics" ? (
+                <><BarChart3 className="w-7 h-7 mr-3 text-[#308fef]" /> Analytics Dashboard</>
               ) : (
                 <><MessageSquare className="w-7 h-7 mr-3 text-[#308fef]" /> Support Tickets</>
               )}
@@ -208,6 +224,8 @@ export default function AdminDashboard() {
             <p className="mt-2 text-sm text-gray-500 font-medium">
               {activeTab === "users" 
                 ? "Monitor user accounts and their lead generation runs across all tools."
+                : activeTab === "analytics"
+                ? "View platform usage, top events, and unique visitor counts."
                 : "Review and manage user feedback and error reports."
               }
             </p>
@@ -311,6 +329,43 @@ export default function AdminDashboard() {
                     </div>
                   ))
                 )}
+              </div>
+            )}
+
+            {activeTab === "analytics" && (
+              <div className="p-6">
+                <div className="mb-6 bg-[#f0f7ff] rounded-xl p-6 border border-[#308fef]/20">
+                  <h3 className="text-sm font-semibold text-[#023dbb] uppercase tracking-wider mb-2">Total Unique Visitors</h3>
+                  <div className="text-4xl font-black text-gray-900">{analytics.total_visitors}</div>
+                  <p className="text-sm text-gray-500 mt-1">Based on unique device IDs</p>
+                </div>
+
+                <div className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm">
+                  <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center">
+                    <Activity className="w-5 h-5 mr-2 text-[#308fef]" />
+                    Top Events
+                  </h3>
+                  
+                  {analytics.top_events.length === 0 ? (
+                    <div className="text-center py-10 text-gray-500 font-medium">
+                      No analytics data collected yet.
+                    </div>
+                  ) : (
+                    <div className="h-80 w-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={analytics.top_events} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                          <XAxis type="number" />
+                          <YAxis dataKey="name" type="category" width={150} tick={{fontSize: 12}} />
+                          <Tooltip 
+                            contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                            cursor={{ fill: 'rgba(48, 143, 239, 0.1)' }}
+                          />
+                          <Bar dataKey="count" fill="#308fef" radius={[0, 4, 4, 0]} barSize={24} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>
