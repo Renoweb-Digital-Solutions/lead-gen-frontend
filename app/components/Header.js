@@ -66,7 +66,7 @@ export default function Header({ onClearAll, activeModule, onModuleChange, onTog
       <div style={{ display: "flex", alignItems: "center", gap: 0, height: "100%" }}>
         {/* Hamburger (Mobile Only) */}
         <button
-          className="md:hidden mr-3 text-brand-dark p-2 hover:bg-gray-100 rounded-md transition-colors"
+          className="lg:hidden mr-3 text-brand-dark p-2 hover:bg-gray-100 rounded-md transition-colors"
           onClick={onToggleSidebar ? onToggleSidebar : undefined}
           aria-label="Toggle menu"
         >
@@ -105,7 +105,7 @@ export default function Header({ onClearAll, activeModule, onModuleChange, onTog
         />
 
         {/* Module Tabs */}
-        <nav className="hidden md:flex items-center gap-0 h-full">
+        <nav className="hidden lg:flex items-center gap-0 h-full">
           {MODULES.map((mod) => {
             const isActive = activeModule === mod.id;
             const Icon = mod.icon;
@@ -161,9 +161,9 @@ export default function Header({ onClearAll, activeModule, onModuleChange, onTog
       </div>
 
       {/* Right side */}
-      <div className="flex items-center gap-2 md:gap-4">
+      <div className="flex items-center gap-2 lg:gap-4">
         {/* Desktop-only items */}
-        <div className="hidden md:flex items-center gap-4">
+        <div className="hidden lg:flex items-center gap-4">
         {/* Health status */}
         <div
           style={{
@@ -215,29 +215,29 @@ export default function Header({ onClearAll, activeModule, onModuleChange, onTog
         {/* Profile button */}
         <button
           type="button"
-          className="rw-btn rw-btn-ghost hover:bg-blue-50 p-2 md:px-3 md:py-2"
+          className="rw-btn rw-btn-ghost hover:bg-blue-50 p-2 lg:px-3 lg:py-2"
           onClick={() => router.push('/profile')}
           style={{
             color: "var(--rw-text-muted)",
           }}
           title="Profile"
         >
-          <User className="w-5 h-5 md:w-4 md:h-4 text-[#023dbb] hover:text-[#308fef]" />
-          <span className="hidden md:inline font-bold text-[13px] text-[#023dbb]">Profile</span>
+          <User className="w-5 h-5 lg:w-4 lg:h-4 text-[#023dbb] hover:text-[#308fef]" />
+          <span className="hidden lg:inline font-bold text-[13px] text-[#023dbb]">Profile</span>
         </button>
 
         {/* Logout button (Visible on all screens) */}
         <button
           type="button"
-          className="rw-btn rw-btn-ghost hover:bg-gray-50 p-2 md:px-3 md:py-2"
+          className="rw-btn rw-btn-ghost hover:bg-gray-50 p-2 lg:px-3 lg:py-2"
           onClick={handleLogout}
           style={{
             color: "var(--rw-text-muted)",
           }}
           title="Logout"
         >
-          <LogOut className="w-5 h-5 md:w-4 md:h-4 text-gray-500 hover:text-gray-700" />
-          <span className="hidden md:inline font-medium text-[13px]">Logout</span>
+          <LogOut className="w-5 h-5 lg:w-4 lg:h-4 text-gray-500 hover:text-gray-700" />
+          <span className="hidden lg:inline font-medium text-[13px]">Logout</span>
         </button>
       </div>
     </header>

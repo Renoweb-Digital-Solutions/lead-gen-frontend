@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Send, Loader2, MessageSquare, AlertCircle, CheckCircle } from "lucide-react";
-import { submitSupportTicket } from "../lib/api";
+import { X, Send, Loader2, MessageSquare, AlertCircle, CheckCircle, Search, ChevronDown, ChevronUp, Sparkles } from "lucide-react";
+import { submitSupportTicket, suggestFaqs } from "../lib/api";
 
 export default function SupportTicketModal({ isOpen, onClose }) {
   const [title, setTitle] = useState("");
@@ -12,6 +12,34 @@ export default function SupportTicketModal({ isOpen, onClose }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  
+  const [step, setStep] = useState(1);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [faqs, setFaqs] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [expandedFaq, setExpandedFaq] = useState(null);
+
+  const activeQuery = step === 1 ? searchQuery : title;
+
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(async () => {
+      if (activeQuery.length > 4) {
+        setIsSearching(true);
+        try {
+          const res = await suggestFaqs(activeQuery);
+          setFaqs(res.faqs || []);
+        } catch (e) {
+          console.error(e);
+        } finally {
+          setIsSearching(false);
+        }
+      } else {
+        setFaqs([]);
+      }
+    }, 500);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [activeQuery]);
 
   if (!isOpen) return null;
 
@@ -61,6 +89,9 @@ export default function SupportTicketModal({ isOpen, onClose }) {
     if (!loading) {
       setError("");
       setSuccess(false);
+      setStep(1);
+      setSearchQuery("");
+      setFaqs([]);
       onClose();
     }
   };
@@ -106,14 +137,97 @@ export default function SupportTicketModal({ isOpen, onClose }) {
                   We've received your request and our team will look into it immediately.
                 </p>
               </motion.div>
+            ) : step === 1 ? (
+              <motion.div
+                key="step1"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="space-y-5"
+              >
+                <div>
+                  <div className="flex justify-between items-end mb-1.5">
+                    <label className="block text-[13px] font-bold text-[#191919] uppercase tracking-wide">
+                      How can we help you?
+                    </label>
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-[#308fef]">
+                      <Sparkles className={`w-3.5 h-3.5 ${isSearching ? 'animate-spin text-[#4ec8ef]' : 'animate-pulse'}`} />
+                      <span className={`${isSearching ? 'animate-pulse text-[#4ec8ef]' : ''}`}>AI Assisted</span>
+                    </div>
+                  </div>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                       {isSearching ? <Loader2 className="h-5 w-5 text-gray-400 animate-spin" /> : <Search className="h-5 w-5 text-gray-400" />}
+                    </div>
+                    <input
+                      type="text"
+                      className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:border-[#4ec8ef] focus:ring-4 focus:ring-[#4ec8ef]/10 transition-all font-medium text-[#191919]"
+                      placeholder="Describe your issue or question..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                {faqs.length > 0 && (
+                  <div className="space-y-2 mt-4">
+                    <h4 className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2">Suggested Answers</h4>
+                    {faqs.map((faq) => (
+                      <div key={faq.id} className="border border-gray-200 rounded-xl overflow-hidden bg-white">
+                        <button
+                          type="button"
+                          className="w-full px-4 py-3 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition-colors text-left font-bold text-gray-800 text-[13px]"
+                          onClick={() => setExpandedFaq(expandedFaq === faq.id ? null : faq.id)}
+                        >
+                          {faq.question}
+                          {expandedFaq === faq.id ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />}
+                        </button>
+                        <AnimatePresence>
+                          {expandedFaq === faq.id && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: 'auto', opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              className="px-4 py-3 text-sm text-gray-600 bg-white border-t border-gray-100 leading-relaxed font-medium"
+                            >
+                              {faq.answer}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div className="pt-4 flex justify-between items-center border-t border-gray-100">
+                  <span className="text-xs text-gray-400 font-medium">Still need help?</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                       setDescription(searchQuery);
+                       setStep(2);
+                    }}
+                    className="text-sm font-bold text-[#023dbb] hover:text-[#308fef] transition-colors"
+                  >
+                    Contact Support Team &rarr;
+                  </button>
+                </div>
+              </motion.div>
             ) : (
               <motion.form
                 key="form"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
                 onSubmit={handleSubmit}
                 className="space-y-5"
               >
+                <div className="flex items-center justify-between mb-2">
+                   <button type="button" onClick={() => setStep(1)} className="text-[13px] font-bold text-gray-500 hover:text-gray-800 transition-colors">
+                     &larr; Back to Search
+                   </button>
+                </div>
+
                 {error && (
                   <div className="p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl font-medium flex items-start gap-2">
                     <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
@@ -123,9 +237,15 @@ export default function SupportTicketModal({ isOpen, onClose }) {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="col-span-2">
-                    <label className="block text-[13px] font-bold text-[#191919] mb-1.5 uppercase tracking-wide">
-                      Title
-                    </label>
+                    <div className="flex justify-between items-end mb-1.5">
+                      <label className="block text-[13px] font-bold text-[#191919] uppercase tracking-wide">
+                        Title
+                      </label>
+                      <div className="flex items-center gap-1.5 text-xs font-bold text-[#308fef]">
+                        <Sparkles className={`w-3.5 h-3.5 ${isSearching ? 'animate-spin text-[#4ec8ef]' : 'animate-pulse'}`} />
+                        <span className={`${isSearching ? 'animate-pulse text-[#4ec8ef]' : ''}`}>AI Assisted</span>
+                      </div>
+                    </div>
                     <input
                       type="text"
                       required
@@ -137,6 +257,36 @@ export default function SupportTicketModal({ isOpen, onClose }) {
                       onChange={(e) => setTitle(e.target.value)}
                     />
                   </div>
+
+                  {faqs.length > 0 && (
+                    <div className="col-span-2 space-y-2 mb-2">
+                      <h4 className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2">Suggested Answers</h4>
+                      {faqs.map((faq) => (
+                        <div key={faq.id} className="border border-gray-200 rounded-xl overflow-hidden bg-white">
+                          <button
+                            type="button"
+                            className="w-full px-4 py-3 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition-colors text-left font-bold text-gray-800 text-[13px]"
+                            onClick={() => setExpandedFaq(expandedFaq === faq.id ? null : faq.id)}
+                          >
+                            {faq.question}
+                            {expandedFaq === faq.id ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />}
+                          </button>
+                          <AnimatePresence>
+                            {expandedFaq === faq.id && (
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                className="px-4 py-3 text-sm text-gray-600 bg-white border-t border-gray-100 leading-relaxed font-medium"
+                              >
+                                {faq.answer}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      ))}
+                    </div>
+                  )}
 
                   <div className="col-span-2 sm:col-span-1">
                     <label className="block text-[13px] font-bold text-[#191919] mb-1.5 uppercase tracking-wide">

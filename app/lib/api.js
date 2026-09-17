@@ -595,6 +595,16 @@ export async function fetchAdminTickets() {
   return res.json();
 }
 
+export async function suggestFaqs(query) {
+  const res = await fetchWithAuth(`/tickets/suggest-faq`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ query }),
+  });
+  if (!res.ok) throw new Error("Failed to suggest FAQs");
+  return res.json();
+}
+
 // ═══════════════════════════════════════════════════════════
 // ANALYTICS API FUNCTIONS
 // ═══════════════════════════════════════════════════════════
