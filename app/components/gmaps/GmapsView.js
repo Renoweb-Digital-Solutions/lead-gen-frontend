@@ -26,12 +26,6 @@ export default function GmapsView() {
   const [companyName, setCompanyName] = useSessionState("gmaps-company-name", "");
   const [companyDescription, setCompanyDescription] = useSessionState("gmaps-company-desc", "");
 
-  useEffect(() => {
-    if (limit > 50) {
-      setLimit(50);
-    }
-  }, [limit, setLimit]);
-
   // ─── Search State ────────────────────────────────────────
   const [isSearching, setIsSearching] = useState(false);
   const [isSuggesting, setIsSuggesting] = useState(false);
