@@ -30,6 +30,7 @@ const MODULES = [
   { id: "youtube", label: "YouTube Scraper", icon: Activity },
   { id: "instagram", label: "Instagram Scraper", icon: Camera },
   { id: "b2b", label: "B2B Scraper", icon: Menu }, // using existing imports for icons
+  { id: "investors", label: "Investor Data", icon: Activity },
 ];
 
 export default function Header({ onClearAll, activeModule, onModuleChange, onToggleSidebar }) {
@@ -104,60 +105,47 @@ export default function Header({ onClearAll, activeModule, onModuleChange, onTog
           }}
         />
 
-        {/* Module Tabs */}
-        <nav className="hidden lg:flex items-center gap-0 h-full">
-          {MODULES.map((mod) => {
-            const isActive = activeModule === mod.id;
-            const Icon = mod.icon;
-            return (
-              <button
-                key={mod.id}
-                type="button"
-                onClick={() => {
-                  if (onModuleChange) {
-                    onModuleChange(mod.id);
-                  } else {
-                    router.push('/');
-                  }
-                }}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  padding: "0 16px",
-                  height: "100%",
-                  border: "none",
-                  background: "transparent",
-                  cursor: "pointer",
-                  fontSize: 13.5,
-                  fontWeight: isActive ? 600 : 500,
-                  fontFamily: "inherit",
-                  color: isActive ? "var(--rw-deep-blue)" : "var(--rw-text-muted)",
-                  borderBottom: isActive
-                    ? "2.5px solid var(--rw-bright-blue)"
-                    : "2.5px solid transparent",
-                  transition: "all 0.2s ease",
-                  position: "relative",
-                }}
-                onMouseEnter={(e) => {
-                  if (!isActive) {
-                    e.currentTarget.style.color = "var(--rw-text-secondary)";
-                    e.currentTarget.style.borderBottomColor = "var(--rw-border)";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!isActive) {
-                    e.currentTarget.style.color = "var(--rw-text-muted)";
-                    e.currentTarget.style.borderBottomColor = "transparent";
-                  }
-                }}
-              >
-                <Icon className={`w-4 h-4 ${isActive ? 'text-brand-bright-blue' : 'text-gray-400'}`} />
-                <span className="rw-hide-mobile">{mod.label}</span>
-              </button>
-            );
-          })}
-        </nav>
+        {/* Module Tabs (Dropdown) */}
+        <div className="hidden lg:flex relative items-center h-full group">
+          {/* Active Module Trigger */}
+          <div className="flex items-center gap-2 px-4 h-full cursor-pointer text-brand-dark font-semibold border-b-[2.5px] border-brand-bright-blue transition-colors hover:text-brand-bright-blue">
+            {(() => {
+              const activeModuleObj = MODULES.find(m => m.id === activeModule) || MODULES[0];
+              const ActiveIcon = activeModuleObj.icon;
+              return (
+                <>
+                  <ActiveIcon className="w-4 h-4 text-brand-bright-blue" />
+                  <span>{activeModuleObj.label}</span>
+                </>
+              );
+            })()}
+            <svg className="w-4 h-4 text-gray-400 group-hover:rotate-180 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+
+          {/* Dropdown Menu */}
+          <div className="absolute top-[calc(100%-1px)] left-0 mt-0 w-56 bg-white border border-gray-100 rounded-b-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 overflow-hidden">
+            {MODULES.map((mod) => {
+              const Icon = mod.icon;
+              const isActive = activeModule === mod.id;
+              return (
+                <button
+                  key={mod.id}
+                  type="button"
+                  onClick={() => {
+                    if (onModuleChange) onModuleChange(mod.id);
+                    else router.push('/');
+                  }}
+                  className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-gray-50 ${isActive ? 'bg-blue-50/50 text-[#023dbb] font-semibold' : 'text-gray-600'}`}
+                >
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-[#308fef]' : 'text-gray-400'}`} />
+                  <span className="text-[13.5px]">{mod.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
       {/* Right side */}
@@ -205,6 +193,7 @@ export default function Header({ onClearAll, activeModule, onModuleChange, onTog
                activeModule === "youtube" ? "Clear YouTube Data" :
                activeModule === "instagram" ? "Clear Instagram Data" :
                activeModule === "b2b" ? "Clear B2B Data" :
+               activeModule === "investors" ? "Clear Investor Data" :
                "Clear Pipeline"}
             </span>
           </button>

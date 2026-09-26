@@ -625,4 +625,36 @@ export async function fetchAnalyticsSummary() {
   return res.json();
 }
 
+// ═══════════════════════════════════════════════════════════
+// INVESTOR DATA PIPELINE API FUNCTIONS
+// ═══════════════════════════════════════════════════════════
+
+export async function fetchInvestors(target, fullEnrichment = true, investorLimit = 50) {
+  const res = await fetchWithAuth(`/investors/enrich`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ target, full_enrichment: fullEnrichment, investor_limit: investorLimit }),
+  });
+
+  if (!res.ok) {
+    let errorDetail = "Failed to fetch investor data";
+    try {
+      const errData = await res.json();
+      if (Array.isArray(errData.detail)) {
+        errorDetail = errData.detail.map(e => e.msg).join(", ");
+      } else {
+        errorDetail = errData.detail || errData.error || errorDetail;
+      }
+    } catch {
+      const text = await res.text();
+      if (text) errorDetail = text;
+    }
+    const err = new Error(errorDetail);
+    err.status = res.status;
+    throw err;
+  }
+
+  return res.json();
+}
+
 

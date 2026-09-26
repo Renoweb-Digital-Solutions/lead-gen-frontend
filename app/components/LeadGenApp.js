@@ -8,6 +8,7 @@ import GmapsView from "./gmaps/GmapsView";
 import YoutubeView from "./youtube/YoutubeView";
 import InstagramView from "./instagram/InstagramView";
 import B2BView from "./b2b/B2BView";
+import InvestorsView from "./investors/InvestorsView";
 import Modal from "./Modal";
 import PeopleStep from "./steps/PeopleStep";
 import CompanyStep from "./steps/CompanyStep";
@@ -122,6 +123,11 @@ export default function LeadGenApp() {
       sessionStorage.removeItem("b2b-location");
       sessionStorage.removeItem("b2b-max-results");
       sessionStorage.removeItem("b2b-results");
+      window.location.reload();
+      return;
+    }
+
+    if (activeModule === "investors") {
       window.location.reload();
       return;
     }
@@ -401,6 +407,23 @@ export default function LeadGenApp() {
           />
         </div>
         <B2BView />
+      </div>
+
+      {/* ── Investors Module ────────────────────────────── */}
+      <div className="rw-main-layout" style={{ display: activeModule === "investors" ? "flex" : "none" }}>
+        <div className="md:hidden block">
+          <Sidebar
+            activeStep={0}
+            onStepChange={()=>{}}
+            isOpen={sidebarOpen}
+            onClose={() => setSidebarOpen(false)}
+            activeModule={activeModule}
+            onModuleChange={setActiveModule}
+            onClearAll={() => setShowClearModal(true)}
+            isMobileOnly={true}
+          />
+        </div>
+        <InvestorsView />
       </div>
 
       {/* ── Lead Gen Pipeline ───────────────────────────── */}
