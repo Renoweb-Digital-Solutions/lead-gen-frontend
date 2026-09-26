@@ -7,8 +7,10 @@ import { fetchInvestors } from "../../lib/api";
 import InvestorVisualizer from "./InvestorVisualizer";
 import ResultsBottomSheet from "../gmaps/ResultsBottomSheet";
 import RippleArrivalSignal from "../gmaps/RippleArrivalSignal";
+import { useAuth } from "../../lib/AuthContext";
 
 export default function InvestorsView() {
+  const { isSuspended } = useAuth();
   const [target, setTarget] = useState("");
   const [fullEnrichment, setFullEnrichment] = useState(true);
   const [investorLimit, setInvestorLimit] = useState(10);
@@ -241,16 +243,17 @@ export default function InvestorsView() {
                 )}
                 <motion.button
                   type="submit"
-                  disabled={isSearching || !target}
+                  disabled={isSearching || !target || isSuspended}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   className={`
                     relative px-8 py-3.5 rounded-xl text-white font-bold text-[15px] tracking-wide flex items-center justify-center gap-2 overflow-hidden transition-all duration-300 min-w-[220px]
-                    ${isSearching || !target
+                    ${(isSearching || !target || isSuspended)
                       ? "bg-gray-400 shadow-inner pointer-events-none"
                       : "bg-gradient-to-r from-[#023dbb] via-[#4460ef] to-[#308fef] shadow-[0_4px_20px_rgba(2,61,187,0.3)] hover:shadow-[0_8px_30px_rgba(48,143,239,0.4)]"
                     }
                   `}
+                  title={isSuspended ? "Account suspended" : ""}
                 >
                   {isSearching ? (
                     <>
@@ -260,7 +263,7 @@ export default function InvestorsView() {
                   ) : (
                     <>
                       <Zap className="w-5 h-5" />
-                      <span>Run Enrichment</span>
+                      <span>{isSuspended ? "Account Suspended" : "Run Enrichment"}</span>
                     </>
                   )}
                 </motion.button>

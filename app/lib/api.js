@@ -56,11 +56,11 @@ export async function apiLogin(email, password) {
   return res.json();
 }
 
-export async function apiSignup(email, password) {
+export async function apiSignup(username, email, password) {
   const res = await fetch(`${BASE_URL}/auth/create-user`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username: email, password }),
+    body: JSON.stringify({ username, email, password }),
   });
   if (!res.ok) {
     const text = await res.text();
@@ -234,9 +234,11 @@ export async function startPipelineJob(formState) {
 
   if (!res.ok) {
     const text = await res.text();
+    logReportRun("B2B General Pipeline", "failed");
     throw new Error(`Pipeline start failed: ${res.status} — ${text}`);
   }
 
+  logReportRun("B2B General Pipeline", "success");
   return res.json(); // returns { job_id, ws_url, status_url, cancel_url, downloads }
 }
 
@@ -329,9 +331,11 @@ export async function gmapsSearch({ keywords, location, limit }) {
 
   if (!res.ok) {
     const text = await res.text();
+    logReportRun("Google Maps Search", "failed");
     throw new Error(`GMaps search failed: ${res.status} — ${text}`);
   }
 
+  logReportRun("Google Maps Search", "success");
   return res.json();
 }
 
@@ -361,7 +365,11 @@ export async function gmapsBulkSearch({ keywords, location, limit }) {
       limit_per_keyword: limit
     }),
   });
-  if (!res.ok) throw new Error("Failed to start GMaps bulk search");
+  if (!res.ok) {
+    logReportRun("Google Maps Bulk Search", "failed");
+    throw new Error("Failed to start GMaps bulk search");
+  }
+  logReportRun("Google Maps Bulk Search", "success");
   return res.json();
 }
 
@@ -446,9 +454,11 @@ export async function fetchYoutubeLeads(params, signal) {
     }
     const err = new Error(errorDetail);
     err.status = res.status;
+    logReportRun("YouTube Leads", "failed");
     throw err;
   }
 
+  logReportRun("YouTube Leads", "success");
   return res.json();
 }
 
@@ -492,9 +502,11 @@ export async function extractInstagramLeads(params, signal) {
     }
     const err = new Error(errorDetail);
     err.status = res.status;
+    logReportRun("Instagram Leads", "failed");
     throw err;
   }
 
+  logReportRun("Instagram Leads", "success");
   return res.json();
 }
 
@@ -518,9 +530,11 @@ export async function fetchB2BLeads(params, signal) {
     }
     const err = new Error(errorDetail);
     err.status = res.status;
+    logReportRun("B2B Direct Leads", "failed");
     throw err;
   }
 
+  logReportRun("B2B Direct Leads", "success");
   return res.json();
 }
 
@@ -651,9 +665,78 @@ export async function fetchInvestors(target, fullEnrichment = true, investorLimi
     }
     const err = new Error(errorDetail);
     err.status = res.status;
+    logReportRun("Investor Data", "failed");
     throw err;
   }
 
+  logReportRun("Investor Data", "success");
+  return res.json();
+}
+
+export async function changePassword(current_password, new_password) {
+  const res = await fetchWithAuth(`/auth/change-password`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ current_password, new_password }),
+  });
+  if (!res.ok) {
+    let errorDetail = "Failed to change password";
+    try {
+      const errData = await res.json();
+      errorDetail = errData.detail || errorDetail;
+    } catch {}
+    throw new Error(errorDetail);
+  }
+  return res.json();
+}
+
+export async function logReportRun(report_type, status) {
+  try {
+    return await fetchWithAuth(`/reports`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ report_type, status }),
+    });
+  } catch (err) {
+    console.error("Failed to log report run:", err);
+  }
+}
+
+export async function fetchReportRuns(page = 1, limit = 10) {
+  const res = await fetchWithAuth(`/reports?page=${page}&limit=${limit}`);
+  if (!res.ok) throw new Error("Failed to fetch reports");
+  return res.json();
+}
+
+export async function apiSuspendUser(userId, reason) {
+  const res = await fetchWithAuth(`/admin/users/${userId}/suspend`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ reason }),
+  });
+  if (!res.ok) {
+    let errorDetail = "Failed to suspend user";
+    try {
+      const errData = await res.json();
+      errorDetail = errData.detail || errorDetail;
+    } catch {}
+    throw new Error(errorDetail);
+  }
+  return res.json();
+}
+
+export async function apiUnsuspendUser(userId) {
+  const res = await fetchWithAuth(`/admin/users/${userId}/unsuspend`, {
+    method: "POST",
+  });
+  if (!res.ok) {
+    let errorDetail = "Failed to unsuspend user";
+    try {
+      const errData = await res.json();
+      errorDetail = errData.detail || errorDetail;
+    } catch {}
+    throw new Error(errorDetail);
+  }
   return res.json();
 }
 

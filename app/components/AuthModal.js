@@ -9,6 +9,7 @@ import { apiForgotPassword, apiVerifyOtp, apiResetPassword } from "../lib/api";
 
 export default function AuthModal({ isOpen, onClose }) {
   const [viewMode, setViewMode] = useState("login"); // 'login', 'signup', 'forgot-password', 'verify-otp', 'reset-password'
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [otp, setOtp] = useState("");
@@ -28,6 +29,7 @@ export default function AuthModal({ isOpen, onClose }) {
     if (!isOpen) {
       setError("");
       setSuccessMsg("");
+      setUsername("");
       setEmail("");
       setPassword("");
       setOtp("");
@@ -75,11 +77,11 @@ export default function AuthModal({ isOpen, onClose }) {
 
     try {
       if (viewMode === "login") {
-        await login(email, password);
+        await login(email, password); // email here is used as username or email
         onClose();
         router.push("/dashboard");
       } else if (viewMode === "signup") {
-        await signup(email, password);
+        await signup(username, email, password);
         // After signup, we log them in or just show success? The original code logged them in or pushed to dashboard.
         // wait, the original code did: await signup(); onClose(); router.push("/dashboard");
         onClose();
@@ -180,7 +182,28 @@ export default function AuthModal({ isOpen, onClose }) {
 
             <form onSubmit={handleSubmit} className="space-y-5">
               
-              {(viewMode === "login" || viewMode === "signup" || viewMode === "forgot-password") && (
+              {viewMode === "signup" && (
+                <div>
+                  <label className="text-[13px] font-bold text-[#191919] block mb-1.5 uppercase tracking-wide">
+                    Username
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-3 flex items-center text-gray-400">
+                      <User className="w-5 h-5" />
+                    </div>
+                    <input
+                      type="text"
+                      required
+                      className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:border-[#4ec8ef] focus:ring-4 focus:ring-[#4ec8ef]/10 transition-all font-medium text-[#191919]"
+                      placeholder="johndoe"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {(viewMode === "login" || viewMode === "forgot-password") && (
                 <div>
                   <label className="text-[13px] font-bold text-[#191919] block mb-1.5 uppercase tracking-wide">
                     Username or Email
@@ -194,6 +217,27 @@ export default function AuthModal({ isOpen, onClose }) {
                       required
                       className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:border-[#4ec8ef] focus:ring-4 focus:ring-[#4ec8ef]/10 transition-all font-medium text-[#191919]"
                       placeholder="name@company.com or username"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {viewMode === "signup" && (
+                <div>
+                  <label className="text-[13px] font-bold text-[#191919] block mb-1.5 uppercase tracking-wide">
+                    Email Address
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-3 flex items-center text-gray-400">
+                      <Mail className="w-5 h-5" />
+                    </div>
+                    <input
+                      type="email"
+                      required
+                      className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:border-[#4ec8ef] focus:ring-4 focus:ring-[#4ec8ef]/10 transition-all font-medium text-[#191919]"
+                      placeholder="name@company.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                     />

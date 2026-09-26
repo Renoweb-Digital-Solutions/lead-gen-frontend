@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "../../lib/AuthContext";
 import RadioCards from "../inputs/RadioCards";
 import ExportBottomSheet from "./ExportBottomSheet";
 import ExportProgress from "../ExportProgress";
@@ -104,6 +105,7 @@ export default function ExportStep({
   onDownload,
   onCancel,
 }) {
+  const { isSuspended } = useAuth();
   const [showPipelineOptions, setShowPipelineOptions] = useState(false);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
@@ -302,7 +304,8 @@ export default function ExportStep({
                 }
               `}
               onClick={onExport}
-              disabled={isExporting}
+              disabled={isExporting || isSuspended}
+              title={isSuspended ? "Your account is suspended. You cannot run pipelines." : ""}
             >
               {isExporting ? (
                 <>
@@ -323,9 +326,9 @@ export default function ExportStep({
                 <>
                   <span className="relative z-10 flex items-center gap-2">
                     <Rocket className="w-5 h-5" />
-                    Generate & Export
+                    {isSuspended ? "Account Suspended" : "Generate & Export"}
                   </span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full hover:animate-[rw-shimmer_1.5s_infinite]" />
+                  {!isSuspended && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full hover:animate-[rw-shimmer_1.5s_infinite]" />}
                 </>
               )}
             </button>

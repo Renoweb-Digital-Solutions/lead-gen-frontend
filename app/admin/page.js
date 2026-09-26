@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { fetchAdminUsersAndRuns, fetchAnalyticsSummary } from "../lib/api";
-import { LogOut, Users, Activity, CheckCircle, XCircle, AlertCircle, Calendar, ChevronDown, ChevronUp, MessageSquare, RefreshCw, BarChart3 } from "lucide-react";
+import { fetchAdminUsersAndRuns, fetchAnalyticsSummary, apiSuspendUser, apiUnsuspendUser } from "../lib/api";
+import { LogOut, Users, Activity, CheckCircle, XCircle, AlertCircle, Calendar, ChevronDown, ChevronUp, MessageSquare, RefreshCw, BarChart3, Ban, Unlock } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
-function UserRow({ user }) {
+function UserRow({ user, onSuspendClick, onUnsuspendClick }) {
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -19,10 +19,33 @@ function UserRow({ user }) {
         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
           {user.runs ? user.runs.length : 0} runs
         </td>
-        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex items-center justify-end gap-3">
+          {user.is_suspended ? (
+            <button
+              onClick={() => onUnsuspendClick(user)}
+              className="text-green-600 hover:text-green-800 flex items-center font-bold px-3 py-1.5 rounded-lg border border-green-200 hover:bg-green-50 transition-colors"
+            >
+              <Unlock className="w-4 h-4 mr-1.5" />
+              Unsuspend
+            </button>
+          ) : (
+            <button
+              onClick={() => onSuspendClick(user)}
+              disabled={user.is_admin}
+              className={`flex items-center font-bold px-3 py-1.5 rounded-lg border transition-colors ${
+                user.is_admin 
+                  ? "text-gray-400 border-gray-200 bg-gray-50 cursor-not-allowed opacity-50" 
+                  : "text-red-600 hover:text-red-800 border-red-200 hover:bg-red-50"
+              }`}
+              title={user.is_admin ? "Cannot suspend an admin" : "Suspend user account"}
+            >
+              <Ban className="w-4 h-4 mr-1.5" />
+              Suspend
+            </button>
+          )}
           <button 
             onClick={() => setExpanded(!expanded)}
-            className="text-[#308fef] hover:text-[#023dbb] flex items-center ml-auto"
+            className="text-[#308fef] hover:text-[#023dbb] flex items-center ml-2 px-2 py-1.5"
           >
             {expanded ? "Hide Details" : "View Runs"}
             {expanded ? <ChevronUp className="w-4 h-4 ml-1" /> : <ChevronDown className="w-4 h-4 ml-1" />}
@@ -80,6 +103,10 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [refreshing, setRefreshing] = useState(false);
+  const [suspendModalOpen, setSuspendModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [suspendReason, setSuspendReason] = useState("");
+  const [isSuspending, setIsSuspending] = useState(false);
   const router = useRouter();
 
   const loadData = async (isRefresh = false) => {
@@ -133,6 +160,36 @@ export default function AdminDashboard() {
   const handleLogout = () => {
     localStorage.removeItem("renoweb_jwt");
     router.push("/admin/login");
+  };
+
+  const handleSuspendClick = (user) => {
+    setSelectedUser(user);
+    setSuspendReason("");
+    setSuspendModalOpen(true);
+  };
+
+  const submitSuspend = async () => {
+    if (!suspendReason.trim()) return;
+    setIsSuspending(true);
+    try {
+      await apiSuspendUser(selectedUser._id, suspendReason);
+      setSuspendModalOpen(false);
+      loadData(true);
+    } catch (err) {
+      alert(err.message || "Failed to suspend user");
+    } finally {
+      setIsSuspending(false);
+    }
+  };
+
+  const submitUnsuspend = async (user) => {
+    if (!confirm(`Are you sure you want to unsuspend ${user.username}?`)) return;
+    try {
+      await apiUnsuspendUser(user._id);
+      loadData(true);
+    } catch (err) {
+      alert(err.message || "Failed to unsuspend user");
+    }
   };
 
   if (loading) {
@@ -282,7 +339,14 @@ export default function AdminDashboard() {
                           </td>
                         </tr>
                       ) : (
-                        users.map((user) => <UserRow key={user._id} user={user} />)
+                        users.map((user) => (
+                          <UserRow 
+                            key={user._id} 
+                            user={user} 
+                            onSuspendClick={handleSuspendClick}
+                            onUnsuspendClick={submitUnsuspend}
+                          />
+                        ))
                       )}
                     </tbody>
                   </table>
@@ -371,6 +435,55 @@ export default function AdminDashboard() {
           </div>
         )}
       </main>
+
+      {/* Suspend Modal */}
+      {suspendModalOpen && selectedUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+              <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                <Ban className="w-5 h-5 text-red-500" />
+                Suspend {selectedUser.username}
+              </h2>
+              <button 
+                onClick={() => setSuspendModalOpen(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+                disabled={isSuspending}
+              >
+                <XCircle className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="p-6">
+              <p className="text-sm text-gray-600 mb-4">
+                Please provide a reason for suspending this user. They will receive an email notification with this reason.
+              </p>
+              <textarea
+                value={suspendReason}
+                onChange={(e) => setSuspendReason(e.target.value)}
+                placeholder="e.g. Violation of terms of service..."
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-red-500 focus:ring-4 focus:ring-red-500/10 transition-all outline-none resize-none h-32 text-sm text-gray-900"
+                disabled={isSuspending}
+              />
+            </div>
+            <div className="p-6 bg-gray-50 flex justify-end gap-3">
+              <button
+                onClick={() => setSuspendModalOpen(false)}
+                className="px-5 py-2.5 rounded-xl font-bold text-gray-600 hover:bg-gray-200 transition-colors"
+                disabled={isSuspending}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={submitSuspend}
+                disabled={!suspendReason.trim() || isSuspending}
+                className="px-6 py-2.5 rounded-xl font-bold text-white bg-red-600 hover:bg-red-700 disabled:opacity-50 transition-colors flex items-center"
+              >
+                {isSuspending ? "Suspending..." : "Suspend User"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -10,8 +10,10 @@ import YoutubeResultsBottomSheet from "./YoutubeResultsBottomSheet";
 import RippleArrivalSignal from "../gmaps/RippleArrivalSignal";
 import { fetchYoutubeLeads } from "../../lib/api";
 import { useSessionState } from "../../hooks/useSessionState";
+import { useAuth } from "../../lib/AuthContext";
 
 export default function YoutubeView() {
+  const { isSuspended } = useAuth();
   // ─── Search Form State ───────────────────────────────────
   const [keyword, setKeyword] = useSessionState("youtube-keyword", "");
   const [maxEmails, setMaxEmails] = useSessionState("youtube-max-emails", 20);
@@ -317,16 +319,17 @@ export default function YoutubeView() {
           <motion.button
             type="button"
             onClick={handleSearch}
-            disabled={isSearching}
+            disabled={isSearching || isSuspended}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             className={`
               relative px-8 py-3.5 rounded-xl text-white font-bold text-[15px] tracking-wide flex items-center justify-center gap-2 overflow-hidden transition-all duration-300 min-w-[220px]
-              ${isSearching
+              ${(isSearching || isSuspended)
                 ? "bg-red-500 shadow-inner pointer-events-none"
                 : "bg-gradient-to-r from-red-600 to-red-500 shadow-[0_4px_20px_rgba(220,38,38,0.3)] hover:shadow-[0_8px_30px_rgba(220,38,38,0.5)]"
               }
             `}
+            title={isSuspended ? "Account suspended" : ""}
           >
             {isSearching ? (
               <>
@@ -336,7 +339,7 @@ export default function YoutubeView() {
             ) : (
               <>
                 <Video className="w-5 h-5" />
-                <span>Extract YouTube Leads</span>
+                <span>{isSuspended ? "Account Suspended" : "Extract YouTube Leads"}</span>
               </>
             )}
           </motion.button>

@@ -10,6 +10,7 @@ import ResultsBottomSheet from "../gmaps/ResultsBottomSheet";
 import RippleArrivalSignal from "../gmaps/RippleArrivalSignal";
 import { fetchB2BLeads } from "../../lib/api";
 import { useSessionState } from "../../hooks/useSessionState";
+import { useAuth } from "../../lib/AuthContext";
 
 const DIRECTORIES = [
   { id: "yellowpages", label: "Yellow Pages (US)", icon: BookOpen, color: "text-yellow-600", bg: "bg-yellow-100", border: "border-yellow-200" },
@@ -17,6 +18,7 @@ const DIRECTORIES = [
 ];
 
 export default function B2BView() {
+  const { isSuspended } = useAuth();
   // ─── Search Form State ───────────────────────────────────
   const [directory, setDirectory] = useSessionState("b2b-directory", "yellowpages");
   const [keywords, setKeywords] = useSessionState("b2b-keywords", []);
@@ -363,16 +365,17 @@ export default function B2BView() {
           <motion.button
             type="button"
             onClick={handleSearch}
-            disabled={isSearching}
+            disabled={isSearching || isSuspended}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             className={`
               relative px-8 py-3.5 rounded-xl text-white font-bold text-[15px] tracking-wide flex items-center justify-center gap-2 overflow-hidden transition-all duration-300 min-w-[220px]
-              ${isSearching
+              ${(isSearching || isSuspended)
                 ? "bg-brand-sky shadow-inner pointer-events-none"
                 : "bg-gradient-to-r from-brand-blue to-brand-cyan shadow-[0_4px_20px_rgba(48,143,239,0.3)] hover:shadow-[0_8px_30px_rgba(48,143,239,0.5)]"
               }
             `}
+            title={isSuspended ? "Account suspended" : ""}
           >
             {isSearching ? (
               <>
@@ -382,7 +385,7 @@ export default function B2BView() {
             ) : (
               <>
                 <Search className="w-5 h-5" />
-                <span>Extract B2B Leads</span>
+                <span>{isSuspended ? "Account Suspended" : "Extract B2B Leads"}</span>
               </>
             )}
           </motion.button>

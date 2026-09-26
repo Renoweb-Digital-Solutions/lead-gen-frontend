@@ -8,9 +8,11 @@ import InstagramResultsBottomSheet from "./InstagramResultsBottomSheet";
 import RippleArrivalSignal from "../gmaps/RippleArrivalSignal";
 import { extractInstagramLeads } from "../../lib/api";
 import { useSessionState } from "../../hooks/useSessionState";
+import { useAuth } from "../../lib/AuthContext";
 import FollowerOrbitPanel from "./FollowerOrbitPanel";
 
 export default function InstagramView() {
+  const { isSuspended } = useAuth();
   // ─── Search Form State ───────────────────────────────────
   const [sourceType, setSourceType] = useSessionState("instagram-source-type", "followers");
   const [target, setTarget] = useSessionState("instagram-target", "");
@@ -320,16 +322,17 @@ export default function InstagramView() {
               <motion.button
                 type="button"
                 onClick={handleSearch}
-                disabled={isSearching}
+                disabled={isSearching || isSuspended}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 className={`
                   relative px-8 py-3.5 rounded-xl text-white font-bold text-[15px] tracking-wide flex items-center justify-center gap-2 overflow-hidden transition-all duration-300 min-w-[220px]
-                  ${isSearching
+                  ${(isSearching || isSuspended)
                     ? "bg-fuchsia-400 shadow-inner pointer-events-none"
                     : "bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 shadow-[0_4px_20px_rgba(236,72,153,0.3)] hover:shadow-[0_8px_30px_rgba(236,72,153,0.5)]"
                   }
                 `}
+                title={isSuspended ? "Account suspended" : ""}
               >
                 {isSearching ? (
                   <>
@@ -339,7 +342,7 @@ export default function InstagramView() {
                 ) : (
                   <>
                     <Camera className="w-5 h-5" />
-                    <span>Extract Leads</span>
+                    <span>{isSuspended ? "Account Suspended" : "Extract Leads"}</span>
                   </>
                 )}
               </motion.button>

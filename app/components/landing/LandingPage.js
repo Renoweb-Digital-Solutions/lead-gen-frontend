@@ -13,8 +13,19 @@ import Pricing from "./Pricing";
 import FAQ from "./FAQ";
 import FinalCTA from "./FinalCTA";
 import Footer from "./Footer";
+import { useAuth } from "../../lib/AuthContext";
+import { useRouter } from "next/navigation";
 
 export default function LandingPage() {
+  const { isAuthenticated } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push("/dashboard");
+    }
+  }, [isAuthenticated, router]);
+
   useEffect(() => {
     // Register GSAP plugins
     gsap.registerPlugin(ScrollTrigger);
