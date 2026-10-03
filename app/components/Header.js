@@ -76,7 +76,7 @@ export default function Header({ onClearAll, activeModule, onModuleChange, onTog
 
         {/* Logo */}
         <div 
-          onClick={() => router.push('/')}
+          onClick={() => router.push('/dashboard')}
           className="cursor-pointer transition-opacity hover:opacity-80"
           style={{ display: "flex", alignItems: "center", gap: 3, marginRight: 24 }}
         >
@@ -134,8 +134,13 @@ export default function Header({ onClearAll, activeModule, onModuleChange, onTog
                   key={mod.id}
                   type="button"
                   onClick={() => {
-                    if (onModuleChange) onModuleChange(mod.id);
-                    else router.push('/');
+                    if (onModuleChange) {
+                      onModuleChange(mod.id);
+                    } else {
+                      sessionStorage.setItem("renoweb-active-module", JSON.stringify(mod.id));
+                      window.dispatchEvent(new Event("local-session-storage"));
+                      router.push('/dashboard');
+                    }
                   }}
                   className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-[var(--rw-surface-hover)] ${isActive ? 'bg-[var(--rw-surface-hover)]/50 text-[#023dbb] font-semibold' : 'text-gray-600'}`}
                 >

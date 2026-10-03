@@ -25,15 +25,22 @@ export function useSessionState(key, defaultValue) {
 
   // Read from storage on mount (after initial render to prevent hydration mismatch)
   useEffect(() => {
-    try {
-      const stored = sessionStorage.getItem(key);
-      if (stored !== null) {
-        setState(JSON.parse(stored));
+    const readStorage = () => {
+      try {
+        const stored = sessionStorage.getItem(key);
+        if (stored !== null) {
+          setState(JSON.parse(stored));
+        }
+      } catch {
+        // ignore
       }
-    } catch {
-      // ignore
-    }
+    };
+    
+    readStorage();
     setIsHydrated(true);
+
+    window.addEventListener("local-session-storage", readStorage);
+    return () => window.removeEventListener("local-session-storage", readStorage);
   }, [key]);
 
   // Sync state → sessionStorage
@@ -42,7 +49,12 @@ export function useSessionState(key, defaultValue) {
     if (!isHydrated) return;
     
     try {
-      sessionStorage.setItem(key, JSON.stringify(state));
+      const stringified = JSON.stringify(state);
+      const prev = sessionStorage.getItem(key);
+      if (prev !== stringified) {
+        sessionStorage.setItem(key, stringified);
+        window.dispatchEvent(new Event("local-session-storage"));
+      }
     } catch {
       // sessionStorage full or unavailable — ignore
     }
@@ -51,6 +63,7 @@ export function useSessionState(key, defaultValue) {
   const clearState = useCallback(() => {
     sessionStorage.removeItem(key);
     setState(defaultValue);
+    window.dispatchEvent(new Event("local-session-storage"));
   }, [key, defaultValue]);
 
   // Before hydration, we return the server-rendered default value.

@@ -80,10 +80,10 @@ export default function SliderInput({
 
   return (
     <div className="rw-field mb-6">
-      <div className="flex justify-between items-baseline mb-4">
+      <div className="flex flex-col md:flex-row md:justify-between md:items-baseline gap-3 md:gap-0 mb-4">
         <label className="text-[13px] font-semibold text-brand-dark block uppercase tracking-wide m-0">
           {label}
-          {hint && <span className="text-[12px] font-normal text-gray-400 ml-2 normal-case">{hint}</span>}
+          {hint && <span className="text-[12px] font-normal text-gray-400 block md:inline md:ml-2 mt-1 md:mt-0 normal-case">{hint}</span>}
         </label>
         <div className="flex items-center gap-1.5">
           <button

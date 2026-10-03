@@ -6,6 +6,7 @@ import { fetchMyTickets, fetchReportRuns, apiForgotPassword, apiVerifyOtp, apiRe
 import { useAuth } from "../lib/AuthContext";
 import { useSessionState } from "../hooks/useSessionState";
 import Header from "../components/Header";
+import Sidebar from "../components/Sidebar";
 import ChangePasswordModal from "../components/profile/ChangePasswordModal";
 import { User, MessageSquare, Calendar, CheckCircle, AlertCircle, XCircle, FileText, Lock, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 
@@ -20,6 +21,7 @@ export default function ProfilePage() {
   const [error, setError] = useState("");
   
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const { token, isInitializing } = useAuth();
   const router = useRouter();
@@ -90,18 +92,30 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--rw-bg)] flex flex-col text-[var(--rw-text)]">
-      <Header isDark={isDark} onToggleTheme={() => setIsDark(!isDark)} />
+    <div className="min-h-screen bg-[var(--rw-bg)] flex flex-col text-[var(--rw-text)]" data-theme={isDark ? "dark" : "light"}>
+      <Header isDark={isDark} onToggleTheme={() => setIsDark(!isDark)} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+      <div className="lg:hidden">
+        <Sidebar 
+          isOpen={isSidebarOpen} 
+          onClose={() => setIsSidebarOpen(false)} 
+          isMobileOnly={true} 
+          onModuleChange={(mod) => {
+            sessionStorage.setItem("renoweb-active-module", JSON.stringify(mod));
+            window.dispatchEvent(new Event("local-session-storage"));
+            router.push('/dashboard');
+          }}
+        />
+      </div>
       
-      <main className="flex-1 max-w-5xl w-full mx-auto py-12 px-4 sm:px-6 lg:px-8 space-y-8">
+      <main className="flex-1 max-w-5xl w-full mx-auto py-8 sm:py-12 px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-8 overflow-hidden">
         
         {/* Profile Card */}
-        <div className="bg-[var(--rw-surface)] rounded-2xl shadow-[var(--rw-shadow-sm)] border border-[var(--rw-border)] p-8 flex items-center gap-6">
-          <div className="w-20 h-20 bg-gradient-to-br from-[#023dbb] to-[#308fef] rounded-full flex items-center justify-center text-white shadow-inner">
-            <User className="w-10 h-10" />
+        <div className="bg-[var(--rw-surface)] rounded-2xl shadow-[var(--rw-shadow-sm)] border border-[var(--rw-border)] p-6 sm:p-8 flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4 sm:gap-6">
+          <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-[#023dbb] to-[#308fef] rounded-full flex items-center justify-center text-white shadow-inner shrink-0">
+            <User className="w-10 h-10 sm:w-12 sm:h-12" />
           </div>
-          <div>
-            <h1 className="text-3xl font-bold text-[var(--rw-text)] font-oswald tracking-wide">
+          <div className="min-w-0 w-full">
+            <h1 className="text-2xl sm:text-3xl font-bold text-[var(--rw-text)] font-oswald tracking-wide break-words">
               Welcome, {username}
             </h1>
             <p className="text-[var(--rw-text-muted)] font-medium mt-1">
@@ -114,12 +128,12 @@ export default function ProfilePage() {
           
           {/* Reports Section */}
           <div className="bg-[var(--rw-surface)] rounded-2xl shadow-[var(--rw-shadow-sm)] border border-[var(--rw-border)] overflow-hidden md:col-span-2">
-            <div className="px-6 py-5 border-b border-[var(--rw-border)] flex items-center justify-between bg-[var(--rw-surface-hover)]">
+            <div className="px-5 sm:px-6 py-5 border-b border-[var(--rw-border)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 bg-[var(--rw-surface-hover)]">
               <h2 className="text-xl font-bold text-[var(--rw-text)] font-oswald tracking-wide flex items-center">
-                <FileText className="w-5 h-5 mr-2 text-[#023dbb]" />
+                <FileText className="w-5 h-5 mr-2 text-[#023dbb] shrink-0" />
                 Lead Reports History
               </h2>
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-[#f0f7ff] text-[#023dbb]">
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-[#f0f7ff] text-[#023dbb] shrink-0">
                 {reportsTotal} Total Generated
               </span>
             </div>

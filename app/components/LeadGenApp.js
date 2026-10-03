@@ -346,7 +346,7 @@ export default function LeadGenApp() {
       {/* ── Google Maps Module ─────────────────────────── */}
       <div className="rw-main-layout" style={{ display: activeModule === "gmaps" ? "flex" : "none" }}>
         {/* Render sidebar for mobile only in GMaps view so the hamburger menu works */}
-        <div className="md:hidden block">
+        <div className="lg:hidden block">
           <Sidebar
             activeStep={0}
             onStepChange={()=>{}}
@@ -363,7 +363,7 @@ export default function LeadGenApp() {
 
       {/* ── YouTube Module ─────────────────────────────── */}
       <div className="rw-main-layout" style={{ display: activeModule === "youtube" ? "flex" : "none" }}>
-        <div className="md:hidden block">
+        <div className="lg:hidden block">
           <Sidebar
             activeStep={0}
             onStepChange={()=>{}}
@@ -380,7 +380,7 @@ export default function LeadGenApp() {
 
       {/* ── Instagram Module ─────────────────────────────── */}
       <div className="rw-main-layout" style={{ display: activeModule === "instagram" ? "flex" : "none" }}>
-        <div className="md:hidden block">
+        <div className="lg:hidden block">
           <Sidebar
             activeStep={0}
             onStepChange={()=>{}}
@@ -397,7 +397,7 @@ export default function LeadGenApp() {
 
       {/* ── B2B Module ─────────────────────────────────── */}
       <div className="rw-main-layout" style={{ display: activeModule === "b2b" ? "flex" : "none" }}>
-        <div className="md:hidden block">
+        <div className="lg:hidden block">
           <Sidebar
             activeStep={0}
             onStepChange={()=>{}}
@@ -414,7 +414,7 @@ export default function LeadGenApp() {
 
       {/* ── Investors Module ────────────────────────────── */}
       <div className="rw-main-layout" style={{ display: activeModule === "investors" ? "flex" : "none" }}>
-        <div className="md:hidden block">
+        <div className="lg:hidden block">
           <Sidebar
             activeStep={0}
             onStepChange={()=>{}}

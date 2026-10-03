@@ -63,11 +63,11 @@ export default function Sidebar({
       {/* Mobile overlay */}
       {isOpen && (
         <div 
-          className="fixed inset-0 bg-black/40 z-40 md:hidden backdrop-blur-sm"
+          className="fixed inset-0 bg-black/40 z-40 lg:hidden backdrop-blur-sm"
           onClick={onClose}
         />
       )}
-      <nav className={`rw-sidebar relative ${isOpen ? "open" : ""}`}>
+      <nav className={`rw-sidebar relative ${isOpen ? "open" : ""} ${isMobileOnly ? "lg:!hidden" : ""}`}>
       {/* Glass shimmer overlay */}
       <div
         className="absolute inset-0 pointer-events-none"
@@ -76,10 +76,10 @@ export default function Sidebar({
 
       <div className="rw-sidebar-steps px-6 pt-4 pb-8 flex flex-col relative z-10">
         {/* Mobile Header (Logo + Close Button) */}
-        <div className="md:hidden flex items-center justify-between mb-6 pb-4 border-b border-border/50">
+        <div className="lg:hidden flex items-center justify-between mb-6 pb-4 border-b border-border/50">
           <div
             className="flex items-center gap-1 font-[800] text-[20px] tracking-[-0.02em] cursor-pointer"
-            onClick={() => { router.push('/'); onClose?.(); }}
+            onClick={() => { router.push('/dashboard'); onClose?.(); }}
           >
             <span style={{ color: "var(--rw-deep-blue)" }}>RENO</span>
             <span style={{ color: "var(--rw-bright-blue)" }}>WEB</span>
@@ -93,7 +93,7 @@ export default function Sidebar({
         </div>
 
         {/* Mobile Top Navigation */}
-        <div className="md:hidden flex flex-col gap-1 mb-6 pb-6 border-b border-border">
+        <div className="lg:hidden flex flex-col gap-1 mb-6 pb-6 border-b border-border">
           <button 
              onClick={() => { onModuleChange?.('leadgen'); onClose?.(); }}
              className={`flex items-center gap-3 p-3 rounded-xl transition-all ${activeModule === 'leadgen' ? 'bg-[var(--rw-surface-hover)] text-brand-blue font-bold shadow-sm' : 'text-gray-500 hover:bg-[var(--rw-surface-hover)] font-medium'}`}
@@ -128,6 +128,13 @@ export default function Sidebar({
           >
              <Menu className="w-5 h-5" />
              <span className="text-[14px]">B2B Scraper</span>
+          </button>
+          <button 
+             onClick={() => { onModuleChange?.('investors'); onClose?.(); }}
+             className={`flex items-center gap-3 p-3 rounded-xl transition-all ${activeModule === 'investors' ? 'bg-[var(--rw-surface-hover)] text-brand-blue font-bold shadow-sm' : 'text-gray-500 hover:bg-[var(--rw-surface-hover)] font-medium'}`}
+          >
+             <Activity className="w-5 h-5" />
+             <span className="text-[14px]">Investor Pipeline</span>
           </button>
           
           <div className="h-px w-full bg-gray-200/60 my-2" />

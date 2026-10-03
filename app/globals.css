@@ -1136,7 +1136,7 @@ body {
 }
 
 /* Mobile Overrides */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .rw-main-layout {
     flex-direction: column;
   }
