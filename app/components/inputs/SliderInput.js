@@ -141,7 +141,7 @@ export default function SliderInput({
         }}
       >
         <div 
-          className={`absolute top-0 left-0 h-full rounded-full bg-gradient-to-r from-brand-blue to-brand-amber ${!isDragging ? 'transition-all duration-100 ease-out' : ''}`} 
+          className={`absolute top-0 left-0 h-full rounded-full bg-brand-blue ${!isDragging ? 'transition-all duration-100 ease-out' : ''}`} 
           style={{ width: `${percentage}%` }} 
         />
         <motion.div
@@ -171,7 +171,7 @@ export default function SliderInput({
         </motion.div>
       </div>
 
-      <div className="flex justify-between mt-2 text-[11px] font-medium text-gray-400">
+      <div className="flex justify-between mt-2 text-[11px] font-medium text-[var(--rw-text-muted)]">
         <span>{min.toLocaleString()}</span>
         <span>{max.toLocaleString()}</span>
       </div>

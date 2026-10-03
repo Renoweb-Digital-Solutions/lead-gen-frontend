@@ -801,7 +801,8 @@ body {
 /* ── Radio Button Group ──────────────────────────────────── */
 .rw-radio-group {
   display: inline-flex;
-  background: #f1f5f9;
+  background: var(--rw-surface-hover);
+  border: 1px solid var(--rw-border);
   border-radius: var(--rw-radius-md);
   padding: 3px;
   gap: 2px;
@@ -812,7 +813,7 @@ body {
   font-size: 13px;
   font-weight: 500;
   font-family: inherit;
-  color: var(--rw-text-secondary);
+  color: var(--rw-text-muted);
   background: transparent;
   border: none;
   border-radius: calc(var(--rw-radius-md) - 2px);
@@ -821,12 +822,12 @@ body {
 }
 
 .rw-radio-item:hover {
-  color: var(--rw-text);
+  color: var(--rw-text-secondary);
 }
 
 .rw-radio-item[data-active="true"] {
-  background: var(--rw-surface);
-  color: var(--rw-deep-blue);
+  background: var(--rw-deep-blue);
+  color: white;
   font-weight: 600;
   box-shadow: var(--rw-shadow-sm);
 }
@@ -1194,9 +1195,17 @@ body {
     gap: 12px;
     align-items: stretch !important;
   }
-  
+
   .rw-action-buttons button {
     width: 100%;
     justify-content: center;
   }
+}
+
+:root {
+  --rw-sidebar-shimmer: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, transparent 50%, rgba(255, 255, 255, 0.2) 100%);
+}
+
+[data-theme='dark'] {
+  --rw-sidebar-shimmer: none;
 }
