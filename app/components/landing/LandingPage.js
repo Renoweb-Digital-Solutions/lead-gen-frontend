@@ -17,14 +17,14 @@ import { useAuth } from "../../lib/AuthContext";
 import { useRouter } from "next/navigation";
 
 export default function LandingPage() {
-  const { isAuthenticated } = useAuth();
+  const { token, isInitializing } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (!isInitializing && token) {
       router.push("/dashboard");
     }
-  }, [isAuthenticated, router]);
+  }, [token, isInitializing, router]);
 
   useEffect(() => {
     // Register GSAP plugins

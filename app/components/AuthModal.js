@@ -23,7 +23,7 @@ export default function AuthModal({ isOpen, onClose }) {
   const [successMsg, setSuccessMsg] = useState("");
   const router = useRouter();
 
-  const { login, signup } = useAuth();
+  const { login, signup, requestLoginOtp, verifyLoginOtp } = useAuth();
 
   useEffect(() => {
     if (!isOpen) {
@@ -43,7 +43,7 @@ export default function AuthModal({ isOpen, onClose }) {
 
   useEffect(() => {
     let interval;
-    if (viewMode === "verify-otp" && resendTimer > 0) {
+    if ((viewMode === "verify-otp" || viewMode === "verify-login-otp") && resendTimer > 0) {
       interval = setInterval(() => {
         setResendTimer((prev) => prev - 1);
       }, 1000);
@@ -59,8 +59,13 @@ export default function AuthModal({ isOpen, onClose }) {
     setError("");
     setSuccessMsg("");
     try {
-      const res = await apiForgotPassword(email);
-      setSuccessMsg(res.message || "OTP resent to your email.");
+      if (viewMode === "verify-login-otp") {
+        const res = await requestLoginOtp(email, password);
+        setSuccessMsg(res.message || "OTP resent to your email.");
+      } else {
+        const res = await apiForgotPassword(email);
+        setSuccessMsg(res.message || "OTP resent to your email.");
+      }
       setResendTimer(60);
     } catch (err) {
       setError(err.message || "Failed to resend OTP");
@@ -77,7 +82,12 @@ export default function AuthModal({ isOpen, onClose }) {
 
     try {
       if (viewMode === "login") {
-        await login(email, password); // email here is used as username or email
+        const res = await requestLoginOtp(email, password);
+        setSuccessMsg(res.message || "OTP sent to your email.");
+        setViewMode("verify-login-otp");
+        setResendTimer(60);
+      } else if (viewMode === "verify-login-otp") {
+        await verifyLoginOtp(email, password, otp);
         onClose();
         router.push("/dashboard");
       } else if (viewMode === "signup") {
@@ -118,6 +128,7 @@ export default function AuthModal({ isOpen, onClose }) {
       case "signup": return "Create Account";
       case "forgot-password": return "Reset Password";
       case "verify-otp": return "Enter OTP";
+      case "verify-login-otp": return "2FA Verification";
       case "reset-password": return "New Password";
       default: return "Welcome";
     }
@@ -129,6 +140,7 @@ export default function AuthModal({ isOpen, onClose }) {
       case "signup": return "Sign up to start generating premium leads.";
       case "forgot-password": return "Enter your email to receive a recovery OTP.";
       case "verify-otp": return "Check your email for the 6-digit OTP.";
+      case "verify-login-otp": return "Check your email for the login verification OTP.";
       case "reset-password": return "Create a strong new password.";
       default: return "";
     }
@@ -289,7 +301,7 @@ export default function AuthModal({ isOpen, onClose }) {
                 </div>
               )}
 
-              {viewMode === "verify-otp" && (
+              {(viewMode === "verify-otp" || viewMode === "verify-login-otp") && (
                 <div>
                   <div className="flex justify-between items-center mb-1.5">
                     <label className="text-[13px] font-bold text-[#191919] block uppercase tracking-wide">
@@ -362,6 +374,7 @@ export default function AuthModal({ isOpen, onClose }) {
                     {viewMode === "signup" && "Create Account"}
                     {viewMode === "forgot-password" && "Send OTP"}
                     {viewMode === "verify-otp" && "Verify OTP"}
+                    {viewMode === "verify-login-otp" && "Verify & Login"}
                     {viewMode === "reset-password" && "Reset Password"}
                     <ArrowRight className="w-5 h-5" />
                   </>

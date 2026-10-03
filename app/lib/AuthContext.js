@@ -14,19 +14,26 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const storedToken = localStorage.getItem("renoweb_jwt");
     if (storedToken && storedToken !== "undefined") {
-      setToken(storedToken);
       try {
         const payloadBase64 = storedToken.split('.')[1];
         const decoded = JSON.parse(atob(payloadBase64));
-        setIsSuspended(!!decoded.is_suspended);
-        setIsAdmin(!!decoded.is_admin);
-      } catch (e) {}
+        if (decoded.exp && decoded.exp * 1000 < Date.now()) {
+          localStorage.removeItem("renoweb_jwt");
+          setToken(null);
+        } else {
+          setToken(storedToken);
+          setIsSuspended(!!decoded.is_suspended);
+          setIsAdmin(!!decoded.is_admin);
+        }
+      } catch (e) {
+        localStorage.removeItem("renoweb_jwt");
+        setToken(null);
+      }
     }
     setIsInitializing(false);
   }, []);
 
-  const login = async (username, password) => {
-    const data = await apiLogin(username, password);
+  const setAuthFromToken = (data) => {
     setToken(data.access_token);
     localStorage.setItem("renoweb_jwt", data.access_token);
     try {
@@ -37,11 +44,28 @@ export function AuthProvider({ children }) {
     } catch (e) {}
   };
 
+  const login = async (username, password) => {
+    const data = await apiLogin(username, password);
+    setAuthFromToken(data);
+  };
+
+  const requestLoginOtp = async (username, password) => {
+    // This is just a pass-through to apiRequestLoginOtp in api.js
+    // Wait, I need to import it at the top of the file!
+    const { apiRequestLoginOtp } = await import('./api');
+    return await apiRequestLoginOtp(username, password);
+  };
+
+  const verifyLoginOtp = async (username, password, otp) => {
+    const { apiVerifyLoginOtp } = await import('./api');
+    const data = await apiVerifyLoginOtp(username, password, otp);
+    setAuthFromToken(data);
+  };
+
   const signup = async (username, email, password) => {
     const data = await apiSignup(username, email, password);
     if (data && data.access_token) {
-      setToken(data.access_token);
-      localStorage.setItem("renoweb_jwt", data.access_token);
+      setAuthFromToken(data);
     } else {
       // If backend only creates user and doesn't return a token, log them in immediately
       await login(username, password); // We can login with username now
@@ -56,7 +80,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ token, isInitializing, isSuspended, isAdmin, login, signup, logout }}>
+    <AuthContext.Provider value={{ token, isInitializing, isSuspended, isAdmin, login, requestLoginOtp, verifyLoginOtp, signup, logout }}>
       {children}
     </AuthContext.Provider>
   );

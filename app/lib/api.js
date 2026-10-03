@@ -56,6 +56,47 @@ export async function apiLogin(email, password) {
   return res.json();
 }
 
+export async function apiRequestLoginOtp(email, password) {
+  const res = await fetch(`${BASE_URL}/auth/request-login-otp`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: new URLSearchParams({
+      username: email,
+      password: password,
+    }),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    let errorDetail = text;
+    try {
+      const errData = JSON.parse(text);
+      errorDetail = errData.detail || text;
+    } catch (e) {}
+    throw new Error(errorDetail);
+  }
+  return res.json();
+}
+
+export async function apiVerifyLoginOtp(email, password, otp) {
+  const res = await fetch(`${BASE_URL}/auth/verify-login-otp`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username: email, password, otp }),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    let errorDetail = text;
+    try {
+      const errData = JSON.parse(text);
+      errorDetail = errData.detail || text;
+    } catch (e) {}
+    throw new Error(errorDetail);
+  }
+  return res.json();
+}
+
 export async function apiSignup(username, email, password) {
   const res = await fetch(`${BASE_URL}/auth/create-user`, {
     method: "POST",
