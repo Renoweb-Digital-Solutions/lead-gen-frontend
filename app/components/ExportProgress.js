@@ -89,6 +89,19 @@ const LOG_MESSAGES_B2B = [
   { icon: "🗂️", text: "Finalizing B2B lead generation pipeline..." }
 ];
 
+const LOG_MESSAGES_INVESTORS = [
+  { icon: "🧠", text: "Consulting LLM to build a targeted query plan..." },
+  { icon: "🌐", text: "Dispatching search queries to Crunchbase..." },
+  { icon: "📡", text: "Connecting to OpenVC directories..." },
+  { icon: "🔍", text: "Fetching curated segments from NFX Signal..." },
+  { icon: "🧹", text: "Deduplicating investors across all sources..." },
+  { icon: "🕷️", text: "Scraping VC firm websites for investment criteria..." },
+  { icon: "🤖", text: "Evaluating firm thesis and portfolio fit via LLM..." },
+  { icon: "📊", text: "Calculating overall fit scores..." },
+  { icon: "🎯", text: "Sorting out the highest-probability matches..." },
+  { icon: "🗂️", text: "Packaging investor pipelines for export..." }
+];
+
 function formatElapsed(seconds) {
   const m = Math.floor(seconds / 60);
   const s = seconds % 60;
@@ -105,11 +118,12 @@ export default function ExportProgress({ isActive, totalResults = 1000, logType 
   const MESSAGES = logType === "gmaps" ? LOG_MESSAGES_GMAPS 
     : logType === "youtube" ? LOG_MESSAGES_YOUTUBE
     : logType === "b2b" ? LOG_MESSAGES_B2B
+    : logType === "investors" ? LOG_MESSAGES_INVESTORS
     : LOG_MESSAGES_APOLLO;
 
   // Estimate: fixed time for scrapers
   const estimatedMinutes = logType === "youtube" ? 10
-    : ["gmaps", "b2b"].includes(logType) ? 5
+    : ["gmaps", "b2b", "investors"].includes(logType) ? 5
     : Math.max(2, Math.ceil((totalResults * 1.5) / 60));
 
   // Reset everything when export starts

@@ -76,7 +76,7 @@ export default function Sidebar({
 
       <div className="rw-sidebar-steps px-6 pt-4 pb-8 flex flex-col relative z-10">
         {/* Mobile Header (Logo + Close Button) */}
-        <div className="md:hidden flex items-center justify-between mb-6 pb-4 border-b border-gray-200/50">
+        <div className="md:hidden flex items-center justify-between mb-6 pb-4 border-b border-border/50">
           <div
             className="flex items-center gap-1 font-[800] text-[20px] tracking-[-0.02em] cursor-pointer"
             onClick={() => { router.push('/'); onClose?.(); }}
@@ -86,45 +86,45 @@ export default function Sidebar({
           </div>
           <button 
             onClick={onClose}
-            className="p-2 text-gray-500 hover:bg-gray-100 rounded-md transition-colors"
+            className="p-2 text-gray-500 hover:bg-[var(--rw-border)] rounded-md transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Mobile Top Navigation */}
-        <div className="md:hidden flex flex-col gap-1 mb-6 pb-6 border-b border-gray-200">
+        <div className="md:hidden flex flex-col gap-1 mb-6 pb-6 border-b border-border">
           <button 
              onClick={() => { onModuleChange?.('leadgen'); onClose?.(); }}
-             className={`flex items-center gap-3 p-3 rounded-xl transition-all ${activeModule === 'leadgen' ? 'bg-blue-50 text-brand-blue font-bold shadow-sm' : 'text-gray-500 hover:bg-gray-50 font-medium'}`}
+             className={`flex items-center gap-3 p-3 rounded-xl transition-all ${activeModule === 'leadgen' ? 'bg-[var(--rw-surface-hover)] text-brand-blue font-bold shadow-sm' : 'text-gray-500 hover:bg-[var(--rw-surface-hover)] font-medium'}`}
           >
              <Target className="w-5 h-5" />
              <span className="text-[14px]">Lead Gen Pipeline</span>
           </button>
           <button 
              onClick={() => { onModuleChange?.('gmaps'); onClose?.(); }}
-             className={`flex items-center gap-3 p-3 rounded-xl transition-all ${activeModule === 'gmaps' ? 'bg-blue-50 text-brand-blue font-bold shadow-sm' : 'text-gray-500 hover:bg-gray-50 font-medium'}`}
+             className={`flex items-center gap-3 p-3 rounded-xl transition-all ${activeModule === 'gmaps' ? 'bg-[var(--rw-surface-hover)] text-brand-blue font-bold shadow-sm' : 'text-gray-500 hover:bg-[var(--rw-surface-hover)] font-medium'}`}
           >
              <Map className="w-5 h-5" />
              <span className="text-[14px]">Google Maps</span>
           </button>
           <button 
              onClick={() => { onModuleChange?.('youtube'); onClose?.(); }}
-             className={`flex items-center gap-3 p-3 rounded-xl transition-all ${activeModule === 'youtube' ? 'bg-blue-50 text-brand-blue font-bold shadow-sm' : 'text-gray-500 hover:bg-gray-50 font-medium'}`}
+             className={`flex items-center gap-3 p-3 rounded-xl transition-all ${activeModule === 'youtube' ? 'bg-[var(--rw-surface-hover)] text-brand-blue font-bold shadow-sm' : 'text-gray-500 hover:bg-[var(--rw-surface-hover)] font-medium'}`}
           >
              <Activity className="w-5 h-5" />
              <span className="text-[14px]">YouTube Scraper</span>
           </button>
           <button 
              onClick={() => { onModuleChange?.('instagram'); onClose?.(); }}
-             className={`flex items-center gap-3 p-3 rounded-xl transition-all ${activeModule === 'instagram' ? 'bg-blue-50 text-brand-blue font-bold shadow-sm' : 'text-gray-500 hover:bg-gray-50 font-medium'}`}
+             className={`flex items-center gap-3 p-3 rounded-xl transition-all ${activeModule === 'instagram' ? 'bg-[var(--rw-surface-hover)] text-brand-blue font-bold shadow-sm' : 'text-gray-500 hover:bg-[var(--rw-surface-hover)] font-medium'}`}
           >
              <Camera className="w-5 h-5" />
              <span className="text-[14px]">Instagram Scraper</span>
           </button>
           <button 
              onClick={() => { onModuleChange?.('b2b'); onClose?.(); }}
-             className={`flex items-center gap-3 p-3 rounded-xl transition-all ${activeModule === 'b2b' ? 'bg-blue-50 text-brand-blue font-bold shadow-sm' : 'text-gray-500 hover:bg-gray-50 font-medium'}`}
+             className={`flex items-center gap-3 p-3 rounded-xl transition-all ${activeModule === 'b2b' ? 'bg-[var(--rw-surface-hover)] text-brand-blue font-bold shadow-sm' : 'text-gray-500 hover:bg-[var(--rw-surface-hover)] font-medium'}`}
           >
              <Menu className="w-5 h-5" />
              <span className="text-[14px]">B2B Scraper</span>
@@ -175,7 +175,7 @@ export default function Sidebar({
                       ? "bg-gradient-to-br from-brand-blue via-brand-sky to-brand-cyan text-white shadow-[0_0_20px_rgba(48,143,239,0.3)]" 
                       : isCompleted 
                         ? "bg-brand-cyan text-white shadow-md"
-                        : "bg-white border-2 border-brand-blue/10 text-brand-blue/40 group-hover:border-brand-blue/30 group-hover:text-brand-blue/60"
+                        : "bg-surface border-2 border-border text-brand-blue/40 group-hover:border-brand-blue/30 group-hover:text-brand-blue/60"
                     }
                   `}
                 >
@@ -213,7 +213,7 @@ export default function Sidebar({
 
       {/* Footer branding */}
       <div className="rw-sidebar-footer relative z-10 mt-auto pt-6 pb-2">
-        <div className="flex items-center gap-3 mb-5 p-2.5 rounded-xl border border-transparent hover:border-brand-blue/10 hover:bg-white hover:shadow-sm transition-all cursor-pointer">
+        <div className="flex items-center gap-3 mb-5 p-2.5 rounded-xl border border-transparent hover:border-border hover:bg-surface hover:shadow-sm transition-all cursor-pointer">
           <div className="w-9 h-9 rounded-full bg-gradient-to-br from-brand-blue to-brand-cyan text-white flex items-center justify-center font-bold text-[14px] shadow-[0_2px_10px_rgba(2,61,187,0.2)] shrink-0">
             {avatarLetter}
           </div>

@@ -40,8 +40,8 @@ export default function RadioCards({
               className={`
                 relative flex items-start gap-4 p-4 text-left border rounded-2xl transition-all duration-300
                 ${isSelected 
-                  ? "border-brand-sky bg-brand-sky/5 shadow-[0_4px_20px_rgba(48,143,239,0.15)] ring-1 ring-brand-sky/30" 
-                  : "border-gray-200 bg-white hover:border-brand-sky/40 hover:bg-gray-50/50"
+                  ? "border-brand-sky bg-brand-sky/5 shadow-md ring-1 ring-brand-sky/30" 
+                  : "border-border bg-surface hover:border-brand-sky/40 hover:bg-[var(--rw-surface-hover)]/50"
                 }
               `}
             >
@@ -58,7 +58,7 @@ export default function RadioCards({
                   w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300
                   ${isSelected
                     ? "bg-gradient-to-br from-brand-blue to-brand-cyan text-white shadow-[0_2px_10px_rgba(48,143,239,0.3)]"
-                    : "bg-gray-100 text-gray-400"
+                    : "bg-[var(--rw-border)] text-gray-400"
                   }
                 `}
               >

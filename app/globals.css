@@ -55,17 +55,61 @@
   --rw-transition-spring: 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
+/* ── Dark Theme (Dashboard Only) ─────────────────────────── */
+[data-theme="dark"] {
+  /* Core background & surfaces */
+  --rw-bg: #09090b; 
+  --rw-surface: #18181b; 
+  --rw-surface-hover: #27272a; 
+  --rw-surface-raised: #27272a; 
+  --rw-border: #27272a; 
+  
+  /* Text */
+  --rw-text: #fafafa;
+  --rw-text-secondary: #a1a1aa;
+  --rw-text-muted: #71717a;
+  --rw-dark: #fafafa;
+  
+  /* Sidebar & Gradients */
+  --rw-sidebar-bg: linear-gradient(165deg, rgba(24, 24, 27, 0.85) 0%, rgba(9, 9, 11, 0.95) 100%);
+  --rw-gradient-surface: linear-gradient(180deg, #18181b 0%, #09090b 100%);
+  
+  /* Shadows are subtle on dark mode */
+  --rw-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
+  --rw-shadow-md: 0 4px 15px rgba(0, 0, 0, 0.3);
+  --rw-shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.4);
+  
+  /* Override Tailwind default colors for this theme scope */
+  --color-gray-50: var(--rw-surface-hover);
+  --color-gray-100: var(--rw-border);
+  --color-gray-200: var(--rw-border);
+  --color-gray-300: #475569;
+  --color-gray-400: var(--rw-text-muted);
+  --color-gray-500: var(--rw-text-secondary);
+  --color-gray-600: var(--rw-text-secondary);
+  --color-gray-700: var(--rw-text);
+  --color-gray-800: var(--rw-text);
+  --color-gray-900: var(--rw-text);
+  --color-slate-900: var(--rw-text);
+  --color-blue-50: rgba(48, 143, 239, 0.1);
+  --color-blue-100: rgba(48, 143, 239, 0.2);
+}
+
 /* ── Tailwind v4 Theme ───────────────────────────────────── */
 @theme inline {
   --color-background: var(--rw-bg);
   --color-foreground: var(--rw-text);
   --color-surface: var(--rw-surface);
+  --color-border: var(--rw-border);
   --color-brand-blue: #023dbb;
   --color-brand-indigo: #4460ef;
   --color-brand-sky: #308fef;
   --color-brand-cyan: #4ec8ef;
   --color-brand-amber: #ffc857;
-  --color-brand-dark: #191919;
+  --color-brand-dark: var(--rw-dark);
+  --shadow-sm: var(--rw-shadow-sm);
+  --shadow-md: var(--rw-shadow-md);
+  --shadow-lg: var(--rw-shadow-lg);
   --font-sans: var(--font-inter);
   --font-display: var(--font-oswald);
 }

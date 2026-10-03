@@ -8,7 +8,7 @@ import { MapPin, Phone, Star, Navigation } from "lucide-react";
 const PopularSearchPill = ({ label, onClick }) => (
   <button
     onClick={onClick}
-    className="px-4 py-2 bg-white border border-brand-blue/10 rounded-full text-[13px] font-medium text-brand-dark hover:border-brand-sky hover:text-brand-blue hover:shadow-sm transition-all duration-200 flex items-center gap-2"
+    className="px-4 py-2 bg-surface border border-border rounded-full text-[13px] font-medium text-brand-dark hover:border-brand-sky hover:text-brand-blue hover:shadow-sm transition-all duration-200 flex items-center gap-2"
   >
     <Navigation className="w-3.5 h-3.5 text-brand-sky" />
     {label}
@@ -39,8 +39,8 @@ const EmptyState = ({ setKeywords, setLocation, onSearch }) => {
         />
         
         {/* Geometric Map Pin */}
-        <div className="relative z-10 w-20 h-20 bg-gradient-to-br from-brand-blue to-brand-cyan rounded-full flex items-center justify-center shadow-[0_8px_30px_rgba(48,143,239,0.4)]">
-          <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+        <div className="relative z-10 w-20 h-20 bg-gradient-to-br from-brand-blue to-brand-cyan rounded-full flex items-center justify-center shadow-lg">
+          <div className="w-8 h-8 bg-surface rounded-full flex items-center justify-center">
             <div className="w-3 h-3 bg-brand-amber rounded-full" />
           </div>
           <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 border-[10px] border-transparent border-t-brand-cyan w-0 h-0" />
@@ -65,17 +65,17 @@ const EmptyState = ({ setKeywords, setLocation, onSearch }) => {
 const ShimmerSkeletonGrid = () => (
   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 py-6">
     {[...Array(6)].map((_, i) => (
-      <div key={i} className="relative overflow-hidden bg-white border border-brand-blue/5 rounded-2xl p-5 shadow-sm">
+      <div key={i} className="relative overflow-hidden bg-surface border border-brand-blue/5 rounded-2xl p-5 shadow-sm">
         <div className="flex items-start gap-4 mb-4">
-          <div className="w-12 h-12 rounded-xl bg-gray-100 animate-pulse shrink-0" />
+          <div className="w-12 h-12 rounded-xl bg-[var(--rw-border)] animate-pulse shrink-0" />
           <div className="flex-1 space-y-2 py-1">
-            <div className="h-4 bg-gray-100 rounded w-3/4 animate-pulse" />
-            <div className="h-3 bg-gray-50 rounded w-1/2 animate-pulse" />
+            <div className="h-4 bg-[var(--rw-border)] rounded w-3/4 animate-pulse" />
+            <div className="h-3 bg-[var(--rw-surface-hover)] rounded w-1/2 animate-pulse" />
           </div>
         </div>
         <div className="space-y-3 mt-4 pt-4 border-t border-gray-50">
-          <div className="h-3 bg-gray-50 rounded w-5/6 animate-pulse" />
-          <div className="h-3 bg-gray-50 rounded w-2/3 animate-pulse" />
+          <div className="h-3 bg-[var(--rw-surface-hover)] rounded w-5/6 animate-pulse" />
+          <div className="h-3 bg-[var(--rw-surface-hover)] rounded w-2/3 animate-pulse" />
         </div>
         {/* Shimmer overlay */}
         <div 
@@ -99,14 +99,14 @@ const ResultCard = ({ result }) => {
   const initial = name.charAt(0).toUpperCase();
 
   return (
-    <div className="bg-white border border-brand-blue/10 rounded-2xl p-5 shadow-[0_2px_8px_rgba(2,61,187,0.04)] hover:shadow-[0_8px_24px_rgba(2,61,187,0.12)] hover:-translate-y-1 transition-all duration-300 flex flex-col h-full group">
+    <div className="bg-surface border border-border rounded-2xl p-5 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col h-full group">
       <div className="flex items-start gap-4 mb-4">
-        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-sky/10 to-brand-cyan/10 text-brand-blue font-bold flex items-center justify-center shrink-0 border border-brand-blue/10 group-hover:bg-brand-blue group-hover:text-white transition-colors duration-300">
+        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-sky/10 to-brand-cyan/10 text-brand-blue font-bold flex items-center justify-center shrink-0 border border-border group-hover:bg-brand-blue group-hover:text-white transition-colors duration-300">
           {initial}
         </div>
         <div className="flex-1 min-w-0">
           <h4 className="text-[15px] font-bold text-brand-dark truncate mb-1" title={name}>{name}</h4>
-          <span className="inline-block px-2.5 py-0.5 bg-gray-100 text-gray-500 text-[11px] font-medium rounded-md truncate max-w-full">
+          <span className="inline-block px-2.5 py-0.5 bg-[var(--rw-border)] text-gray-500 text-[11px] font-medium rounded-md truncate max-w-full">
             {category}
           </span>
         </div>

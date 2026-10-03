@@ -42,7 +42,7 @@ export default function ChipSelect({
                 relative inline-flex items-center gap-1.5 px-3 py-1.5 text-[13px] font-medium rounded-full border transition-colors duration-200
                 ${isSelected 
                   ? "border-transparent text-white shadow-md shadow-brand-blue/20 bg-gradient-to-r from-brand-blue to-brand-cyan" 
-                  : "border-gray-200 bg-white text-gray-500 hover:border-brand-sky/50 hover:bg-brand-sky/5 hover:text-brand-sky"
+                  : "border-border bg-surface text-gray-500 hover:border-brand-sky/50 hover:bg-brand-sky/5 hover:text-brand-sky"
                 }
               `}
               onClick={() => toggleChip(chipValue)}

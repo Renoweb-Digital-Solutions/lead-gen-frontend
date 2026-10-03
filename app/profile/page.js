@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { fetchMyTickets, fetchReportRuns, apiForgotPassword, apiVerifyOtp, apiResetPassword } from "../lib/api";
 import { useAuth } from "../lib/AuthContext";
+import { useSessionState } from "../hooks/useSessionState";
 import Header from "../components/Header";
 import ChangePasswordModal from "../components/profile/ChangePasswordModal";
 import { User, MessageSquare, Calendar, CheckCircle, AlertCircle, XCircle, FileText, Lock, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
@@ -24,6 +25,7 @@ export default function ProfilePage() {
   const router = useRouter();
   
   const [username, setUsername] = useState("");
+  const [isDark, setIsDark] = useSessionState("renoweb-theme-dark", false);
 
   useEffect(() => {
     if (isInitializing) return;
@@ -81,28 +83,28 @@ export default function ProfilePage() {
 
   if (loading || isInitializing) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[var(--rw-bg)] flex items-center justify-center">
         <div className="w-8 h-8 border-4 border-[#023dbb] border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <Header />
+    <div className="min-h-screen bg-[var(--rw-bg)] flex flex-col text-[var(--rw-text)]">
+      <Header isDark={isDark} onToggleTheme={() => setIsDark(!isDark)} />
       
       <main className="flex-1 max-w-5xl w-full mx-auto py-12 px-4 sm:px-6 lg:px-8 space-y-8">
         
         {/* Profile Card */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 flex items-center gap-6">
+        <div className="bg-[var(--rw-surface)] rounded-2xl shadow-[var(--rw-shadow-sm)] border border-[var(--rw-border)] p-8 flex items-center gap-6">
           <div className="w-20 h-20 bg-gradient-to-br from-[#023dbb] to-[#308fef] rounded-full flex items-center justify-center text-white shadow-inner">
             <User className="w-10 h-10" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 font-oswald tracking-wide">
+            <h1 className="text-3xl font-bold text-[var(--rw-text)] font-oswald tracking-wide">
               Welcome, {username}
             </h1>
-            <p className="text-gray-500 font-medium mt-1">
+            <p className="text-[var(--rw-text-muted)] font-medium mt-1">
               Account Overview
             </p>
           </div>
@@ -111,9 +113,9 @@ export default function ProfilePage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
           
           {/* Reports Section */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden md:col-span-2">
-            <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-              <h2 className="text-xl font-bold text-gray-900 font-oswald tracking-wide flex items-center">
+          <div className="bg-[var(--rw-surface)] rounded-2xl shadow-[var(--rw-shadow-sm)] border border-[var(--rw-border)] overflow-hidden md:col-span-2">
+            <div className="px-6 py-5 border-b border-[var(--rw-border)] flex items-center justify-between bg-[var(--rw-surface-hover)]">
+              <h2 className="text-xl font-bold text-[var(--rw-text)] font-oswald tracking-wide flex items-center">
                 <FileText className="w-5 h-5 mr-2 text-[#023dbb]" />
                 Lead Reports History
               </h2>
@@ -124,11 +126,11 @@ export default function ProfilePage() {
 
             {reports.length === 0 ? (
               <div className="p-12 text-center flex flex-col items-center">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4 text-gray-400">
+                <div className="w-16 h-16 bg-[var(--rw-surface-raised)] rounded-full flex items-center justify-center mb-4 text-[var(--rw-text-muted)]">
                   <FileText className="w-8 h-8" />
                 </div>
-                <h3 className="text-lg font-bold text-gray-900 mb-1">No Reports Yet</h3>
-                <p className="text-gray-500 font-medium max-w-sm">
+                <h3 className="text-lg font-bold text-[var(--rw-text)] mb-1">No Reports Yet</h3>
+                <p className="text-[var(--rw-text-muted)] font-medium max-w-sm">
                   Run a lead generation pipeline from the dashboard to see your history here.
                 </p>
               </div>
@@ -136,26 +138,26 @@ export default function ProfilePage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider">
+                    <tr className="bg-[var(--rw-bg)] text-[var(--rw-text-muted)] text-xs uppercase tracking-wider">
                       <th className="px-6 py-4 font-semibold">Report Type</th>
                       <th className="px-6 py-4 font-semibold">Status</th>
                       <th className="px-6 py-4 font-semibold">Generated On</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody className="divide-y divide-[var(--rw-border)]">
                     {reports.map((report) => {
                       const date = new Date(report.created_at);
                       const isSuccess = report.status.toLowerCase() === 'success';
                       return (
-                        <tr key={report.id} className="hover:bg-gray-50/50 transition-colors">
-                          <td className="px-6 py-4 font-medium text-gray-900">{report.report_type}</td>
+                        <tr key={report.id} className="hover:bg-[var(--rw-surface-hover)] transition-colors">
+                          <td className="px-6 py-4 font-medium text-[var(--rw-text)]">{report.report_type}</td>
                           <td className="px-6 py-4">
                             <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${isSuccess ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                               {isSuccess ? <CheckCircle className="w-3.5 h-3.5" /> : <XCircle className="w-3.5 h-3.5" />}
                               {report.status}
                             </span>
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-500 font-medium">
+                          <td className="px-6 py-4 text-sm text-[var(--rw-text-muted)] font-medium">
                             {date.toLocaleDateString()} at {date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </td>
                         </tr>
@@ -166,22 +168,22 @@ export default function ProfilePage() {
                 
                 {/* Pagination */}
                 {reportsPages > 1 && (
-                  <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
-                    <span className="text-sm text-gray-500 font-medium">
+                  <div className="px-6 py-4 border-t border-[var(--rw-border)] flex items-center justify-between">
+                    <span className="text-sm text-[var(--rw-text-muted)] font-medium">
                       Page {reportsPage} of {reportsPages}
                     </span>
                     <div className="flex gap-2">
                       <button
                         onClick={() => setReportsPage(p => Math.max(1, p - 1))}
                         disabled={reportsPage === 1}
-                        className="p-2 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="p-2 rounded-lg border border-[var(--rw-border)] text-[var(--rw-text-muted)] hover:bg-[var(--rw-bg)] disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <ChevronLeft className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => setReportsPage(p => Math.min(reportsPages, p + 1))}
                         disabled={reportsPage === reportsPages}
-                        className="p-2 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="p-2 rounded-lg border border-[var(--rw-border)] text-[var(--rw-text-muted)] hover:bg-[var(--rw-bg)] disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <ChevronRight className="w-4 h-4" />
                       </button>
@@ -193,9 +195,9 @@ export default function ProfilePage() {
           </div>
 
           {/* Password Reset Section */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="px-6 py-5 border-b border-gray-100 flex items-center bg-gray-50/50">
-              <h2 className="text-xl font-bold text-gray-900 font-oswald tracking-wide flex items-center">
+          <div className="bg-[var(--rw-surface)] rounded-2xl shadow-[var(--rw-shadow-sm)] border border-[var(--rw-border)] overflow-hidden">
+            <div className="px-6 py-5 border-b border-[var(--rw-border)] flex items-center bg-[var(--rw-surface-hover)]">
+              <h2 className="text-xl font-bold text-[var(--rw-text)] font-oswald tracking-wide flex items-center">
                 <Lock className="w-5 h-5 mr-2 text-[#023dbb]" />
                 Change Password
               </h2>
@@ -204,8 +206,8 @@ export default function ProfilePage() {
               <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4 text-[#023dbb]">
                 <Lock className="w-8 h-8" />
               </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2">Update Your Credentials</h3>
-              <p className="text-gray-500 font-medium max-w-sm mb-6 text-sm">
+              <h3 className="text-lg font-bold text-[var(--rw-text)] mb-2">Update Your Credentials</h3>
+              <p className="text-[var(--rw-text-muted)] font-medium max-w-sm mb-6 text-sm">
                 For security reasons, changing your password requires email verification via OTP.
               </p>
               <button
@@ -219,31 +221,31 @@ export default function ProfilePage() {
           </div>
 
           {/* Tickets Section */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-              <h2 className="text-xl font-bold text-gray-900 font-oswald tracking-wide flex items-center">
+          <div className="bg-[var(--rw-surface)] rounded-2xl shadow-[var(--rw-shadow-sm)] border border-[var(--rw-border)] overflow-hidden">
+            <div className="px-6 py-5 border-b border-[var(--rw-border)] flex items-center justify-between bg-[var(--rw-surface-hover)]">
+              <h2 className="text-xl font-bold text-[var(--rw-text)] font-oswald tracking-wide flex items-center">
                 <MessageSquare className="w-5 h-5 mr-2 text-[#023dbb]" />
                 Support Tickets
               </h2>
             </div>
             {tickets.length === 0 ? (
-              <div className="p-8 text-center text-gray-500 text-sm font-medium">
+              <div className="p-8 text-center text-[var(--rw-text-muted)] text-sm font-medium">
                 You haven't submitted any support requests.
               </div>
             ) : (
-              <div className="divide-y divide-gray-100 max-h-[350px] overflow-y-auto">
+              <div className="divide-y divide-[var(--rw-border)] max-h-[350px] overflow-y-auto">
                 {tickets.map(ticket => (
-                  <div key={ticket.id} className="p-5 hover:bg-gray-50/50 transition-colors">
+                  <div key={ticket.id} className="p-5 hover:bg-[var(--rw-surface-hover)] transition-colors">
                     <div className="flex justify-between items-start mb-2">
-                      <h3 className="text-sm font-bold text-gray-900">{ticket.title}</h3>
+                      <h3 className="text-sm font-bold text-[var(--rw-text)]">{ticket.title}</h3>
                       <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${ticket.type === 'error' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'}`}>
                         {ticket.type}
                       </span>
                     </div>
-                    <p className="text-gray-600 font-medium text-xs whitespace-pre-wrap line-clamp-2 mb-3">
+                    <p className="text-[var(--rw-text-secondary)] font-medium text-xs whitespace-pre-wrap line-clamp-2 mb-3">
                       {ticket.description}
                     </p>
-                    <div className="flex items-center text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+                    <div className="flex items-center text-[10px] text-[var(--rw-text-muted)] font-bold uppercase tracking-wider">
                       <Calendar className="w-3 h-3 mr-1" />
                       {new Date(ticket.created_at).toLocaleDateString()}
                     </div>

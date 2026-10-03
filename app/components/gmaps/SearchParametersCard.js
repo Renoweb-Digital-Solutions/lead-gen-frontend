@@ -28,7 +28,7 @@ export default function SearchParametersCard({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-2xl p-6 lg:p-7 border border-brand-blue/10 shadow-[0_4px_20px_rgba(2,61,187,0.06)] relative z-10"
+      className="bg-surface rounded-2xl p-6 lg:p-7 border border-border shadow-md relative z-10"
     >
       <div className="flex items-center gap-2.5 mb-6 pb-3 border-b border-brand-blue/5">
         <div className="w-1 h-3.5 bg-gradient-to-b from-brand-blue to-brand-cyan rounded-full" />
@@ -37,7 +37,7 @@ export default function SearchParametersCard({
         </h2>
       </div>
 
-      <div className="mb-6 pb-6 border-b border-gray-100">
+      <div className="mb-6 pb-6 border-b border-border">
         <h3 className="text-sm font-bold text-brand-dark mb-4">Step A: Generate Keywords with AI</h3>
         <div className="flex flex-col gap-4">
           <div className="flex flex-col md:flex-row gap-4">
@@ -47,7 +47,7 @@ export default function SearchParametersCard({
               </label>
               <input
                 type="text"
-                className="w-full px-4 py-2.5 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-sky focus:ring-4 focus:ring-brand-sky/10 transition-all font-medium"
+                className="w-full px-4 py-2.5 text-sm bg-surface border border-border rounded-xl focus:outline-none focus:border-brand-sky focus:ring-4 focus:ring-brand-sky/10 transition-all font-medium"
                 value={companyName || ""}
                 onChange={(e) => setCompanyName(e.target.value)}
                 placeholder="e.g. Acme Roofing"
@@ -59,7 +59,7 @@ export default function SearchParametersCard({
               </label>
               <input
                 type="text"
-                className="w-full px-4 py-2.5 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-sky focus:ring-4 focus:ring-brand-sky/10 transition-all font-medium"
+                className="w-full px-4 py-2.5 text-sm bg-surface border border-border rounded-xl focus:outline-none focus:border-brand-sky focus:ring-4 focus:ring-brand-sky/10 transition-all font-medium"
                 value={companyDescription || ""}
                 onChange={(e) => setCompanyDescription(e.target.value)}
                 placeholder="e.g. We provide commercial roofing materials."
@@ -121,7 +121,7 @@ export default function SearchParametersCard({
             </div>
             <input
               type="text"
-              className="w-full pl-10 pr-4 py-2.5 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-sky focus:ring-4 focus:ring-brand-sky/10 transition-all hover:border-brand-sky/40 text-brand-dark font-medium"
+              className="w-full pl-10 pr-4 py-2.5 text-sm bg-surface border border-border rounded-xl focus:outline-none focus:border-brand-sky focus:ring-4 focus:ring-brand-sky/10 transition-all hover:border-brand-sky/40 text-brand-dark font-medium"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               placeholder="e.g. Manchester, UK"
@@ -171,7 +171,7 @@ export default function SearchParametersCard({
             relative px-8 py-3.5 rounded-xl text-white font-bold text-[15px] tracking-wide flex items-center justify-center gap-2 overflow-hidden transition-all duration-300 min-w-[200px]
             ${(isSearching || isSuspended)
               ? "bg-brand-sky shadow-inner pointer-events-none"
-              : "bg-gradient-to-r from-brand-blue to-brand-cyan shadow-[0_4px_20px_rgba(48,143,239,0.3)] hover:shadow-[0_8px_30px_rgba(48,143,239,0.5)]"
+              : "bg-gradient-to-r from-brand-blue to-brand-cyan shadow-md hover:shadow-lg"
             }
           `}
           title={isSuspended ? "Account suspended" : ""}

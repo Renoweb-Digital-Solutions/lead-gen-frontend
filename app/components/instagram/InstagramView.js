@@ -236,7 +236,7 @@ export default function InstagramView() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-2xl p-6 lg:p-7 border border-brand-blue/10 shadow-[0_4px_20px_rgba(2,61,187,0.06)] h-full"
+            className="bg-surface rounded-2xl p-6 lg:p-7 border border-border shadow-md h-full"
           >
             <div className="flex items-center gap-2.5 mb-6 pb-3 border-b border-brand-blue/5">
               <div className="w-1 h-3.5 bg-gradient-to-b from-brand-blue to-brand-cyan rounded-full" />
@@ -253,7 +253,7 @@ export default function InstagramView() {
                 <select
                   value={sourceType}
                   onChange={(e) => setSourceType(e.target.value)}
-                  className="w-full px-4 py-3 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-sky focus:ring-4 focus:ring-brand-sky/10 transition-all hover:border-brand-sky/40 text-brand-dark font-medium"
+                  className="w-full px-4 py-3 text-sm bg-surface border border-border rounded-xl focus:outline-none focus:border-brand-sky focus:ring-4 focus:ring-brand-sky/10 transition-all hover:border-brand-sky/40 text-brand-dark font-medium"
                 >
                   <option value="followers">Followers (from a Profile URL)</option>
                   <option value="followings">Followings (from a Profile URL)</option>
@@ -274,7 +274,7 @@ export default function InstagramView() {
                     value={target}
                     onChange={(e) => setTarget(e.target.value)}
                     placeholder={sourceType === "comments" ? "https://www.instagram.com/p/..." : "https://www.instagram.com/username"}
-                    className="w-full pl-10 pr-4 py-3 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-sky focus:ring-4 focus:ring-brand-sky/10 transition-all hover:border-brand-sky/40 text-brand-dark font-medium placeholder:text-gray-400"
+                    className="w-full pl-10 pr-4 py-3 text-sm bg-surface border border-border rounded-xl focus:outline-none focus:border-brand-sky focus:ring-4 focus:ring-brand-sky/10 transition-all hover:border-brand-sky/40 text-brand-dark font-medium placeholder:text-gray-400"
                   />
                 </div>
               </div>
@@ -297,7 +297,7 @@ export default function InstagramView() {
                     }}
                     min={50}
                     max={sourceType === "comments" ? 10000 : 500}
-                    className="w-full pl-10 pr-4 py-3 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-sky focus:ring-4 focus:ring-brand-sky/10 transition-all hover:border-brand-sky/40 text-brand-dark font-medium"
+                    className="w-full pl-10 pr-4 py-3 text-sm bg-surface border border-border rounded-xl focus:outline-none focus:border-brand-sky focus:ring-4 focus:ring-brand-sky/10 transition-all hover:border-brand-sky/40 text-brand-dark font-medium"
                   />
                 </div>
                 {sourceType !== "comments" && (
@@ -306,7 +306,7 @@ export default function InstagramView() {
               </div>
             </div>
 
-            <div className="flex justify-end pt-4 border-t border-gray-100 gap-3">
+            <div className="flex justify-end pt-4 border-t border-border gap-3">
               {isSearching && (
                 <motion.button
                   type="button"
@@ -329,7 +329,7 @@ export default function InstagramView() {
                   relative px-8 py-3.5 rounded-xl text-white font-bold text-[15px] tracking-wide flex items-center justify-center gap-2 overflow-hidden transition-all duration-300 min-w-[220px]
                   ${(isSearching || isSuspended)
                     ? "bg-fuchsia-400 shadow-inner pointer-events-none"
-                    : "bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 shadow-[0_4px_20px_rgba(236,72,153,0.3)] hover:shadow-[0_8px_30px_rgba(236,72,153,0.5)]"
+                    : "bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 shadow-md hover:shadow-lg"
                   }
                 `}
                 title={isSuspended ? "Account suspended" : ""}
@@ -365,7 +365,7 @@ export default function InstagramView() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="bg-white rounded-2xl p-6 border border-brand-blue/10 shadow-[0_4px_24px_rgba(2,61,187,0.06)] flex flex-col items-center justify-center h-full min-h-[200px]"
+              className="bg-surface rounded-2xl p-6 border border-border shadow-md flex flex-col items-center justify-center h-full min-h-[200px]"
             >
               <Camera className="w-10 h-10 text-gray-200 mb-3" />
               <p className="text-sm font-medium text-gray-500 text-center">Ready to extract Instagram data. Enter a URL to begin.</p>
@@ -377,9 +377,9 @@ export default function InstagramView() {
       {!isSearching && resultData && resultData.length === 0 && (
         <motion.div 
           initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-          className="bg-white rounded-2xl p-12 border border-brand-blue/10 flex flex-col items-center justify-center text-center"
+          className="bg-surface rounded-2xl p-12 border border-border flex flex-col items-center justify-center text-center"
         >
-          <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-6">
+          <div className="w-24 h-24 bg-[var(--rw-surface-hover)] rounded-full flex items-center justify-center mb-6">
             <Camera className="w-12 h-12 text-gray-300" />
           </div>
           <h3 className="text-xl font-bold text-gray-700 mb-2">No data found</h3>

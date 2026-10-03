@@ -242,7 +242,7 @@ export default function B2BView() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-2xl p-6 lg:p-7 border border-brand-blue/10 shadow-[0_4px_20px_rgba(2,61,187,0.06)] h-full"
+            className="bg-surface rounded-2xl p-6 lg:p-7 border border-border shadow-md h-full"
           >
             <div className="flex items-center gap-2.5 mb-6 pb-3 border-b border-brand-blue/5">
               <div className="w-1 h-3.5 bg-gradient-to-b from-brand-blue to-brand-cyan rounded-full" />
@@ -251,7 +251,7 @@ export default function B2BView() {
               </h2>
             </div>
 
-        <div className="mb-6 pb-6 border-b border-gray-100">
+        <div className="mb-6 pb-6 border-b border-border">
           <label className="text-[13px] font-semibold text-brand-dark block mb-3 uppercase tracking-wide">
             Select Data Source Directory
           </label>
@@ -268,11 +268,11 @@ export default function B2BView() {
                     relative p-4 rounded-xl flex items-center gap-4 text-left transition-all border-2
                     ${isActive 
                       ? `${dir.border} ${dir.bg} shadow-sm ring-4 ring-opacity-20 ring-brand-blue` 
-                      : "border-gray-100 hover:border-gray-200 bg-white"
+                      : "border-border hover:border-border bg-surface"
                     }
                   `}
                 >
-                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${isActive ? "bg-white/60 shadow-sm" : "bg-gray-50"}`}>
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${isActive ? "bg-surface/60 shadow-sm" : "bg-[var(--rw-surface-hover)]"}`}>
                     <Icon className={`w-5 h-5 ${isActive ? dir.color : "text-gray-400"}`} />
                   </div>
                   <div>
@@ -326,7 +326,7 @@ export default function B2BView() {
               </div>
               <input
                 type="text"
-                className="w-full pl-10 pr-4 py-2.5 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all hover:border-indigo-500/40 text-brand-dark font-medium"
+                className="w-full pl-10 pr-4 py-2.5 text-sm bg-surface border border-border rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all hover:border-indigo-500/40 text-brand-dark font-medium"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 placeholder="e.g. Mumbai, New York..."
@@ -340,7 +340,7 @@ export default function B2BView() {
             </label>
             <input
               type="number"
-              className="w-full px-4 py-2.5 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all hover:border-indigo-500/40 text-brand-dark font-medium"
+              className="w-full px-4 py-2.5 text-sm bg-surface border border-border rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all hover:border-indigo-500/40 text-brand-dark font-medium"
               value={maxResults}
               onChange={(e) => setMaxResults(e.target.value)}
               min={1}
@@ -349,7 +349,7 @@ export default function B2BView() {
           </div>
         </div>
 
-        <div className="flex justify-end pt-4 border-t border-gray-100 gap-3">
+        <div className="flex justify-end pt-4 border-t border-border gap-3">
           {isSearching && (
             <motion.button
               type="button"
@@ -372,7 +372,7 @@ export default function B2BView() {
               relative px-8 py-3.5 rounded-xl text-white font-bold text-[15px] tracking-wide flex items-center justify-center gap-2 overflow-hidden transition-all duration-300 min-w-[220px]
               ${(isSearching || isSuspended)
                 ? "bg-brand-sky shadow-inner pointer-events-none"
-                : "bg-gradient-to-r from-brand-blue to-brand-cyan shadow-[0_4px_20px_rgba(48,143,239,0.3)] hover:shadow-[0_8px_30px_rgba(48,143,239,0.5)]"
+                : "bg-gradient-to-r from-brand-blue to-brand-cyan shadow-md hover:shadow-lg"
               }
             `}
             title={isSuspended ? "Account suspended" : ""}

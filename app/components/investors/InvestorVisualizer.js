@@ -16,7 +16,7 @@ const FloatingNode = ({ delay, icon: Icon, color, label, status }) => {
       <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg border-2 border-white ${color}`}>
         <Icon className="w-5 h-5 text-white" />
       </div>
-      <div className="bg-white/90 backdrop-blur px-2 py-1 rounded-md text-[10px] font-bold text-gray-600 shadow-sm whitespace-nowrap">
+      <div className="bg-surface/90 backdrop-blur px-2 py-1 rounded-md text-[10px] font-bold text-gray-600 shadow-sm whitespace-nowrap">
         {label}
       </div>
     </motion.div>
@@ -39,7 +39,7 @@ export default function InvestorVisualizer({ status, targetUrl, resultCount = 0 
   useEffect(() => {
     if (status === 'scanning' || status === 'complete') {
       const newNodes = [
-        { id: 'cb', icon: Database, color: 'bg-blue-500', label: 'Private Market Data', delay: 0.2, pos: { top: '15%', left: '20%' } },
+        { id: 'cb', icon: Database, color: 'bg-[var(--rw-surface-hover)]0', label: 'Private Market Data', delay: 0.2, pos: { top: '15%', left: '20%' } },
         { id: 'pb', icon: Briefcase, color: 'bg-indigo-600', label: 'Venture Capital DB', delay: 0.8, pos: { top: '15%', right: '20%' } },
         { id: 'ap', icon: Zap, color: 'bg-[#ffc857]', label: 'Enrichment Engine', delay: 0.5, pos: { bottom: '20%', left: '50%', transform: 'translateX(-50%)' } }
       ];
@@ -50,7 +50,7 @@ export default function InvestorVisualizer({ status, targetUrl, resultCount = 0 
   }, [status]);
 
   return (
-    <div className="bg-white rounded-2xl p-6 border border-[#023dbb]/10 shadow-[0_4px_24px_rgba(2,61,187,0.06)] flex flex-col h-full min-h-[400px] lg:min-h-[500px] overflow-hidden relative">
+    <div className="bg-surface rounded-2xl p-6 border border-border shadow-md flex flex-col h-full min-h-[400px] lg:min-h-[500px] overflow-hidden relative">
       {/* Header */}
       <div className="flex items-center gap-2 mb-6 relative z-10 shrink-0">
         <div className="w-1 h-3 bg-gradient-to-b from-[#023dbb] to-[#4ec8ef] rounded-full" />
@@ -132,7 +132,7 @@ export default function InvestorVisualizer({ status, targetUrl, resultCount = 0 
                 }}
               >
                 <motion.div 
-                  className="w-full h-full rounded-full bg-white"
+                  className="w-full h-full rounded-full bg-surface"
                   animate={status === 'scanning' ? { rotate: -360 } : { rotate: 0 }}
                   transition={{ repeat: Infinity, duration: 3, ease: "linear" }}
                 />
@@ -148,7 +148,7 @@ export default function InvestorVisualizer({ status, targetUrl, resultCount = 0 
           
           <div className={`
             w-20 h-20 rounded-full flex items-center justify-center relative z-10
-            ${status === 'idle' ? 'bg-gray-100 border-2 border-gray-200' : 'bg-gradient-to-tr from-[#023dbb] to-[#4ec8ef] border-4 border-white shadow-xl'}
+            ${status === 'idle' ? 'bg-[var(--rw-border)] border-2 border-border' : 'bg-gradient-to-tr from-[#023dbb] to-[#4ec8ef] border-4 border-white shadow-xl'}
             transition-all duration-500
           `}>
             {status === 'idle' ? (
@@ -191,7 +191,7 @@ export default function InvestorVisualizer({ status, targetUrl, resultCount = 0 
       </div>
 
       {/* Footer / Status Bar */}
-      <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between shrink-0 relative z-10">
+      <div className="mt-4 pt-4 border-t border-border flex items-center justify-between shrink-0 relative z-10">
         <div className={`flex items-center gap-2 text-xs font-bold tracking-wide ${currentStatus.color}`}>
           {currentStatus.icon}
           {status === 'complete' ? (

@@ -360,7 +360,7 @@ export default function GmapsView() {
                     px-4 py-2 rounded-xl text-[13px] transition-all font-medium border
                     ${isActive 
                       ? "border-brand-sky bg-brand-sky/10 text-brand-blue shadow-sm" 
-                      : "border-gray-200 bg-white text-gray-500 hover:border-brand-sky/30 hover:bg-gray-50"
+                      : "border-border bg-surface text-gray-500 hover:border-brand-sky/30 hover:bg-[var(--rw-surface-hover)]"
                     }
                   `}
                 >

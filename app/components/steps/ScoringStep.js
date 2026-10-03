@@ -15,7 +15,7 @@ const Card = ({ title, children, zIndex }) => (
   <motion.div 
     variants={sectionVariants}
     style={{ zIndex }}
-    className={`relative bg-white rounded-2xl p-6 lg:p-7 border border-brand-blue/10 shadow-[0_2px_8px_rgba(2,61,187,0.08)] hover:shadow-[0_8px_24px_rgba(2,61,187,0.12)] hover:-translate-y-[2px] transition-all duration-200 mb-6`}
+    className={`relative bg-surface rounded-2xl p-6 lg:p-7 border border-border shadow-sm hover:shadow-lg hover:-translate-y-[2px] transition-all duration-200 mb-6`}
   >
     <div className="flex items-center gap-2.5 mb-6 pb-3 border-b border-brand-blue/5">
       <div className="w-1 h-3.5 bg-gradient-to-b from-brand-blue to-brand-cyan rounded-full" />
@@ -48,7 +48,7 @@ export default function ScoringStep({ formState, updateField }) {
             </span>
           </label>
           <textarea
-            className="w-full px-3.5 py-3 text-sm bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-brand-sky focus:ring-2 focus:ring-brand-sky/20 transition-all resize-y min-h-[100px]"
+            className="w-full px-3.5 py-3 text-sm bg-surface border border-border rounded-lg focus:outline-none focus:border-brand-sky focus:ring-2 focus:ring-brand-sky/20 transition-all resize-y min-h-[100px]"
             value={formState.companyDescription}
             onChange={(e) => updateField("companyDescription", e.target.value)}
             placeholder="e.g. We are a SaaS company providing digital marketing solutions for small businesses..."
@@ -69,8 +69,8 @@ export default function ScoringStep({ formState, updateField }) {
         />
 
         {/* Info card */}
-        <div className="mt-6 p-4 rounded-xl border border-brand-blue/10 bg-gradient-to-br from-brand-blue/5 to-brand-cyan/5 flex items-start gap-3">
-          <div className="p-2 bg-white rounded-lg shadow-sm text-brand-amber">
+        <div className="mt-6 p-4 rounded-xl border border-border bg-gradient-to-br from-brand-blue/5 to-brand-cyan/5 flex items-start gap-3">
+          <div className="p-2 bg-surface rounded-lg shadow-sm text-brand-amber">
             <Lightbulb className="w-5 h-5" />
           </div>
           <div className="text-[13px] text-gray-600 leading-relaxed">

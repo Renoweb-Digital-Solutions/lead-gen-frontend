@@ -89,7 +89,7 @@ export default function SliderInput({
           <button
             type="button"
             onClick={() => onChange(Math.max(min, value - step))}
-            className="w-7 h-7 rounded-md border border-gray-200 bg-white text-gray-400 hover:bg-gray-50 hover:text-gray-600 flex items-center justify-center text-lg leading-none transition-colors"
+            className="w-7 h-7 rounded-md border border-[var(--rw-border)] bg-[var(--rw-surface-raised)] text-[var(--rw-text)] hover:bg-brand-sky/20 hover:border-brand-sky hover:text-brand-sky flex items-center justify-center text-lg leading-none transition-all shadow-sm"
           >
             -
           </button>
@@ -114,7 +114,7 @@ export default function SliderInput({
           <button
             type="button"
             onClick={() => onChange(Math.min(max, value + step))}
-            className="w-7 h-7 rounded-md border border-gray-200 bg-white text-gray-400 hover:bg-gray-50 hover:text-gray-600 flex items-center justify-center text-lg leading-none transition-colors"
+            className="w-7 h-7 rounded-md border border-[var(--rw-border)] bg-[var(--rw-surface-raised)] text-[var(--rw-text)] hover:bg-brand-sky/20 hover:border-brand-sky hover:text-brand-sky flex items-center justify-center text-lg leading-none transition-all shadow-sm"
           >
             +
           </button>
@@ -123,7 +123,7 @@ export default function SliderInput({
 
       <div
         ref={trackRef}
-        className="relative w-full h-2 rounded-full bg-gray-100 cursor-pointer"
+        className="relative w-full h-2 rounded-full bg-[var(--rw-border)] cursor-pointer"
         onMouseDown={handleMouseDown}
         onTouchStart={handleTouchStart}
         role="slider"
@@ -152,19 +152,20 @@ export default function SliderInput({
           }}
           initial="idle"
           transition={{ type: "spring", stiffness: 500, damping: 25 }}
-          className="absolute top-1/2 w-[18px] h-[18px] rounded-full bg-white border-2 border-brand-blue -translate-x-1/2 -translate-y-1/2 flex items-center justify-center"
+          className="absolute top-1/2 w-[18px] h-[18px] rounded-full bg-surface border-2 border-brand-blue -translate-x-1/2 -translate-y-1/2 flex items-center justify-center"
           style={{ left: `${percentage}%`, zIndex: 10 }}
         >
           {isDragging && (
             <motion.div
-              initial={{ opacity: 0, y: 10, scale: 0.8 }}
-              animate={{ opacity: 1, y: -30, scale: 1 }}
-              exit={{ opacity: 0, y: 10, scale: 0.8 }}
+              initial={{ opacity: 0, y: -10, scale: 0.8 }}
+              animate={{ opacity: 1, y: 25, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.8 }}
               transition={{ type: "spring", stiffness: 400, damping: 20 }}
-              className="absolute whitespace-nowrap bg-brand-dark text-white text-[11px] font-bold px-2 py-1 rounded-md shadow-lg pointer-events-none"
+              className="absolute whitespace-nowrap bg-[var(--rw-surface-hover)] text-[var(--rw-text)] border border-[var(--rw-border)] text-[11px] font-bold px-2.5 py-1 rounded-md shadow-lg pointer-events-none"
             >
               {value}
-              <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-brand-dark" />
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 border-4 border-transparent border-b-[var(--rw-border)]" />
+              <div className="absolute bottom-[calc(100%-1px)] left-1/2 -translate-x-1/2 border-4 border-transparent border-b-[var(--rw-surface-hover)]" />
             </motion.div>
           )}
         </motion.div>

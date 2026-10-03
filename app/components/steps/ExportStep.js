@@ -18,7 +18,7 @@ const sectionVariants = {
 const Card = ({ title, children, onClickTitle, expandable = false, expanded = false }) => (
   <motion.div 
     variants={sectionVariants}
-    className="bg-white rounded-2xl p-6 lg:p-7 border border-brand-blue/10 shadow-[0_2px_8px_rgba(2,61,187,0.08)] hover:shadow-[0_8px_24px_rgba(2,61,187,0.12)] hover:-translate-y-[2px] transition-all duration-200 mb-6"
+    className="bg-surface rounded-2xl p-6 lg:p-7 border border-border shadow-sm hover:shadow-lg hover:-translate-y-[2px] transition-all duration-200 mb-6"
   >
     <div 
       className={`flex items-center justify-between mb-6 pb-3 border-b border-brand-blue/5 ${expandable ? 'cursor-pointer' : ''}`}
@@ -39,9 +39,9 @@ const Card = ({ title, children, onClickTitle, expandable = false, expanded = fa
 );
 
 const ShimmerTable = () => (
-  <div className="w-full bg-white rounded-xl border border-gray-100 overflow-hidden shadow-sm">
+  <div className="w-full bg-surface rounded-xl border border-border overflow-hidden shadow-sm">
     {/* Table Header */}
-    <div className="flex bg-gray-50/80 px-4 py-3 border-b border-gray-100 gap-4">
+    <div className="flex bg-[var(--rw-surface-hover)]/80 px-4 py-3 border-b border-border gap-4">
       {[1, 2, 3, 4].map(i => (
         <div key={i} className="h-4 bg-gray-200 rounded animate-pulse" style={{ width: `${Math.random() * 20 + 10}%` }} />
       ))}
@@ -81,7 +81,7 @@ const AnimatedDocumentStack = () => (
           className="absolute inset-0 flex items-center justify-center"
           style={{ zIndex: 3 - i, transform: `translateY(${i * 8}px)` }}
         >
-          <div className="w-16 h-20 bg-white border-2 border-brand-blue/20 rounded-lg shadow-md flex flex-col items-center p-2 gap-1.5 bg-gradient-to-br from-white to-brand-sky/5">
+          <div className="w-16 h-20 bg-surface border-2 border-brand-blue/20 rounded-lg shadow-md flex flex-col items-center p-2 gap-1.5 bg-gradient-to-br from-white to-brand-sky/5">
              <div className="w-full h-1.5 bg-brand-cyan/40 rounded-full" />
              <div className="w-3/4 h-1.5 bg-brand-sky/40 rounded-full self-start" />
              <div className="w-full h-1.5 bg-gray-200 rounded-full mt-auto" />
@@ -149,7 +149,7 @@ export default function ExportStep({
                   <label className="text-[13px] font-semibold text-brand-dark block mb-1.5 uppercase tracking-wide">Filename</label>
                   <input
                     type="text"
-                    className="w-full px-3.5 py-2.5 text-sm bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-brand-sky focus:ring-2 focus:ring-brand-sky/20 transition-all"
+                    className="w-full px-3.5 py-2.5 text-sm bg-surface border border-border rounded-lg focus:outline-none focus:border-brand-sky focus:ring-2 focus:ring-brand-sky/20 transition-all"
                     value={formState.filename}
                     onChange={(e) => updateField("filename", e.target.value)}
                     placeholder={EXPORT_FORMATS.find((f) => f.id === formState.exportFormat)?.defaultFilename || "export.csv"}
@@ -163,7 +163,7 @@ export default function ExportStep({
                 </label>
                 <input
                   type="number"
-                  className="w-full px-3.5 py-2.5 text-sm bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-brand-sky focus:ring-2 focus:ring-brand-sky/20 transition-all"
+                  className="w-full px-3.5 py-2.5 text-sm bg-surface border border-border rounded-lg focus:outline-none focus:border-brand-sky focus:ring-2 focus:ring-brand-sky/20 transition-all"
                   value={formState.limitItems ?? ""}
                   onChange={(e) =>
                     updateField(
@@ -243,7 +243,7 @@ export default function ExportStep({
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
-                className="bg-white rounded-2xl p-6 lg:p-7 border border-brand-blue/10 shadow-[0_4px_24px_rgba(2,61,187,0.08)] mt-4"
+                className="bg-surface rounded-2xl p-6 lg:p-7 border border-border shadow-md mt-4"
               >
                 <div className="flex flex-col md:flex-row gap-8 items-center justify-center">
                   <AnimatedDocumentStack />
@@ -269,7 +269,7 @@ export default function ExportStep({
 
         {/* ── Summary & Generate Panel (Sidebar for this step) ── */}
         <div className="w-full">
-          <div className="sticky top-24 bg-white rounded-2xl p-6 border border-brand-blue/10 shadow-[0_4px_24px_rgba(2,61,187,0.08)] flex flex-col gap-6">
+          <div className="sticky top-24 bg-surface rounded-2xl p-6 border border-border shadow-md flex flex-col gap-6">
             <div className="flex items-center gap-2">
               <FileText className="w-4 h-4 text-brand-sky" />
               <h3 className="text-xs uppercase tracking-widest text-brand-blue font-semibold">Export Summary</h3>
@@ -300,7 +300,7 @@ export default function ExportStep({
                 relative w-full py-4 px-6 rounded-xl text-white font-bold text-[15px] tracking-wide flex items-center justify-center gap-2 overflow-hidden transition-all duration-300
                 ${isExporting 
                   ? "bg-brand-sky shadow-inner pointer-events-none" 
-                  : "bg-gradient-to-r from-brand-blue to-brand-cyan shadow-[0_4px_20px_rgba(48,143,239,0.4)] hover:shadow-[0_8px_30px_rgba(48,143,239,0.5)] hover:-translate-y-0.5"
+                  : "bg-gradient-to-r from-brand-blue to-brand-cyan shadow-md hover:shadow-lg hover:-translate-y-0.5"
                 }
               `}
               onClick={onExport}
@@ -309,7 +309,7 @@ export default function ExportStep({
             >
               {isExporting ? (
                 <>
-                  <div className="absolute inset-0 bg-white/20 animate-pulse" />
+                  <div className="absolute inset-0 bg-surface/20 animate-pulse" />
                   {/* Inline progress bar background */}
                   <motion.div 
                     className="absolute top-0 left-0 h-full bg-brand-blue/30"

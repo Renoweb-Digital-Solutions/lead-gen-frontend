@@ -238,7 +238,7 @@ export default function YoutubeView() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-2xl p-6 lg:p-7 border border-red-600/10 shadow-[0_4px_20px_rgba(220,38,38,0.06)] h-full"
+            className="bg-surface rounded-2xl p-6 lg:p-7 border border-red-600/10 shadow-md h-full"
           >
             <div className="flex items-center gap-2.5 mb-6 pb-3 border-b border-red-600/5">
               <div className="w-1 h-3.5 bg-gradient-to-b from-red-600 to-red-500 rounded-full" />
@@ -261,7 +261,7 @@ export default function YoutubeView() {
                 placeholder="e.g. vloggers"
                 value={keyword}
                 onChange={(e) => setKeyword(e.target.value)}
-                className="w-full pl-11 pr-4 py-3 text-[14px] bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-red-500 focus:ring-4 focus:ring-red-500/10 transition-all hover:border-red-500/40 text-brand-dark font-medium shadow-sm"
+                className="w-full pl-11 pr-4 py-3 text-[14px] bg-surface border border-border rounded-xl focus:outline-none focus:border-red-500 focus:ring-4 focus:ring-red-500/10 transition-all hover:border-red-500/40 text-brand-dark font-medium shadow-sm"
               />
             </div>
           </div>
@@ -277,7 +277,7 @@ export default function YoutubeView() {
               <select
                 value={customDomain}
                 onChange={(e) => setCustomDomain(e.target.value)}
-                className="w-full pl-11 pr-10 py-3 text-[14px] bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-red-500 focus:ring-4 focus:ring-red-500/10 transition-all hover:border-red-500/40 text-brand-dark font-medium shadow-sm appearance-none cursor-pointer"
+                className="w-full pl-11 pr-10 py-3 text-[14px] bg-surface border border-border rounded-xl focus:outline-none focus:border-red-500 focus:ring-4 focus:ring-red-500/10 transition-all hover:border-red-500/40 text-brand-dark font-medium shadow-sm appearance-none cursor-pointer"
               >
                 <option value="@gmail.com,@yahoo.com">Both (@gmail & @yahoo)</option>
                 <option value="@gmail.com">Only @gmail.com</option>
@@ -295,7 +295,7 @@ export default function YoutubeView() {
             </label>
             <input
               type="number"
-              className="w-full px-4 py-3 text-[14px] bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-red-500 focus:ring-4 focus:ring-red-500/10 transition-all hover:border-red-500/40 text-brand-dark font-medium shadow-sm"
+              className="w-full px-4 py-3 text-[14px] bg-surface border border-border rounded-xl focus:outline-none focus:border-red-500 focus:ring-4 focus:ring-red-500/10 transition-all hover:border-red-500/40 text-brand-dark font-medium shadow-sm"
               value={maxEmails}
               onChange={(e) => setMaxEmails(e.target.value)}
               min={1}
@@ -303,7 +303,7 @@ export default function YoutubeView() {
           </div>
         </div>
 
-        <div className="flex justify-end pt-4 border-t border-gray-100 gap-3">
+        <div className="flex justify-end pt-4 border-t border-border gap-3">
           {isSearching && (
             <motion.button
               type="button"
@@ -326,7 +326,7 @@ export default function YoutubeView() {
               relative px-8 py-3.5 rounded-xl text-white font-bold text-[15px] tracking-wide flex items-center justify-center gap-2 overflow-hidden transition-all duration-300 min-w-[220px]
               ${(isSearching || isSuspended)
                 ? "bg-red-500 shadow-inner pointer-events-none"
-                : "bg-gradient-to-r from-red-600 to-red-500 shadow-[0_4px_20px_rgba(220,38,38,0.3)] hover:shadow-[0_8px_30px_rgba(220,38,38,0.5)]"
+                : "bg-gradient-to-r from-red-600 to-red-500 shadow-md hover:shadow-lg"
               }
             `}
             title={isSuspended ? "Account suspended" : ""}
@@ -360,7 +360,7 @@ export default function YoutubeView() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="bg-white rounded-2xl p-6 border border-brand-blue/10 shadow-[0_4px_24px_rgba(2,61,187,0.06)] flex flex-col"
+              className="bg-surface rounded-2xl p-6 border border-border shadow-md flex flex-col"
             >
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-1 h-3 bg-gradient-to-b from-brand-blue to-brand-cyan rounded-full" />
@@ -378,7 +378,7 @@ export default function YoutubeView() {
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.2 + (idx * 0.1) }}
-                    className="p-3 rounded-xl border border-gray-100 bg-gray-50/50 hover:bg-brand-blue/5 hover:border-brand-blue/20 transition-colors flex items-start gap-3"
+                    className="p-3 rounded-xl border border-border bg-[var(--rw-surface-hover)]/50 hover:bg-brand-blue/5 hover:border-brand-blue/20 transition-colors flex items-start gap-3"
                   >
                     <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-blue to-brand-sky flex items-center justify-center text-white font-bold text-xs shrink-0">
                       {channel.name.charAt(0)}
@@ -404,9 +404,9 @@ export default function YoutubeView() {
       {!isSearching && resultData && resultData.length === 0 && (
         <motion.div 
           initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-          className="bg-white rounded-2xl p-12 border border-brand-blue/10 flex flex-col items-center justify-center text-center"
+          className="bg-surface rounded-2xl p-12 border border-border flex flex-col items-center justify-center text-center"
         >
-          <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-6">
+          <div className="w-24 h-24 bg-[var(--rw-surface-hover)] rounded-full flex items-center justify-center mb-6">
             <Video className="w-12 h-12 text-gray-300" />
           </div>
           <h3 className="text-xl font-bold text-gray-700 mb-2">No channels found</h3>

@@ -14,7 +14,7 @@ const sectionVariants = {
 const Card = ({ title, children }) => (
   <motion.div 
     variants={sectionVariants}
-    className="bg-white rounded-2xl p-6 lg:p-7 border border-brand-blue/10 shadow-[0_4px_12px_rgba(2,61,187,0.10)] hover:shadow-[0_8px_20px_rgba(2,61,187,0.14)] hover:-translate-y-[2px] transition-all duration-200 mb-6"
+    className="bg-surface rounded-2xl p-6 lg:p-7 border border-border shadow-md hover:shadow-lg hover:-translate-y-[2px] transition-all duration-200 mb-6"
   >
     <div className="flex items-center gap-2.5 mb-6 pb-3 border-b border-brand-blue/5">
       <div className="w-[3px] h-3.5 bg-gradient-to-b from-brand-blue to-brand-sky rounded-full" />
@@ -39,7 +39,7 @@ export default function JobsStep({ formState, updateField }) {
     >
       {/* ── Include Jobs Toggle ─────────────────────────────── */}
       <Card title="Job Search">
-        <div className="p-4 bg-gray-50/50 rounded-xl border border-gray-100">
+        <div className="p-4 bg-[var(--rw-surface-hover)]/50 rounded-xl border border-border">
           <Toggle
             label="Include Jobs Data"
             hint="Fetch and cross-reference job postings with leads"
@@ -72,7 +72,7 @@ export default function JobsStep({ formState, updateField }) {
                   <label className="text-[13px] font-semibold text-brand-dark block mb-1.5 uppercase tracking-wide">Job Title</label>
                   <input
                     type="text"
-                    className="w-full px-3.5 py-2.5 text-sm bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-brand-sky focus:ring-2 focus:ring-brand-sky/20 transition-all"
+                    className="w-full px-3.5 py-2.5 text-sm bg-surface border border-border rounded-lg focus:outline-none focus:border-brand-sky focus:ring-2 focus:ring-brand-sky/20 transition-all"
                     value={formState.jobsTitle}
                     onChange={(e) => updateField("jobsTitle", e.target.value)}
                     placeholder="e.g. Marketing Manager"
@@ -82,7 +82,7 @@ export default function JobsStep({ formState, updateField }) {
                   <label className="text-[13px] font-semibold text-brand-dark block mb-1.5 uppercase tracking-wide">Job Location</label>
                   <input
                     type="text"
-                    className="w-full px-3.5 py-2.5 text-sm bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-brand-sky focus:ring-2 focus:ring-brand-sky/20 transition-all"
+                    className="w-full px-3.5 py-2.5 text-sm bg-surface border border-border rounded-lg focus:outline-none focus:border-brand-sky focus:ring-2 focus:ring-brand-sky/20 transition-all"
                     value={formState.jobsLocation}
                     onChange={(e) => updateField("jobsLocation", e.target.value)}
                     placeholder="e.g. United States"

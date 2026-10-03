@@ -33,7 +33,7 @@ export default function SignalScannerPanel({ status, channelCount }) {
   }, [status, channelCount]);
 
   return (
-    <div className="w-full h-full min-h-[500px] bg-white rounded-2xl relative overflow-hidden shadow-[0_4px_15px_rgba(220,38,38,0.12)] border border-red-600/10 flex flex-col p-6">
+    <div className="w-full h-full min-h-[500px] bg-surface rounded-2xl relative overflow-hidden shadow-md border border-red-600/10 flex flex-col p-6">
       {/* ── Overlay UI / Status Panel ── */}
       <div className="absolute top-6 left-6 z-10 pointer-events-none">
         <h3 className="text-brand-dark font-display font-semibold tracking-wide text-lg flex items-center gap-2 drop-shadow-sm">
@@ -63,7 +63,7 @@ export default function SignalScannerPanel({ status, channelCount }) {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              className="mt-3 bg-white/90 backdrop-blur-md border border-red-600/20 rounded-xl p-4 inline-block shadow-[0_4px_20px_rgba(220,38,38,0.15)] pointer-events-auto"
+              className="mt-3 bg-surface/90 backdrop-blur-md border border-red-600/20 rounded-xl p-4 inline-block shadow-md pointer-events-auto"
             >
               <div className="text-red-500 text-[10px] uppercase tracking-[0.2em] font-bold mb-1.5 flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
@@ -81,7 +81,7 @@ export default function SignalScannerPanel({ status, channelCount }) {
               key="complete"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="mt-3 bg-emerald-50/90 backdrop-blur-md border border-emerald-200 rounded-xl p-4 inline-flex items-center gap-4 shadow-[0_4px_20px_rgba(16,185,129,0.15)] pointer-events-auto"
+              className="mt-3 bg-emerald-50/90 backdrop-blur-md border border-emerald-200 rounded-xl p-4 inline-flex items-center gap-4 shadow-md pointer-events-auto"
             >
               <div className="w-10 h-10 rounded-full bg-[#10b981]/20 flex items-center justify-center shrink-0">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-[#10b981]">

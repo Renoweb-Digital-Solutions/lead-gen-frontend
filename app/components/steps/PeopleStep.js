@@ -27,7 +27,7 @@ const Card = ({ title, children, zIndex }) => (
   <motion.div 
     variants={sectionVariants}
     style={{ zIndex }}
-    className={`relative bg-white rounded-2xl p-6 lg:p-7 border border-brand-blue/10 shadow-[0_2px_8px_rgba(2,61,187,0.08)] hover:shadow-[0_8px_24px_rgba(2,61,187,0.12)] hover:-translate-y-[2px] transition-all duration-200 mb-6`}
+    className={`relative bg-surface rounded-2xl p-6 lg:p-7 border border-border shadow-sm hover:shadow-lg hover:-translate-y-[2px] transition-all duration-200 mb-6`}
   >
     <div className="flex items-center gap-2.5 mb-6 pb-3 border-b border-brand-blue/5">
       <div className="w-1 h-3.5 bg-gradient-to-b from-brand-blue to-brand-cyan rounded-full" />
@@ -108,7 +108,7 @@ export default function PeopleStep({ formState, updateField }) {
             placeholder="Type a title and press Enter..."
           />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-2 p-5 bg-gray-50/50 rounded-xl border border-gray-100">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-2 p-5 bg-[var(--rw-surface-hover)]/50 rounded-xl border border-border">
             <Toggle
               label="Include Similar Titles"
               hint="Broaden search with related titles"

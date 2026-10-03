@@ -1,5 +1,6 @@
 "use client";
 
+
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Lock, X, Loader2, CheckCircle, AlertCircle, Eye, EyeOff, KeyRound, Mail } from "lucide-react";
@@ -107,11 +108,11 @@ export default function ChangePasswordModal({ isOpen, onClose, username }) {
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
         transition={{ type: "spring", damping: 25, stiffness: 300 }}
-        className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden"
+        className="relative w-full max-w-md bg-surface rounded-3xl shadow-2xl overflow-hidden"
       >
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors z-10"
+          className="absolute top-5 right-5 p-2 text-[var(--rw-text-muted)] hover:text-[var(--rw-text-secondary)] hover:bg-[var(--rw-border)] rounded-full transition-colors z-10"
         >
           <X className="w-5 h-5" />
         </button>
@@ -129,13 +130,13 @@ export default function ChangePasswordModal({ isOpen, onClose, username }) {
                 transition={{ duration: 0.2 }}
                 className="flex flex-col"
               >
-                <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center mb-6 text-[#023dbb]">
+                <div className="w-12 h-12 bg-[var(--rw-surface-hover)] rounded-2xl flex items-center justify-center mb-6 text-[#023dbb]">
                   <Lock className="w-6 h-6" />
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2 font-oswald tracking-wide">
+                <h2 className="text-2xl font-bold text-[var(--rw-text)] mb-2 font-oswald tracking-wide">
                   Change Password
                 </h2>
-                <p className="text-gray-500 font-medium text-sm mb-6">
+                <p className="text-[var(--rw-text-muted)] font-medium text-sm mb-6">
                   For your security, we will send a one-time password (OTP) to your registered email address to verify your identity.
                 </p>
 
@@ -167,13 +168,13 @@ export default function ChangePasswordModal({ isOpen, onClose, username }) {
                 transition={{ duration: 0.2 }}
                 className="flex flex-col"
               >
-                <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center mb-6 text-[#023dbb]">
+                <div className="w-12 h-12 bg-[var(--rw-surface-hover)] rounded-2xl flex items-center justify-center mb-6 text-[#023dbb]">
                   <KeyRound className="w-6 h-6" />
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2 font-oswald tracking-wide">
+                <h2 className="text-2xl font-bold text-[var(--rw-text)] mb-2 font-oswald tracking-wide">
                   Enter OTP
                 </h2>
-                <p className="text-gray-500 font-medium text-sm mb-6">
+                <p className="text-[var(--rw-text-muted)] font-medium text-sm mb-6">
                   Please enter the 6-digit verification code sent to your email.
                 </p>
 
@@ -186,7 +187,7 @@ export default function ChangePasswordModal({ isOpen, onClose, username }) {
 
                 <form onSubmit={handleVerifyOtp} className="space-y-4">
                   <div>
-                    <label className="text-[13px] font-bold text-gray-900 block mb-1.5 uppercase tracking-wide">
+                    <label className="text-[13px] font-bold text-[var(--rw-text)] block mb-1.5 uppercase tracking-wide">
                       Verification Code
                     </label>
                     <input
@@ -194,7 +195,7 @@ export default function ChangePasswordModal({ isOpen, onClose, username }) {
                       required
                       value={otp}
                       onChange={(e) => setOtp(e.target.value)}
-                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:border-[#4ec8ef] focus:ring-4 focus:ring-[#4ec8ef]/10 transition-all font-medium text-gray-900 placeholder:text-gray-400"
+                      className="w-full px-4 py-3 bg-[var(--rw-surface-hover)] border border-border rounded-xl focus:bg-surface focus:outline-none focus:border-[#4ec8ef] focus:ring-4 focus:ring-[#4ec8ef]/10 transition-all font-medium text-[var(--rw-text)] placeholder:text-[var(--rw-text-muted)]"
                       placeholder="123456"
                       maxLength={6}
                     />
@@ -230,13 +231,13 @@ export default function ChangePasswordModal({ isOpen, onClose, username }) {
                 transition={{ duration: 0.2 }}
                 className="flex flex-col"
               >
-                <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center mb-6 text-[#023dbb]">
+                <div className="w-12 h-12 bg-[var(--rw-surface-hover)] rounded-2xl flex items-center justify-center mb-6 text-[#023dbb]">
                   <Lock className="w-6 h-6" />
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2 font-oswald tracking-wide">
+                <h2 className="text-2xl font-bold text-[var(--rw-text)] mb-2 font-oswald tracking-wide">
                   New Password
                 </h2>
-                <p className="text-gray-500 font-medium text-sm mb-6">
+                <p className="text-[var(--rw-text-muted)] font-medium text-sm mb-6">
                   Create a strong new password for your account.
                 </p>
 
@@ -249,7 +250,7 @@ export default function ChangePasswordModal({ isOpen, onClose, username }) {
 
                 <form onSubmit={handleResetPassword} className="space-y-4">
                   <div>
-                    <label className="text-[13px] font-bold text-gray-900 block mb-1.5 uppercase tracking-wide">
+                    <label className="text-[13px] font-bold text-[var(--rw-text)] block mb-1.5 uppercase tracking-wide">
                       New Password
                     </label>
                     <div className="relative">
@@ -258,13 +259,13 @@ export default function ChangePasswordModal({ isOpen, onClose, username }) {
                         required
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
-                        className="w-full px-4 py-3 pr-12 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:border-[#4ec8ef] focus:ring-4 focus:ring-[#4ec8ef]/10 transition-all font-medium text-gray-900 placeholder:text-gray-400"
+                        className="w-full px-4 py-3 pr-12 bg-[var(--rw-surface-hover)] border border-border rounded-xl focus:bg-surface focus:outline-none focus:border-[#4ec8ef] focus:ring-4 focus:ring-[#4ec8ef]/10 transition-all font-medium text-[var(--rw-text)] placeholder:text-[var(--rw-text-muted)]"
                         placeholder="••••••••"
                       />
                       <button
                         type="button"
                         onClick={() => setShowNewPwd(!showNewPwd)}
-                        className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                        className="absolute inset-y-0 right-3 flex items-center text-[var(--rw-text-muted)] hover:text-[var(--rw-text-secondary)] transition-colors"
                         tabIndex="-1"
                       >
                         {showNewPwd ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -273,7 +274,7 @@ export default function ChangePasswordModal({ isOpen, onClose, username }) {
                   </div>
 
                   <div>
-                    <label className="text-[13px] font-bold text-gray-900 block mb-1.5 uppercase tracking-wide">
+                    <label className="text-[13px] font-bold text-[var(--rw-text)] block mb-1.5 uppercase tracking-wide">
                       Confirm New Password
                     </label>
                     <div className="relative">
@@ -282,13 +283,13 @@ export default function ChangePasswordModal({ isOpen, onClose, username }) {
                         required
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
-                        className="w-full px-4 py-3 pr-12 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:border-[#4ec8ef] focus:ring-4 focus:ring-[#4ec8ef]/10 transition-all font-medium text-gray-900 placeholder:text-gray-400"
+                        className="w-full px-4 py-3 pr-12 bg-[var(--rw-surface-hover)] border border-border rounded-xl focus:bg-surface focus:outline-none focus:border-[#4ec8ef] focus:ring-4 focus:ring-[#4ec8ef]/10 transition-all font-medium text-[var(--rw-text)] placeholder:text-[var(--rw-text-muted)]"
                         placeholder="••••••••"
                       />
                       <button
                         type="button"
                         onClick={() => setShowConfirmPwd(!showConfirmPwd)}
-                        className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                        className="absolute inset-y-0 right-3 flex items-center text-[var(--rw-text-muted)] hover:text-[var(--rw-text-secondary)] transition-colors"
                         tabIndex="-1"
                       >
                         {showConfirmPwd ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -320,10 +321,10 @@ export default function ChangePasswordModal({ isOpen, onClose, username }) {
                 <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mb-6 text-green-500">
                   <CheckCircle className="w-8 h-8" />
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2 font-oswald tracking-wide">
+                <h2 className="text-2xl font-bold text-[var(--rw-text)] mb-2 font-oswald tracking-wide">
                   Password Updated!
                 </h2>
-                <p className="text-gray-500 font-medium text-sm mb-8 max-w-[250px]">
+                <p className="text-[var(--rw-text-muted)] font-medium text-sm mb-8 max-w-[250px]">
                   Your password has been successfully changed.
                 </p>
                 <button

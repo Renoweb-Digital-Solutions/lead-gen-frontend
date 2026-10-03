@@ -673,6 +673,78 @@ export async function fetchInvestors(target, fullEnrichment = true, investorLimi
   return res.json();
 }
 
+export async function discoverInvestors(companyDescription, industry, targetAudience, investmentStage, investorLimit = 10) {
+  const res = await fetchWithAuth(`/investors/discover`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      company_description: companyDescription,
+      industry,
+      target_audience: targetAudience,
+      investment_stage: investmentStage,
+      investor_limit: investorLimit
+    }),
+  });
+
+  if (!res.ok) {
+    let errorDetail = "Failed to discover investors";
+    try {
+      const errData = await res.json();
+      if (Array.isArray(errData.detail)) {
+        errorDetail = errData.detail.map(e => e.msg).join(", ");
+      } else {
+        errorDetail = errData.detail || errData.error || errorDetail;
+      }
+    } catch {
+      const text = await res.text();
+      if (text) errorDetail = text;
+    }
+    const err = new Error(errorDetail);
+    err.status = res.status;
+    logReportRun("Investor Discovery", "failed");
+    throw err;
+  }
+
+  logReportRun("Investor Discovery", "success");
+  return res.json();
+}
+
+export async function discoverInvestorsV2(companyDescription, industry, targetAudience, investmentStage, investorLimit = 50) {
+  const res = await fetchWithAuth(`/investors_v2/discover`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      company_description: companyDescription,
+      industry,
+      target_audience: targetAudience,
+      investment_stage: investmentStage,
+      investor_limit: investorLimit
+    }),
+  });
+
+  if (!res.ok) {
+    let errorDetail = "Failed to discover investors";
+    try {
+      const errData = await res.json();
+      if (Array.isArray(errData.detail)) {
+        errorDetail = errData.detail.map(e => e.msg).join(", ");
+      } else {
+        errorDetail = errData.detail || errData.error || errorDetail;
+      }
+    } catch {
+      const text = await res.text();
+      if (text) errorDetail = text;
+    }
+    const err = new Error(errorDetail);
+    err.status = res.status;
+    logReportRun("Investor Discovery V2", "failed");
+    throw err;
+  }
+
+  logReportRun("Investor Discovery V2", "success");
+  return res.json();
+}
+
 export async function changePassword(current_password, new_password) {
   const res = await fetchWithAuth(`/auth/change-password`, {
     method: "POST",

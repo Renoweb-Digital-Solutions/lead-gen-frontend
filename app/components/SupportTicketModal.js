@@ -1,5 +1,6 @@
 "use client";
 
+
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Send, Loader2, MessageSquare, AlertCircle, CheckCircle, Search, ChevronDown, ChevronUp, Sparkles } from "lucide-react";
@@ -102,19 +103,19 @@ export default function SupportTicketModal({ isOpen, onClose }) {
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden"
+        className="relative w-full max-w-lg bg-surface rounded-2xl shadow-2xl overflow-hidden"
       >
-        <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+        <div className="px-6 py-5 border-b border-border flex items-center justify-between bg-[var(--rw-surface-hover)]/50">
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 rounded-full bg-[#023dbb]/10 flex items-center justify-center">
               <MessageSquare className="w-4 h-4 text-[#023dbb]" />
             </div>
-            <h3 className="text-lg font-bold text-gray-900 font-oswald tracking-wide">Contact Support</h3>
+            <h3 className="text-lg font-bold text-[var(--rw-text)] font-oswald tracking-wide">Contact Support</h3>
           </div>
           <button
             onClick={handleClose}
             disabled={loading}
-            className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-md hover:bg-gray-100 disabled:opacity-50"
+            className="text-[var(--rw-text-muted)] hover:text-[var(--rw-text-secondary)] transition-colors p-1 rounded-md hover:bg-[var(--rw-border)] disabled:opacity-50"
           >
             <X className="w-5 h-5" />
           </button>
@@ -132,8 +133,8 @@ export default function SupportTicketModal({ isOpen, onClose }) {
                 <div className="w-16 h-16 bg-green-100 text-green-500 rounded-full flex items-center justify-center mb-4">
                   <CheckCircle className="w-8 h-8" />
                 </div>
-                <h4 className="text-xl font-bold text-gray-900 mb-2">Ticket Submitted!</h4>
-                <p className="text-gray-500 font-medium">
+                <h4 className="text-xl font-bold text-[var(--rw-text)] mb-2">Ticket Submitted!</h4>
+                <p className="text-[var(--rw-text-muted)] font-medium">
                   We've received your request and our team will look into it immediately.
                 </p>
               </motion.div>
@@ -147,7 +148,7 @@ export default function SupportTicketModal({ isOpen, onClose }) {
               >
                 <div>
                   <div className="flex justify-between items-end mb-1.5">
-                    <label className="block text-[13px] font-bold text-[#191919] uppercase tracking-wide">
+                    <label className="block text-[13px] font-bold text-[var(--rw-text)] uppercase tracking-wide">
                       How can we help you?
                     </label>
                     <div className="flex items-center gap-1.5 text-xs font-bold text-[#308fef]">
@@ -157,11 +158,11 @@ export default function SupportTicketModal({ isOpen, onClose }) {
                   </div>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                       {isSearching ? <Loader2 className="h-5 w-5 text-gray-400 animate-spin" /> : <Search className="h-5 w-5 text-gray-400" />}
+                       {isSearching ? <Loader2 className="h-5 w-5 text-[var(--rw-text-muted)] animate-spin" /> : <Search className="h-5 w-5 text-[var(--rw-text-muted)]" />}
                     </div>
                     <input
                       type="text"
-                      className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:border-[#4ec8ef] focus:ring-4 focus:ring-[#4ec8ef]/10 transition-all font-medium text-[#191919]"
+                      className="w-full pl-10 pr-4 py-3 bg-[var(--rw-surface-hover)] border border-border rounded-xl focus:bg-surface focus:outline-none focus:border-[#4ec8ef] focus:ring-4 focus:ring-[#4ec8ef]/10 transition-all font-medium text-[var(--rw-text)]"
                       placeholder="Describe your issue or question..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
@@ -171,16 +172,16 @@ export default function SupportTicketModal({ isOpen, onClose }) {
 
                 {faqs.length > 0 && (
                   <div className="space-y-2 mt-4">
-                    <h4 className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2">Suggested Answers</h4>
+                    <h4 className="text-[11px] font-bold text-[var(--rw-text-muted)] uppercase tracking-wider mb-2">Suggested Answers</h4>
                     {faqs.map((faq) => (
-                      <div key={faq.id} className="border border-gray-200 rounded-xl overflow-hidden bg-white">
+                      <div key={faq.id} className="border border-border rounded-xl overflow-hidden bg-surface">
                         <button
                           type="button"
-                          className="w-full px-4 py-3 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition-colors text-left font-bold text-gray-800 text-[13px]"
+                          className="w-full px-4 py-3 flex items-center justify-between bg-[var(--rw-surface-hover)] hover:bg-[var(--rw-border)] transition-colors text-left font-bold text-[var(--rw-text)] text-[13px]"
                           onClick={() => setExpandedFaq(expandedFaq === faq.id ? null : faq.id)}
                         >
                           {faq.question}
-                          {expandedFaq === faq.id ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />}
+                          {expandedFaq === faq.id ? <ChevronUp className="w-4 h-4 text-[var(--rw-text-muted)]" /> : <ChevronDown className="w-4 h-4 text-[var(--rw-text-muted)]" />}
                         </button>
                         <AnimatePresence>
                           {expandedFaq === faq.id && (
@@ -188,7 +189,7 @@ export default function SupportTicketModal({ isOpen, onClose }) {
                               initial={{ height: 0, opacity: 0 }}
                               animate={{ height: 'auto', opacity: 1 }}
                               exit={{ height: 0, opacity: 0 }}
-                              className="px-4 py-3 text-sm text-gray-600 bg-white border-t border-gray-100 leading-relaxed font-medium"
+                              className="px-4 py-3 text-sm text-[var(--rw-text-secondary)] bg-surface border-t border-border leading-relaxed font-medium"
                             >
                               {faq.answer}
                             </motion.div>
@@ -199,8 +200,8 @@ export default function SupportTicketModal({ isOpen, onClose }) {
                   </div>
                 )}
 
-                <div className="pt-4 flex justify-between items-center border-t border-gray-100">
-                  <span className="text-xs text-gray-400 font-medium">Still need help?</span>
+                <div className="pt-4 flex justify-between items-center border-t border-border">
+                  <span className="text-xs text-[var(--rw-text-muted)] font-medium">Still need help?</span>
                   <button
                     type="button"
                     onClick={() => {
@@ -223,7 +224,7 @@ export default function SupportTicketModal({ isOpen, onClose }) {
                 className="space-y-5"
               >
                 <div className="flex items-center justify-between mb-2">
-                   <button type="button" onClick={() => setStep(1)} className="text-[13px] font-bold text-gray-500 hover:text-gray-800 transition-colors">
+                   <button type="button" onClick={() => setStep(1)} className="text-[13px] font-bold text-[var(--rw-text-muted)] hover:text-[var(--rw-text)] transition-colors">
                      &larr; Back to Search
                    </button>
                 </div>
@@ -238,7 +239,7 @@ export default function SupportTicketModal({ isOpen, onClose }) {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="col-span-2">
                     <div className="flex justify-between items-end mb-1.5">
-                      <label className="block text-[13px] font-bold text-[#191919] uppercase tracking-wide">
+                      <label className="block text-[13px] font-bold text-[var(--rw-text)] uppercase tracking-wide">
                         Title
                       </label>
                       <div className="flex items-center gap-1.5 text-xs font-bold text-[#308fef]">
@@ -251,7 +252,7 @@ export default function SupportTicketModal({ isOpen, onClose }) {
                       required
                       minLength={3}
                       maxLength={150}
-                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:border-[#4ec8ef] focus:ring-4 focus:ring-[#4ec8ef]/10 transition-all font-medium text-[#191919]"
+                      className="w-full px-4 py-3 bg-[var(--rw-surface-hover)] border border-border rounded-xl focus:bg-surface focus:outline-none focus:border-[#4ec8ef] focus:ring-4 focus:ring-[#4ec8ef]/10 transition-all font-medium text-[var(--rw-text)]"
                       placeholder="Brief summary of your issue or idea"
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
@@ -260,16 +261,16 @@ export default function SupportTicketModal({ isOpen, onClose }) {
 
                   {faqs.length > 0 && (
                     <div className="col-span-2 space-y-2 mb-2">
-                      <h4 className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2">Suggested Answers</h4>
+                      <h4 className="text-[11px] font-bold text-[var(--rw-text-muted)] uppercase tracking-wider mb-2">Suggested Answers</h4>
                       {faqs.map((faq) => (
-                        <div key={faq.id} className="border border-gray-200 rounded-xl overflow-hidden bg-white">
+                        <div key={faq.id} className="border border-border rounded-xl overflow-hidden bg-surface">
                           <button
                             type="button"
-                            className="w-full px-4 py-3 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition-colors text-left font-bold text-gray-800 text-[13px]"
+                            className="w-full px-4 py-3 flex items-center justify-between bg-[var(--rw-surface-hover)] hover:bg-[var(--rw-border)] transition-colors text-left font-bold text-[var(--rw-text)] text-[13px]"
                             onClick={() => setExpandedFaq(expandedFaq === faq.id ? null : faq.id)}
                           >
                             {faq.question}
-                            {expandedFaq === faq.id ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />}
+                            {expandedFaq === faq.id ? <ChevronUp className="w-4 h-4 text-[var(--rw-text-muted)]" /> : <ChevronDown className="w-4 h-4 text-[var(--rw-text-muted)]" />}
                           </button>
                           <AnimatePresence>
                             {expandedFaq === faq.id && (
@@ -277,7 +278,7 @@ export default function SupportTicketModal({ isOpen, onClose }) {
                                 initial={{ height: 0, opacity: 0 }}
                                 animate={{ height: 'auto', opacity: 1 }}
                                 exit={{ height: 0, opacity: 0 }}
-                                className="px-4 py-3 text-sm text-gray-600 bg-white border-t border-gray-100 leading-relaxed font-medium"
+                                className="px-4 py-3 text-sm text-[var(--rw-text-secondary)] bg-surface border-t border-border leading-relaxed font-medium"
                               >
                                 {faq.answer}
                               </motion.div>
@@ -289,19 +290,19 @@ export default function SupportTicketModal({ isOpen, onClose }) {
                   )}
 
                   <div className="col-span-2 sm:col-span-1">
-                    <label className="block text-[13px] font-bold text-[#191919] mb-1.5 uppercase tracking-wide">
+                    <label className="block text-[13px] font-bold text-[var(--rw-text)] mb-1.5 uppercase tracking-wide">
                       Type
                     </label>
                     <div className="relative">
                       <select
                         value={type}
                         onChange={(e) => setType(e.target.value)}
-                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:border-[#4ec8ef] focus:ring-4 focus:ring-[#4ec8ef]/10 transition-all font-medium text-[#191919] appearance-none"
+                        className="w-full px-4 py-3 bg-[var(--rw-surface-hover)] border border-border rounded-xl focus:bg-surface focus:outline-none focus:border-[#4ec8ef] focus:ring-4 focus:ring-[#4ec8ef]/10 transition-all font-medium text-[var(--rw-text)] appearance-none"
                       >
                         <option value="feedback">Feedback / Suggestion</option>
                         <option value="error">Report an Error</option>
                       </select>
-                      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
+                      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-[var(--rw-text-muted)]">
                         <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                         </svg>
@@ -311,14 +312,14 @@ export default function SupportTicketModal({ isOpen, onClose }) {
                 </div>
 
                 <div>
-                  <label className="block text-[13px] font-bold text-[#191919] mb-1.5 uppercase tracking-wide">
+                  <label className="block text-[13px] font-bold text-[var(--rw-text)] mb-1.5 uppercase tracking-wide">
                     Detailed Description
                   </label>
                   <textarea
                     required
                     minLength={10}
                     rows={4}
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:border-[#4ec8ef] focus:ring-4 focus:ring-[#4ec8ef]/10 transition-all font-medium text-[#191919] resize-none"
+                    className="w-full px-4 py-3 bg-[var(--rw-surface-hover)] border border-border rounded-xl focus:bg-surface focus:outline-none focus:border-[#4ec8ef] focus:ring-4 focus:ring-[#4ec8ef]/10 transition-all font-medium text-[var(--rw-text)] resize-none"
                     placeholder="Please provide as much detail as possible..."
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}

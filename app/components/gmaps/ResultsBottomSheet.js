@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useSpring, animated, config } from "@react-spring/web";
 import { useDrag } from "@use-gesture/react";
-import { X, Download, GripHorizontal } from "lucide-react";
+import { X, Download, ChevronUp } from "lucide-react";
 import ResultsTable from "../ResultsTable";
 
 export default function ResultsBottomSheet({ isOpen, onOpen, onClose, onExport, data, extraExcludeColumns = [], subtitle }) {
@@ -87,7 +87,7 @@ export default function ResultsBottomSheet({ isOpen, onOpen, onClose, onExport, 
           y,
           height: `${SHEET_HEIGHT_VH}vh`
         }}
-        className="fixed bottom-0 left-0 right-0 z-[110] bg-white rounded-t-[32px] shadow-[0_-10px_40px_rgba(2,61,187,0.1)] flex flex-col will-change-transform"
+        className="fixed bottom-0 left-0 right-0 z-[110] bg-[var(--rw-surface)] rounded-t-[32px] border-t border-[var(--rw-border)] shadow-[0_-15px_40px_rgba(48,143,239,0.15)] flex flex-col will-change-transform"
       >
         <div
           {...bind()}
@@ -95,12 +95,18 @@ export default function ResultsBottomSheet({ isOpen, onOpen, onClose, onExport, 
           className="relative w-full pt-3 pb-3 flex flex-col items-center justify-center cursor-grab active:cursor-grabbing touch-none group hover:bg-brand-sky/[0.02] transition-colors rounded-t-[32px]"
         >
           {/* Main Grip Handle */}
-          <div className="flex items-center justify-center w-16 h-1.5 rounded-full bg-gray-200 group-hover:bg-brand-sky/40 transition-colors mb-2" />
+          <div className="flex items-center justify-center w-16 h-1.5 rounded-full bg-gray-400/50 group-hover:bg-brand-sky/60 transition-colors mb-2" />
 
-          {/* Subtle icon/hint visible mainly when closed */}
+          {/* Subtle animated arrows visible mainly when closed */}
           {!isOpen && (
-            <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.15em] text-brand-blue/60 group-hover:text-brand-blue transition-colors">
-              <GripHorizontal className="w-3.5 h-3.5" />
+            <div className="flex flex-col items-center -mt-1 mb-1 animate-bounce">
+              <ChevronUp className="w-5 h-5 text-brand-sky opacity-100" />
+              <ChevronUp className="w-5 h-5 text-brand-sky opacity-50 -mt-3" />
+            </div>
+          )}
+          
+          {!isOpen && (
+            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-brand-sky/80 group-hover:text-brand-sky transition-colors">
               Pull to open
             </div>
           )}
@@ -127,7 +133,7 @@ export default function ResultsBottomSheet({ isOpen, onOpen, onClose, onExport, 
             </button>
             <button
               onClick={onClose}
-              className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 hover:text-brand-dark transition-colors"
+              className="w-10 h-10 rounded-full bg-[var(--rw-border)] flex items-center justify-center text-gray-500 hover:bg-gray-200 hover:text-brand-dark transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
@@ -137,7 +143,7 @@ export default function ResultsBottomSheet({ isOpen, onOpen, onClose, onExport, 
         {/* Body / Table */}
         <div className="flex-1 overflow-auto p-6 bg-var(--rw-bg, #f5f7fb)">
           {/* We wrap ResultsTable to ensure it takes up height and scrolls internally if needed */}
-          <div className="h-full bg-white rounded-2xl shadow-sm border border-brand-blue/5">
+          <div className="h-full bg-surface rounded-2xl shadow-sm border border-brand-blue/5">
             <ResultsTable
               data={data}
               hideEmptyColumns={true}

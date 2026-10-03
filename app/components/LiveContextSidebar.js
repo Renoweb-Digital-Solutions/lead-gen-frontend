@@ -40,7 +40,7 @@ export default function LiveContextSidebar({ formState, activeStep }) {
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-2xl p-6 border border-brand-blue/10 shadow-[0_4px_24px_rgba(2,61,187,0.06)]"
+        className="bg-surface rounded-2xl p-6 border border-border shadow-md"
       >
         <div className="flex items-center gap-2 mb-4">
           <div className="w-1 h-3 bg-gradient-to-b from-brand-blue to-brand-cyan rounded-full" />
@@ -62,7 +62,7 @@ export default function LiveContextSidebar({ formState, activeStep }) {
               <span>Total Contacts</span>
               <span>50,000+</span>
             </div>
-            <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+            <div className="h-1.5 w-full bg-[var(--rw-border)] rounded-full overflow-hidden">
               <motion.div initial={{ width: 0 }} animate={{ width: "100%" }} transition={{ duration: 1 }} className="h-full bg-gray-300 rounded-full" />
             </div>
           </div>
@@ -71,7 +71,7 @@ export default function LiveContextSidebar({ formState, activeStep }) {
               <span>After Title Filter</span>
               <span>{Math.floor(targetCount * 1.5).toLocaleString()}</span>
             </div>
-            <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+            <div className="h-1.5 w-full bg-[var(--rw-border)] rounded-full overflow-hidden">
               <motion.div initial={{ width: 0 }} animate={{ width: "70%" }} transition={{ duration: 1, delay: 0.2 }} className="h-full bg-brand-sky rounded-full" />
             </div>
           </div>
@@ -80,7 +80,7 @@ export default function LiveContextSidebar({ formState, activeStep }) {
               <span>After Location Filter</span>
               <span className="text-brand-blue font-bold text-[12px]">{Math.round(targetCount).toLocaleString()}</span>
             </div>
-            <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+            <div className="h-1.5 w-full bg-[var(--rw-border)] rounded-full overflow-hidden">
               <motion.div initial={{ width: 0 }} animate={{ width: "40%" }} transition={{ duration: 1, delay: 0.4 }} className="h-full bg-gradient-to-r from-brand-blue to-brand-cyan rounded-full" />
             </div>
           </div>
@@ -92,7 +92,7 @@ export default function LiveContextSidebar({ formState, activeStep }) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="bg-white rounded-2xl p-6 border border-brand-blue/10 shadow-[0_4px_24px_rgba(2,61,187,0.06)] flex-1"
+        className="bg-surface rounded-2xl p-6 border border-border shadow-md flex-1"
       >
          <div className="flex items-center gap-2 mb-4">
           <div className="w-1 h-3 bg-gradient-to-b from-brand-blue to-brand-cyan rounded-full" />
@@ -106,7 +106,7 @@ export default function LiveContextSidebar({ formState, activeStep }) {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 + (idx * 0.1) }}
-              className="p-3 rounded-xl border border-gray-100 bg-gray-50/50 hover:bg-brand-blue/5 hover:border-brand-blue/20 transition-colors flex items-start gap-3"
+              className="p-3 rounded-xl border border-border bg-[var(--rw-surface-hover)]/50 hover:bg-brand-blue/5 hover:border-brand-blue/20 transition-colors flex items-start gap-3"
             >
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-blue to-brand-sky flex items-center justify-center text-white font-bold text-xs shrink-0">
                 {lead.name.charAt(0)}
@@ -129,7 +129,7 @@ export default function LiveContextSidebar({ formState, activeStep }) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="bg-white rounded-2xl p-6 border border-brand-blue/10 shadow-[0_4px_24px_rgba(2,61,187,0.06)]"
+        className="bg-surface rounded-2xl p-6 border border-border shadow-md"
       >
         <div className="flex items-center gap-2 mb-4">
           <div className="w-1 h-3 bg-gradient-to-b from-brand-blue to-brand-cyan rounded-full" />
@@ -142,7 +142,7 @@ export default function LiveContextSidebar({ formState, activeStep }) {
               <span>Information Technology</span>
               <span>45%</span>
             </div>
-            <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+            <div className="h-1.5 w-full bg-[var(--rw-border)] rounded-full overflow-hidden">
               <motion.div initial={{ width: 0 }} animate={{ width: "45%" }} transition={{ duration: 1, delay: 0.5 }} className="h-full bg-gradient-to-r from-brand-blue to-brand-sky rounded-full" />
             </div>
           </div>
@@ -151,7 +151,7 @@ export default function LiveContextSidebar({ formState, activeStep }) {
               <span>Financial Services</span>
               <span>30%</span>
             </div>
-            <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+            <div className="h-1.5 w-full bg-[var(--rw-border)] rounded-full overflow-hidden">
               <motion.div initial={{ width: 0 }} animate={{ width: "30%" }} transition={{ duration: 1, delay: 0.6 }} className="h-full bg-brand-sky rounded-full" />
             </div>
           </div>
@@ -160,7 +160,7 @@ export default function LiveContextSidebar({ formState, activeStep }) {
               <span>Healthcare</span>
               <span>25%</span>
             </div>
-            <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+            <div className="h-1.5 w-full bg-[var(--rw-border)] rounded-full overflow-hidden">
               <motion.div initial={{ width: 0 }} animate={{ width: "25%" }} transition={{ duration: 1, delay: 0.7 }} className="h-full bg-brand-cyan rounded-full" />
             </div>
           </div>

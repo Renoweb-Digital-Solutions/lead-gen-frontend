@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useSpring, animated } from "@react-spring/web";
+import { useEffect, useState, useRef } from "react";
+import { useSpring, animated, config } from "@react-spring/web";
 import { useDrag } from "@use-gesture/react";
 import { X, Download, ChevronUp } from "lucide-react";
-import YoutubeResultsGrid from "./YoutubeResultsGrid";
+import InvestorResultsTable from "./InvestorResultsTable";
 
-export default function YoutubeResultsBottomSheet({ isOpen, onOpen, onClose, onExport, data, subtitle }) {
+export default function ResultsBottomSheet({ isOpen, onOpen, onClose, onExport, data, extraExcludeColumns = [], subtitle }) {
   // Height of the bottom sheet (vh)
   const SHEET_HEIGHT_VH = 85;
   const [sheetHeightPx, setSheetHeightPx] = useState(800);
@@ -77,7 +77,7 @@ export default function YoutubeResultsBottomSheet({ isOpen, onOpen, onClose, onE
           opacity,
           pointerEvents: isOpen ? "auto" : "none",
         }}
-        className="fixed inset-0 z-[100] bg-red-900/15 backdrop-blur-[2px]"
+        className="fixed inset-0 z-[100] bg-[#023dbb]/15 backdrop-blur-[2px]"
         onClick={onClose}
       />
 
@@ -87,46 +87,46 @@ export default function YoutubeResultsBottomSheet({ isOpen, onOpen, onClose, onE
           y,
           height: `${SHEET_HEIGHT_VH}vh`
         }}
-        className="fixed bottom-0 left-0 right-0 z-[110] bg-[var(--rw-surface)] rounded-t-[32px] border-t border-[var(--rw-border)] shadow-[0_-15px_40px_rgba(220,38,38,0.15)] flex flex-col will-change-transform"
+        className="fixed bottom-0 left-0 right-0 z-[110] bg-[var(--rw-surface)] rounded-t-[32px] border-t border-[var(--rw-border)] shadow-[0_-15px_40px_rgba(48,143,239,0.15)] flex flex-col will-change-transform"
       >
         <div
           {...bind()}
           onClick={() => { if (!isOpen && onOpen) onOpen(); }}
-          className="relative w-full pt-3 pb-3 flex flex-col items-center justify-center cursor-grab active:cursor-grabbing touch-none group hover:bg-red-500/[0.02] transition-colors rounded-t-[32px]"
+          className="relative w-full pt-3 pb-3 flex flex-col items-center justify-center cursor-grab active:cursor-grabbing touch-none group hover:bg-brand-sky/[0.02] transition-colors rounded-t-[32px]"
         >
           {/* Main Grip Handle */}
-          <div className="flex items-center justify-center w-16 h-1.5 rounded-full bg-gray-400/50 group-hover:bg-red-500/60 transition-colors mb-2" />
+          <div className="flex items-center justify-center w-16 h-1.5 rounded-full bg-gray-400/50 group-hover:bg-brand-sky/60 transition-colors mb-2" />
 
           {/* Subtle animated arrows visible mainly when closed */}
           {!isOpen && (
             <div className="flex flex-col items-center -mt-1 mb-1 animate-bounce">
-              <ChevronUp className="w-5 h-5 text-red-500 opacity-100" />
-              <ChevronUp className="w-5 h-5 text-red-500 opacity-50 -mt-3" />
+              <ChevronUp className="w-5 h-5 text-brand-sky opacity-100" />
+              <ChevronUp className="w-5 h-5 text-brand-sky opacity-50 -mt-3" />
             </div>
           )}
-
+          
           {!isOpen && (
-            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-red-500/80 group-hover:text-red-500 transition-colors">
+            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-brand-sky/80 group-hover:text-brand-sky transition-colors">
               Pull to open
             </div>
           )}
         </div>
 
         {/* Header */}
-        <div className="px-8 pb-4 border-b border-red-600/5 flex items-center justify-between shrink-0">
+        <div className="px-8 pb-4 border-b border-brand-blue/5 flex items-center justify-between shrink-0">
           <div>
             <h2 className="text-2xl font-bold font-display text-brand-dark leading-tight">
-              YouTube Search Results
+              Search Results
             </h2>
             <p className="text-[13px] font-medium text-gray-500">
-              {subtitle || `${data?.length || 0} YouTube channels ready for export`}
+              {subtitle || `${data?.length || 0} local businesses ready for export`}
             </p>
           </div>
 
           <div className="flex items-center gap-4">
             <button
               onClick={onExport}
-              className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-bold text-[13px] hover:shadow-lg hover:shadow-red-500/20 transition-all duration-300"
+              className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-brand-blue to-brand-sky text-white rounded-xl font-bold text-[13px] hover:shadow-lg hover:shadow-brand-sky/20 transition-all duration-300"
             >
               <Download className="w-4 h-4" />
               Export to CSV
@@ -140,9 +140,25 @@ export default function YoutubeResultsBottomSheet({ isOpen, onOpen, onClose, onE
           </div>
         </div>
 
-        {/* Body / Grid */}
-        <div className="flex-1 overflow-hidden bg-[#f5f7fb] p-4 sm:p-6 pb-8">
-          <YoutubeResultsGrid data={data} />
+        {/* Body / Table */}
+        <div className="flex-1 overflow-auto p-6 bg-var(--rw-bg, #f5f7fb)">
+          {/* We wrap ResultsTable to ensure it takes up height and scrolls internally if needed */}
+          <div className="h-full bg-surface rounded-2xl shadow-sm border border-brand-blue/5">
+            <InvestorResultsTable
+              data={data}
+              hideEmptyColumns={true}
+              excludeColumns={[
+                'isAdvertisement', 'imageUrl', 'kgmid', 'sourceKeyword', 'source_keyword',
+                'additionalInfo', 'description', 'reviewsDistribution', 'additionalOptions', 'additional_options',
+                'IsAdvertisement', 'ImageUrl', 'Kgmid', 'SourceKeyword',
+                'AdditionalInfo', 'Description', 'ReviewsDistribution', 'AdditionalOptions', 'AdditionalOpeningHours',
+                'fid', 'Fid', 'cid', 'Cid', 'scrapedAt', 'ScrapedAt', 'scraped_at',
+                'searchString', 'SearchString', 'search_string',
+                'photos_count', 'photosCount', 'thumbnail', 'Thumbnail',
+                ...extraExcludeColumns
+              ]}
+            />
+          </div>
         </div>
       </animated.div>
     </>

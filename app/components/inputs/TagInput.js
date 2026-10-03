@@ -79,7 +79,7 @@ export default function TagInput({
 
       <div
         onClick={() => inputRef.current?.focus()}
-        className={`group flex flex-wrap items-center gap-1.5 p-2 min-h-[42px] bg-white border-1.5 border-gray-200 rounded-xl cursor-text transition-all focus-within:ring-4 ${containerClasses}`}
+        className={`group flex flex-wrap items-center gap-1.5 p-2 min-h-[42px] bg-surface border-1.5 border-border rounded-xl cursor-text transition-all focus-within:ring-4 ${containerClasses}`}
       >
         {Icon && (
           <div className={`pl-1.5 pr-1 text-gray-400 transition-colors flex items-center h-full ${iconClasses}`}>

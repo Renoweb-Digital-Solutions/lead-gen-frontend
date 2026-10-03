@@ -59,6 +59,7 @@ export default function LeadGenApp() {
   const [exportResults, setExportResults] = useState({});
   const [direction, setDirection] = useState("forward");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isDark, setIsDark] = useSessionState("renoweb-theme-dark", false);
   const contentRef = useRef(null);
   const wsRef = useRef(null);
 
@@ -332,12 +333,14 @@ export default function LeadGenApp() {
   };
 
   return (
-    <div className="rw-app-container">
+    <div className="rw-app-container" data-theme={isDark ? "dark" : "light"} style={{ background: "var(--rw-bg)", color: "var(--rw-text)" }}>
       <Header
         onClearAll={() => setShowClearModal(true)}
         activeModule={activeModule}
         onModuleChange={setActiveModule}
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+        isDark={isDark}
+        onToggleTheme={() => setIsDark(!isDark)}
       />
 
       {/* ── Google Maps Module ─────────────────────────── */}

@@ -52,9 +52,9 @@ export default function InstagramResultsGrid({ data }) {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
+    <div className="flex flex-col h-full bg-surface rounded-2xl overflow-hidden border border-border shadow-sm">
       {/* Top Controls */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-b border-gray-100 shrink-0 bg-gray-50/50">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-b border-border shrink-0 bg-[var(--rw-surface-hover)]/50">
         <div className="text-sm font-semibold text-gray-600">
           Showing {((currentPage - 1) * itemsPerPage) + (filteredData.length > 0 ? 1 : 0)}-{Math.min(currentPage * itemsPerPage, filteredData.length)} of {filteredData.length} records
         </div>
@@ -64,7 +64,7 @@ export default function InstagramResultsGrid({ data }) {
             <Filter className="w-4 h-4 text-gray-400" />
             <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Category:</label>
             <select 
-              className="text-sm border border-gray-200 rounded-lg px-3 py-1.5 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 transition-colors cursor-pointer outline-none capitalize"
+              className="text-sm border border-border rounded-lg px-3 py-1.5 bg-surface text-gray-700 focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 transition-colors cursor-pointer outline-none capitalize"
               value={filterCategory}
               onChange={(e) => {
                 setFilterCategory(e.target.value);
@@ -84,7 +84,7 @@ export default function InstagramResultsGrid({ data }) {
       <div className="flex-1 overflow-auto custom-scrollbar">
         {filteredData.length > 0 ? (
           <table className="w-full text-left border-collapse min-w-max">
-            <thead className="bg-gray-50 sticky top-0 z-10 border-b border-gray-200">
+            <thead className="bg-[var(--rw-surface-hover)] sticky top-0 z-10 border-b border-border">
               <tr>
                 {columns.map((col) => (
                   <th key={col} className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">
@@ -102,7 +102,7 @@ export default function InstagramResultsGrid({ data }) {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.15, delay: idx * 0.02 }}
-                    className="border-b border-gray-100 hover:bg-pink-50/30 transition-colors group"
+                    className="border-b border-border hover:bg-pink-50/30 transition-colors group"
                   >
                     {columns.map((col) => {
                       const val = row[col];
@@ -168,11 +168,11 @@ export default function InstagramResultsGrid({ data }) {
 
       {/* Pagination Controls */}
       {totalPages > 1 && (
-        <div className="p-4 bg-white border-t border-gray-100 flex items-center justify-between shrink-0">
+        <div className="p-4 bg-surface border-t border-border flex items-center justify-between shrink-0">
           <button
             onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
             disabled={currentPage === 1}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 active:bg-gray-100 disabled:opacity-40 disabled:hover:bg-transparent transition-all border border-transparent hover:border-gray-200"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold text-gray-600 hover:bg-[var(--rw-surface-hover)] active:bg-[var(--rw-border)] disabled:opacity-40 disabled:hover:bg-transparent transition-all border border-transparent hover:border-border"
           >
             <ChevronLeft className="w-4 h-4" /> Prev
           </button>
@@ -192,7 +192,7 @@ export default function InstagramResultsGrid({ data }) {
                     className={`w-9 h-9 rounded-xl text-sm font-bold flex items-center justify-center transition-all ${
                       currentPage === pageNum 
                         ? 'bg-gradient-to-br from-pink-500 to-purple-500 text-white shadow-md shadow-pink-500/20' 
-                        : 'text-gray-500 hover:bg-gray-100 hover:text-gray-800'
+                        : 'text-gray-500 hover:bg-[var(--rw-border)] hover:text-gray-800'
                     }`}
                   >
                     {pageNum}

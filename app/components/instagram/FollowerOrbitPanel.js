@@ -238,7 +238,7 @@ export default function FollowerOrbitPanel({ status, targetUrl, followers = [] }
   ];
 
   return (
-    <div className="bg-white rounded-2xl p-6 border border-pink-500/10 shadow-[0_4px_24px_rgba(219,39,119,0.06)] flex flex-col h-full min-h-[400px] lg:min-h-[500px] overflow-hidden relative">
+    <div className="bg-surface rounded-2xl p-6 border border-pink-500/10 shadow-md flex flex-col h-full min-h-[400px] lg:min-h-[500px] overflow-hidden relative">
       {/* Header */}
       <div className="flex items-center gap-2 mb-6 relative z-10 shrink-0">
         <div className="w-1 h-3 bg-gradient-to-b from-purple-500 via-pink-500 to-orange-400 rounded-full" />
@@ -280,7 +280,7 @@ export default function FollowerOrbitPanel({ status, targetUrl, followers = [] }
                   }}
                 >
                   <motion.div 
-                    className="w-full h-full rounded-full bg-white"
+                    className="w-full h-full rounded-full bg-surface"
                     animate={status === 'scanning' ? { rotate: 360 } : { rotate: 0 }}
                     transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
                   />
@@ -298,7 +298,7 @@ export default function FollowerOrbitPanel({ status, targetUrl, followers = [] }
             {/* The actual avatar circle */}
             <div className={`
               w-16 h-16 rounded-full flex items-center justify-center relative z-10
-              ${status === 'idle' ? 'bg-gray-100 border-2 border-gray-200' : 'bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 border-4 border-white shadow-lg'}
+              ${status === 'idle' ? 'bg-[var(--rw-border)] border-2 border-border' : 'bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 border-4 border-white shadow-lg'}
               transition-all duration-500
             `}>
               {status === 'idle' ? (
@@ -319,7 +319,7 @@ export default function FollowerOrbitPanel({ status, targetUrl, followers = [] }
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs font-bold text-pink-600 shadow-sm border border-pink-500/10"
+              className="absolute bottom-4 right-4 bg-surface/80 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs font-bold text-pink-600 shadow-sm border border-pink-500/10"
             >
               +{followers.length - MAX_VISIBLE} more
             </motion.div>
@@ -328,7 +328,7 @@ export default function FollowerOrbitPanel({ status, targetUrl, followers = [] }
       </div>
 
       {/* Footer / Status Bar */}
-      <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between shrink-0 relative z-10">
+      <div className="mt-4 pt-4 border-t border-border flex items-center justify-between shrink-0 relative z-10">
         <div className={`flex items-center gap-2 text-xs font-bold tracking-wide ${currentStatus.color}`}>
           {currentStatus.icon}
           {status === 'scanning' ? (

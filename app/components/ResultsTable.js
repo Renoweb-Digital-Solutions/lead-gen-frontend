@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { AgGridReact } from "ag-grid-react";
 import { AllCommunityModule, ModuleRegistry, themeQuartz } from "ag-grid-community";
+import { X } from "lucide-react";
 
 // Register AG Grid Community modules
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -164,10 +165,14 @@ function SmartFallbackRenderer(params) {
 
   if (typeof value === "object") {
     if (Object.keys(value).length === 0) return null;
-    try {
-      value = JSON.stringify(value);
-    } catch (e) {
-      value = String(value);
+    if (Array.isArray(value)) {
+      value = value.join(", ");
+    } else {
+      try {
+        value = JSON.stringify(value);
+      } catch (e) {
+        value = String(value);
+      }
     }
   }
   
@@ -206,8 +211,31 @@ function SmartFallbackRenderer(params) {
   return strVal;
 }
 
+function LongTextCellRenderer(params) {
+  let value = params.value;
+  if (!value) return null;
+  const strVal = String(value).trim();
+  
+  return (
+    <div 
+      style={{ 
+        cursor: 'pointer', 
+        color: 'var(--rw-text)', 
+        overflow: 'hidden', 
+        textOverflow: 'ellipsis',
+        width: '100%'
+      }}
+      onClick={() => params.context?.openTextModal(strVal, params.colDef.headerName)}
+      title="Click to read full text"
+    >
+      {strVal}
+    </div>
+  );
+}
+
 export default function ResultsTable({ data, hideEmptyColumns = false, excludeColumns = [] }) {
   const [colDefs, setColDefs] = useState([]);
+  const [textModal, setTextModal] = useState(null);
 
   // Generate column definitions dynamically based on the first row of data.
   // Detects email/phone/linkedin/website columns and assigns clickable cell renderers.
@@ -267,10 +295,14 @@ export default function ResultsTable({ data, hideEmptyColumns = false, excludeCo
             filter: true,
             resizable: true,
             minWidth: 150,
+            tooltipField: key,
             valueFormatter: (params) => {
               if (params.value == null) return "";
               if (typeof params.value === "object") {
                 if (Object.keys(params.value).length === 0) return "";
+                if (Array.isArray(params.value)) {
+                  return params.value.join(", ");
+                }
                 try {
                   return JSON.stringify(params.value);
                 } catch (e) {
@@ -300,6 +332,9 @@ export default function ResultsTable({ data, hideEmptyColumns = false, excludeCo
             colDef.cellRenderer = PhoneCellRenderer;
           } else if (linkType === "url") {
             colDef.cellRenderer = UrlCellRenderer;
+          } else if (key === "fit_summary" || key === "fitSummary" || key === "description" || key.includes("criteria")) {
+            colDef.cellRenderer = LongTextCellRenderer;
+            colDef.minWidth = 300;
           } else {
             colDef.cellRenderer = SmartFallbackRenderer;
           }
@@ -381,7 +416,30 @@ export default function ResultsTable({ data, hideEmptyColumns = false, excludeCo
         paginationPageSize={10}
         paginationPageSizeSelector={[10, 25, 50, 100]}
         rowSelection={{ mode: 'multiRow' }}
+        context={{ openTextModal: (text, title) => setTextModal({ text, title }) }}
       />
+      
+      {/* Modal for long text */}
+      {textModal && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-surface rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between p-5 border-b border-border">
+              <h3 className="font-bold text-lg text-gray-900">{textModal.title}</h3>
+              <button 
+                onClick={() => setTextModal(null)}
+                className="p-2 text-gray-400 hover:text-gray-700 hover:bg-[var(--rw-border)] rounded-full transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto">
+              <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                {textModal.text}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -74,7 +74,7 @@ export default function DirectoryNetworkPanel({ status, selectedDirectory, busin
   }, [status, businessCount]);
 
   return (
-    <div className="w-full h-full min-h-[500px] bg-white rounded-2xl relative overflow-hidden shadow-[0_4px_15px_rgba(2,61,187,0.12)] border border-brand-blue/10 flex flex-col p-6">
+    <div className="w-full h-full min-h-[500px] bg-surface rounded-2xl relative overflow-hidden shadow-md border border-border flex flex-col p-6">
       {/* ── Overlay UI / Status Panel ── */}
       <div className="absolute top-6 left-6 z-10 pointer-events-none">
         <h3 className="text-brand-dark font-display font-semibold tracking-wide text-lg flex items-center gap-2 drop-shadow-sm">
@@ -108,7 +108,7 @@ export default function DirectoryNetworkPanel({ status, selectedDirectory, busin
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              className="mt-3 bg-white/90 backdrop-blur-md border border-brand-blue/20 rounded-xl p-4 inline-block shadow-[0_4px_20px_rgba(48,143,239,0.15)] pointer-events-auto"
+              className="mt-3 bg-surface/90 backdrop-blur-md border border-brand-blue/20 rounded-xl p-4 inline-block shadow-md pointer-events-auto"
             >
               <div className="text-[#4ec8ef] text-[10px] uppercase tracking-[0.2em] font-bold mb-1.5 flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-brand-cyan animate-pulse" />
@@ -125,7 +125,7 @@ export default function DirectoryNetworkPanel({ status, selectedDirectory, busin
               key="complete"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="mt-3 bg-emerald-50/90 backdrop-blur-md border border-emerald-200 rounded-xl p-4 inline-flex items-center gap-4 shadow-[0_4px_20px_rgba(16,185,129,0.15)] pointer-events-auto"
+              className="mt-3 bg-emerald-50/90 backdrop-blur-md border border-emerald-200 rounded-xl p-4 inline-flex items-center gap-4 shadow-md pointer-events-auto"
             >
               <div className="w-10 h-10 rounded-full bg-[#10b981]/20 flex items-center justify-center shrink-0">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-[#10b981]">
@@ -218,7 +218,7 @@ export default function DirectoryNetworkPanel({ status, selectedDirectory, busin
                   animate={{ opacity: 1, y: -20 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 1.5 }}
-                  className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 whitespace-nowrap bg-white/90 border border-gray-200 text-brand-dark text-[9px] font-bold px-1.5 py-0.5 rounded shadow-sm"
+                  className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 whitespace-nowrap bg-surface/90 border border-border text-brand-dark text-[9px] font-bold px-1.5 py-0.5 rounded shadow-sm"
                 >
                   {node.label}
                 </motion.div>
@@ -229,7 +229,7 @@ export default function DirectoryNetworkPanel({ status, selectedDirectory, busin
 
         {/* Central Directory Node */}
         <motion.div 
-          className="relative z-20 flex items-center justify-center rounded-full bg-white shadow-md border-2"
+          className="relative z-20 flex items-center justify-center rounded-full bg-surface shadow-md border-2"
           initial={false}
           animate={{ 
             borderColor: meta.color,

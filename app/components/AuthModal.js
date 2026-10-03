@@ -141,14 +141,14 @@ export default function AuthModal({ isOpen, onClose }) {
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
         transition={{ type: "spring", damping: 25, stiffness: 300 }}
-        className="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-[550px]"
+        className="relative w-full max-w-4xl bg-surface rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-[550px]"
       >
         {/* Left Side: Form */}
         <div className="w-full md:w-1/2 p-10 lg:p-12 flex flex-col justify-center relative">
           
           <button
             onClick={onClose}
-            className="absolute top-6 right-6 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+            className="absolute top-6 right-6 p-2 text-gray-400 hover:text-gray-600 hover:bg-[var(--rw-border)] rounded-full transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -194,7 +194,7 @@ export default function AuthModal({ isOpen, onClose }) {
                     <input
                       type="text"
                       required
-                      className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:border-[#4ec8ef] focus:ring-4 focus:ring-[#4ec8ef]/10 transition-all font-medium text-[#191919]"
+                      className="w-full pl-10 pr-4 py-3 bg-[var(--rw-surface-hover)] border border-border rounded-xl focus:bg-surface focus:outline-none focus:border-[#4ec8ef] focus:ring-4 focus:ring-[#4ec8ef]/10 transition-all font-medium text-[#191919]"
                       placeholder="johndoe"
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
@@ -215,7 +215,7 @@ export default function AuthModal({ isOpen, onClose }) {
                     <input
                       type="text"
                       required
-                      className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:border-[#4ec8ef] focus:ring-4 focus:ring-[#4ec8ef]/10 transition-all font-medium text-[#191919]"
+                      className="w-full pl-10 pr-4 py-3 bg-[var(--rw-surface-hover)] border border-border rounded-xl focus:bg-surface focus:outline-none focus:border-[#4ec8ef] focus:ring-4 focus:ring-[#4ec8ef]/10 transition-all font-medium text-[#191919]"
                       placeholder="name@company.com or username"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
@@ -236,7 +236,7 @@ export default function AuthModal({ isOpen, onClose }) {
                     <input
                       type="email"
                       required
-                      className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:border-[#4ec8ef] focus:ring-4 focus:ring-[#4ec8ef]/10 transition-all font-medium text-[#191919]"
+                      className="w-full pl-10 pr-4 py-3 bg-[var(--rw-surface-hover)] border border-border rounded-xl focus:bg-surface focus:outline-none focus:border-[#4ec8ef] focus:ring-4 focus:ring-[#4ec8ef]/10 transition-all font-medium text-[#191919]"
                       placeholder="name@company.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
@@ -272,7 +272,7 @@ export default function AuthModal({ isOpen, onClose }) {
                     <input
                       type={showPassword ? "text" : "password"}
                       required
-                      className="w-full pl-10 pr-12 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:border-[#4ec8ef] focus:ring-4 focus:ring-[#4ec8ef]/10 transition-all font-medium text-[#191919]"
+                      className="w-full pl-10 pr-12 py-3 bg-[var(--rw-surface-hover)] border border-border rounded-xl focus:bg-surface focus:outline-none focus:border-[#4ec8ef] focus:ring-4 focus:ring-[#4ec8ef]/10 transition-all font-medium text-[#191919]"
                       placeholder="••••••••"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
@@ -311,7 +311,7 @@ export default function AuthModal({ isOpen, onClose }) {
                     <input
                       type="text"
                       required
-                      className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:border-[#4ec8ef] focus:ring-4 focus:ring-[#4ec8ef]/10 transition-all font-medium text-[#191919]"
+                      className="w-full pl-10 pr-4 py-3 bg-[var(--rw-surface-hover)] border border-border rounded-xl focus:bg-surface focus:outline-none focus:border-[#4ec8ef] focus:ring-4 focus:ring-[#4ec8ef]/10 transition-all font-medium text-[#191919]"
                       placeholder="123456"
                       value={otp}
                       onChange={(e) => setOtp(e.target.value)}
@@ -332,7 +332,7 @@ export default function AuthModal({ isOpen, onClose }) {
                     <input
                       type={showNewPassword ? "text" : "password"}
                       required
-                      className="w-full pl-10 pr-12 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:border-[#4ec8ef] focus:ring-4 focus:ring-[#4ec8ef]/10 transition-all font-medium text-[#191919]"
+                      className="w-full pl-10 pr-12 py-3 bg-[var(--rw-surface-hover)] border border-border rounded-xl focus:bg-surface focus:outline-none focus:border-[#4ec8ef] focus:ring-4 focus:ring-[#4ec8ef]/10 transition-all font-medium text-[#191919]"
                       placeholder="••••••••"
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
@@ -436,7 +436,7 @@ export default function AuthModal({ isOpen, onClose }) {
               <motion.div
                 animate={{ y: [-5, 5, -5] }}
                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-white rounded-2xl shadow-[0_0_40px_rgba(255,255,255,0.2)] flex items-center justify-center z-20"
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-surface rounded-2xl shadow-[0_0_40px_rgba(255,255,255,0.2)] flex items-center justify-center z-20"
               >
                 <Target className="w-12 h-12 text-[#023dbb]" />
               </motion.div>

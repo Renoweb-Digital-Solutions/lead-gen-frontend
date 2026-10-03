@@ -21,7 +21,7 @@ export default function Toggle({ checked, onChange, label, hint }) {
         <motion.div
           animate={{ x: checked ? 20 : 2 }}
           transition={{ type: "spring", stiffness: 500, damping: 30 }}
-          className="absolute top-0.5 left-0 w-5 h-5 bg-white rounded-full shadow-sm"
+          className="absolute top-0.5 left-0 w-5 h-5 bg-surface rounded-full shadow-sm"
         />
       </button>
     </div>

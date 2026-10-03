@@ -9,7 +9,7 @@ import { CheckCircle2, Scan } from "lucide-react";
 const Globe = dynamic(() => import("react-globe.gl"), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-full flex flex-col items-center justify-center bg-white rounded-2xl border border-brand-blue/10">
+    <div className="w-full h-full flex flex-col items-center justify-center bg-surface rounded-2xl border border-border">
       <div className="w-8 h-8 border-2 border-brand-cyan border-t-transparent rounded-full animate-spin mb-4" />
       <div className="text-brand-cyan/60 text-xs font-semibold tracking-widest uppercase">Initializing Radar...</div>
     </div>
@@ -254,7 +254,7 @@ export default function GlobeVisualization({ status, targetLocation, resultCount
   return (
     <div
       ref={wrapperRef}
-      className="w-full h-full min-h-[600px] bg-white rounded-2xl relative overflow-hidden shadow-[0_4px_15px_rgba(2,61,187,0.12)] border border-brand-blue/10 flex items-center justify-center"
+      className="w-full h-full min-h-[600px] bg-surface rounded-2xl relative overflow-hidden shadow-md border border-border flex items-center justify-center"
       style={{
         backgroundImage: "radial-gradient(circle at center, rgba(48,143,239,0.05) 0%, transparent 70%)",
         isolation: "isolate",
@@ -291,7 +291,7 @@ export default function GlobeVisualization({ status, targetLocation, resultCount
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              className="mt-3 bg-white/90 backdrop-blur-md border border-brand-blue/20 rounded-xl p-4 inline-block shadow-[0_4px_20px_rgba(48,143,239,0.15)]"
+              className="mt-3 bg-surface/90 backdrop-blur-md border border-brand-blue/20 rounded-xl p-4 inline-block shadow-md"
             >
               <div className="text-[#4ec8ef] text-[10px] uppercase tracking-[0.2em] font-bold mb-1.5 flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-brand-cyan animate-pulse" />
@@ -308,7 +308,7 @@ export default function GlobeVisualization({ status, targetLocation, resultCount
               key="complete"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="mt-3 bg-emerald-50/90 backdrop-blur-md border border-emerald-200 rounded-xl p-4 inline-flex items-center gap-4 shadow-[0_4px_20px_rgba(16,185,129,0.15)]"
+              className="mt-3 bg-emerald-50/90 backdrop-blur-md border border-emerald-200 rounded-xl p-4 inline-flex items-center gap-4 shadow-md"
             >
               <div className="w-10 h-10 rounded-full bg-[#10b981]/20 flex items-center justify-center shrink-0">
                 <CheckCircle2 className="w-6 h-6 text-[#10b981]" />

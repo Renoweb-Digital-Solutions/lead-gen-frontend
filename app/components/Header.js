@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { checkHealth } from "../lib/api";
-import { Target, Map, Trash2, Activity, LogOut, Menu, Camera, User } from "lucide-react";
+import { Target, Map, Trash2, Activity, LogOut, Menu, Camera, User, Sun, Moon } from "lucide-react";
 import { useAuth } from "../lib/AuthContext";
 import { useRouter } from "next/navigation";
 
@@ -33,7 +33,7 @@ const MODULES = [
   { id: "investors", label: "Investor Data", icon: Activity },
 ];
 
-export default function Header({ onClearAll, activeModule, onModuleChange, onToggleSidebar }) {
+export default function Header({ onClearAll, activeModule, onModuleChange, onToggleSidebar, isDark, onToggleTheme }) {
   const [health, setHealth] = useState(null);
   const { logout } = useAuth();
   const router = useRouter();
@@ -62,12 +62,12 @@ export default function Header({ onClearAll, activeModule, onModuleChange, onTog
   }, []);
 
   return (
-    <header className="rw-header shadow-sm border-b border-brand-blue/10 bg-white/90 backdrop-blur-md">
+    <header className="rw-header shadow-sm border-b border-border bg-surface/90 backdrop-blur-md">
       {/* Left: Logo + Module Tabs */}
       <div style={{ display: "flex", alignItems: "center", gap: 0, height: "100%" }}>
         {/* Hamburger (Mobile Only) */}
         <button
-          className="lg:hidden mr-3 text-brand-dark p-2 hover:bg-gray-100 rounded-md transition-colors"
+          className="lg:hidden mr-3 text-brand-dark p-2 hover:bg-[var(--rw-border)] rounded-md transition-colors"
           onClick={onToggleSidebar ? onToggleSidebar : undefined}
           aria-label="Toggle menu"
         >
@@ -108,14 +108,14 @@ export default function Header({ onClearAll, activeModule, onModuleChange, onTog
         {/* Module Tabs (Dropdown) */}
         <div className="hidden lg:flex relative items-center h-full group">
           {/* Active Module Trigger */}
-          <div className="flex items-center gap-2 px-4 h-full cursor-pointer text-brand-dark font-semibold border-b-[2.5px] border-brand-bright-blue transition-colors hover:text-brand-bright-blue">
+          <div className="flex items-center gap-2 px-4 h-full cursor-pointer text-brand-dark font-semibold border-b-[2.5px] border-brand-sky transition-colors hover:text-brand-sky">
             {(() => {
               const activeModuleObj = MODULES.find(m => m.id === activeModule) || MODULES[0];
               const ActiveIcon = activeModuleObj.icon;
               return (
                 <>
-                  <ActiveIcon className="w-4 h-4 text-brand-bright-blue" />
-                  <span>{activeModuleObj.label}</span>
+                  <ActiveIcon className="w-4 h-4 text-brand-sky" />
+                  <span className="text-[14px] font-bold">{activeModuleObj.label}</span>
                 </>
               );
             })()}
@@ -125,7 +125,7 @@ export default function Header({ onClearAll, activeModule, onModuleChange, onTog
           </div>
 
           {/* Dropdown Menu */}
-          <div className="absolute top-[calc(100%-1px)] left-0 mt-0 w-56 bg-white border border-gray-100 rounded-b-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 overflow-hidden">
+          <div className="absolute top-[calc(100%-1px)] left-0 mt-0 w-56 bg-surface border border-border rounded-b-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 overflow-hidden">
             {MODULES.map((mod) => {
               const Icon = mod.icon;
               const isActive = activeModule === mod.id;
@@ -137,7 +137,7 @@ export default function Header({ onClearAll, activeModule, onModuleChange, onTog
                     if (onModuleChange) onModuleChange(mod.id);
                     else router.push('/');
                   }}
-                  className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-gray-50 ${isActive ? 'bg-blue-50/50 text-[#023dbb] font-semibold' : 'text-gray-600'}`}
+                  className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-[var(--rw-surface-hover)] ${isActive ? 'bg-[var(--rw-surface-hover)]/50 text-[#023dbb] font-semibold' : 'text-gray-600'}`}
                 >
                   <Icon className={`w-4 h-4 ${isActive ? 'text-[#308fef]' : 'text-gray-400'}`} />
                   <span className="text-[13.5px]">{mod.label}</span>
@@ -201,24 +201,36 @@ export default function Header({ onClearAll, activeModule, onModuleChange, onTog
 
         </div>
 
+        {/* Theme Toggle button */}
+        <button
+          type="button"
+          className="rw-btn rw-btn-ghost hover:bg-[var(--rw-surface-hover)] p-2 lg:px-3 lg:py-2 text-brand-sky"
+          onClick={onToggleTheme}
+          title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+        >
+          {isDark ? (
+            <Sun className="w-5 h-5 lg:w-4 lg:h-4 text-brand-sky hover:text-brand-sky/80" />
+          ) : (
+            <Moon className="w-5 h-5 lg:w-4 lg:h-4 text-brand-sky hover:text-brand-sky/80" />
+          )}
+          <span className="hidden lg:inline font-bold text-[13px] ml-1">{isDark ? 'Light' : 'Dark'}</span>
+        </button>
+
         {/* Profile button */}
         <button
           type="button"
-          className="rw-btn rw-btn-ghost hover:bg-blue-50 p-2 lg:px-3 lg:py-2"
+          className="rw-btn rw-btn-ghost hover:bg-[var(--rw-surface-hover)] p-2 lg:px-3 lg:py-2 text-brand-sky"
           onClick={() => router.push('/profile')}
-          style={{
-            color: "var(--rw-text-muted)",
-          }}
           title="Profile"
         >
-          <User className="w-5 h-5 lg:w-4 lg:h-4 text-[#023dbb] hover:text-[#308fef]" />
-          <span className="hidden lg:inline font-bold text-[13px] text-[#023dbb]">Profile</span>
+          <User className="w-5 h-5 lg:w-4 lg:h-4 text-brand-sky hover:text-brand-sky/80" />
+          <span className="hidden lg:inline font-bold text-[13px] text-brand-sky">Profile</span>
         </button>
 
         {/* Logout button (Visible on all screens) */}
         <button
           type="button"
-          className="rw-btn rw-btn-ghost hover:bg-gray-50 p-2 lg:px-3 lg:py-2"
+          className="rw-btn rw-btn-ghost hover:bg-[var(--rw-surface-hover)] p-2 lg:px-3 lg:py-2"
           onClick={handleLogout}
           style={{
             color: "var(--rw-text-muted)",
