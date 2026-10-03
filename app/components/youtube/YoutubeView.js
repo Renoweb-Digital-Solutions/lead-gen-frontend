@@ -55,23 +55,23 @@ export default function YoutubeView() {
         custom_domains: customDomain.split(",").map(d => d.trim())
       });
 
-      const wsAbsoluteUrl = jobData.ws_url.startsWith('ws') 
-        ? jobData.ws_url 
+      const wsAbsoluteUrl = jobData.ws_url.startsWith('ws')
+        ? jobData.ws_url
         : `${process.env.NEXT_PUBLIC_API_URL.replace('http', 'ws')}${jobData.ws_url}`;
-      
+
       const ws = new WebSocket(wsAbsoluteUrl);
       wsRef.current = ws;
 
       ws.onmessage = async (event) => {
         try {
           const msg = JSON.parse(event.data);
-          
+
           if (msg.status === "completed") {
             ws.close();
             try {
               let result = msg.yt_data || [];
               let rows = Array.isArray(result) ? result : (result.data || []);
-              
+
               // Flatten socialLinks for YouTube
               rows = rows.map(row => {
                 const newRow = { ...row };
@@ -184,7 +184,7 @@ export default function YoutubeView() {
       {/* Elegant Alerts (replaces toasts) */}
       <AnimatePresence>
         {errorMsg && (
-          <motion.div 
+          <motion.div
             key="error-alert"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -192,13 +192,13 @@ export default function YoutubeView() {
             className="mb-6 p-4 bg-red-50/80 backdrop-blur border border-red-200 rounded-xl shadow-sm flex items-start gap-3 relative"
           >
             <div className="mt-0.5 bg-red-100 text-red-600 p-1 rounded-full shrink-0">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
             </div>
             <div className="pr-6">
               <h4 className="text-sm font-bold text-red-800 m-0">Error</h4>
               <p className="text-sm text-red-700 mt-1 mb-0">{errorMsg}</p>
             </div>
-            <button 
+            <button
               onClick={() => setErrorMsg(null)}
               className="absolute top-4 right-4 text-red-400 hover:text-red-700 transition-colors"
             >
@@ -208,21 +208,21 @@ export default function YoutubeView() {
         )}
 
         {successMsg && !isSearching && (
-          <motion.div 
+          <motion.div
             key="success-alert"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
             className="mb-6 p-4 bg-emerald-50/80 backdrop-blur border border-emerald-200 rounded-xl shadow-sm flex items-start gap-3 relative"
           >
-             <div className="mt-0.5 bg-emerald-100 text-emerald-600 p-1 rounded-full shrink-0">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            <div className="mt-0.5 bg-emerald-100 text-emerald-600 p-1 rounded-full shrink-0">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
             </div>
             <div className="pr-6">
               <h4 className="text-sm font-bold text-emerald-800 m-0">Success</h4>
               <p className="text-sm text-emerald-700 mt-1 mb-0">{successMsg}</p>
             </div>
-            <button 
+            <button
               onClick={() => setSuccessMsg(null)}
               className="absolute top-4 right-4 text-emerald-400 hover:text-emerald-700 transition-colors"
             >
@@ -247,162 +247,129 @@ export default function YoutubeView() {
               </h2>
             </div>
 
-        <div className="flex flex-col lg:flex-row gap-6 mb-6">
-          <div className="flex-[1.5] relative group">
-            <label className="text-[13px] font-semibold text-brand-dark block mb-1.5 uppercase tracking-wide">
-              Target Keyword
-            </label>
-            <div className="relative flex items-center">
-              <div className="absolute left-4 text-gray-400 group-focus-within:text-red-500 transition-colors pointer-events-none">
-                <Search className="w-4 h-4" />
+            <div className="flex flex-col lg:flex-row gap-6 mb-6">
+              <div className="flex-[1.5] relative group">
+                <label className="text-[13px] font-semibold text-brand-dark block mb-1.5 uppercase tracking-wide">
+                  Target Keyword
+                </label>
+                <div className="relative flex items-center">
+                  <div className="absolute left-4 text-gray-400 group-focus-within:text-red-500 transition-colors pointer-events-none">
+                    <Search className="w-4 h-4" />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="e.g. vloggers"
+                    value={keyword}
+                    onChange={(e) => setKeyword(e.target.value)}
+                    className="w-full pl-11 pr-4 py-3 text-[14px] bg-surface border border-border rounded-xl focus:outline-none focus:border-red-500 focus:ring-4 focus:ring-red-500/10 transition-all hover:border-red-500/40 text-brand-dark font-medium shadow-sm"
+                  />
+                </div>
               </div>
-              <input
-                type="text"
-                placeholder="e.g. vloggers"
-                value={keyword}
-                onChange={(e) => setKeyword(e.target.value)}
-                className="w-full pl-11 pr-4 py-3 text-[14px] bg-surface border border-border rounded-xl focus:outline-none focus:border-red-500 focus:ring-4 focus:ring-red-500/10 transition-all hover:border-red-500/40 text-brand-dark font-medium shadow-sm"
-              />
+
+              <div className="flex-[1.5] relative group">
+                <label className="text-[13px] font-semibold text-brand-dark block mb-1.5 uppercase tracking-wide">
+                  Custom Domain
+                </label>
+                <div className="relative flex items-center">
+                  <div className="absolute left-4 text-gray-400 group-focus-within:text-red-500 transition-colors pointer-events-none">
+                    <Mail className="w-4 h-4" />
+                  </div>
+                  <select
+                    value={customDomain}
+                    onChange={(e) => setCustomDomain(e.target.value)}
+                    className="w-full pl-11 pr-10 py-3 text-[14px] bg-surface border border-border rounded-xl focus:outline-none focus:border-red-500 focus:ring-4 focus:ring-red-500/10 transition-all hover:border-red-500/40 text-brand-dark font-medium shadow-sm appearance-none cursor-pointer"
+                  >
+                    <option value="@gmail.com,@yahoo.com">Both (@gmail & @yahoo)</option>
+                    <option value="@gmail.com">Only @gmail.com</option>
+                    <option value="@yahoo.com">Only @yahoo.com</option>
+                  </select>
+                  <div className="absolute right-4 pointer-events-none text-gray-400">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex-1 relative group">
+                <label className="text-[13px] font-semibold text-brand-dark block mb-1.5 uppercase tracking-wide">
+                  Max Emails
+                </label>
+                <input
+                  type="number"
+                  className="w-full px-4 py-3 text-[14px] bg-surface border border-border rounded-xl focus:outline-none focus:border-red-500 focus:ring-4 focus:ring-red-500/10 transition-all hover:border-red-500/40 text-brand-dark font-medium shadow-sm"
+                  value={maxEmails}
+                  onChange={(e) => setMaxEmails(e.target.value)}
+                  min={1}
+                />
+              </div>
             </div>
-          </div>
 
-          <div className="flex-[1.5] relative group">
-            <label className="text-[13px] font-semibold text-brand-dark block mb-1.5 uppercase tracking-wide">
-              Custom Domain
-            </label>
-            <div className="relative flex items-center">
-              <div className="absolute left-4 text-gray-400 group-focus-within:text-red-500 transition-colors pointer-events-none">
-                <Mail className="w-4 h-4" />
-              </div>
-              <select
-                value={customDomain}
-                onChange={(e) => setCustomDomain(e.target.value)}
-                className="w-full pl-11 pr-10 py-3 text-[14px] bg-surface border border-border rounded-xl focus:outline-none focus:border-red-500 focus:ring-4 focus:ring-red-500/10 transition-all hover:border-red-500/40 text-brand-dark font-medium shadow-sm appearance-none cursor-pointer"
-              >
-                <option value="@gmail.com,@yahoo.com">Both (@gmail & @yahoo)</option>
-                <option value="@gmail.com">Only @gmail.com</option>
-                <option value="@yahoo.com">Only @yahoo.com</option>
-              </select>
-              <div className="absolute right-4 pointer-events-none text-gray-400">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex-1 relative group">
-            <label className="text-[13px] font-semibold text-brand-dark block mb-1.5 uppercase tracking-wide">
-              Max Emails
-            </label>
-            <input
-              type="number"
-              className="w-full px-4 py-3 text-[14px] bg-surface border border-border rounded-xl focus:outline-none focus:border-red-500 focus:ring-4 focus:ring-red-500/10 transition-all hover:border-red-500/40 text-brand-dark font-medium shadow-sm"
-              value={maxEmails}
-              onChange={(e) => setMaxEmails(e.target.value)}
-              min={1}
-            />
-          </div>
-        </div>
-
-        <div className="flex justify-end pt-4 border-t border-border gap-3">
-          {isSearching && (
-            <motion.button
-              type="button"
-              onClick={handleAbort}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="px-6 py-3.5 rounded-xl text-white font-bold text-[15px] tracking-wide flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 shadow-md transition-all duration-300"
-            >
-              <X className="w-5 h-5" />
-              <span>Abort</span>
-            </motion.button>
-          )}
-          <motion.button
-            type="button"
-            onClick={handleSearch}
-            disabled={isSearching || isSuspended}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className={`
+            <div className="flex justify-end pt-4 border-t border-border gap-3">
+              {isSearching && (
+                <motion.button
+                  type="button"
+                  onClick={handleAbort}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="px-6 py-3.5 rounded-xl text-white font-bold text-[15px] tracking-wide flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 shadow-md transition-all duration-300"
+                >
+                  <X className="w-5 h-5" />
+                  <span>Abort</span>
+                </motion.button>
+              )}
+              <motion.button
+                type="button"
+                onClick={handleSearch}
+                disabled={isSearching || isSuspended}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className={`
               relative px-8 py-3.5 rounded-xl text-white font-bold text-[15px] tracking-wide flex items-center justify-center gap-2 overflow-hidden transition-all duration-300 min-w-[220px]
               ${(isSearching || isSuspended)
-                ? "bg-red-500 shadow-inner pointer-events-none"
-                : "bg-gradient-to-r from-red-600 to-red-500 shadow-md hover:shadow-lg"
-              }
+                    ? "bg-red-500 shadow-inner pointer-events-none"
+                    : "bg-gradient-to-r from-red-600 to-red-500 shadow-md hover:shadow-lg"
+                  }
             `}
-            title={isSuspended ? "Account suspended" : ""}
-          >
-            {isSearching ? (
-              <>
-                <Loader2 className="w-5 h-5 animate-spin" />
-                <span>Extracting... (Up to 10 min)</span>
-              </>
-            ) : (
-              <>
-                <Video className="w-5 h-5" />
-                <span>{isSuspended ? "Account Suspended" : "Extract YouTube Leads"}</span>
-              </>
-            )}
-          </motion.button>
-        </div>
+                title={isSuspended ? "Account suspended" : ""}
+              >
+                {isSearching ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <span>Extracting... (Up to 10 min)</span>
+                  </>
+                ) : (
+                  <>
+                    <Video className="w-5 h-5" />
+                    <span>{isSuspended ? "Account Suspended" : "Extract YouTube Leads"}</span>
+                  </>
+                )}
+              </motion.button>
+            </div>
           </motion.div>
           <div className="mt-4">
             <ExportProgress isActive={isSearching} logType="youtube" />
           </div>
         </div>
         <div className="flex flex-col min-h-[500px] gap-6">
-          <SignalScannerPanel 
-            status={isSearching ? "scanning" : (resultData?.length > 0 ? "complete" : "idle")} 
+          <SignalScannerPanel
+            status={isSearching ? "scanning" : (resultData?.length > 0 ? "complete" : "idle")}
             channelCount={resultData?.length || 0}
           />
-          
-          {(!resultData || resultData.length === 0) && !isSearching && (
-            <motion.div 
+
+          {/* {(!resultData || resultData.length === 0) && !isSearching && (
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
               className="bg-surface rounded-2xl p-6 border border-border shadow-md flex flex-col"
             >
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-1 h-3 bg-gradient-to-b from-brand-blue to-brand-cyan rounded-full" />
-                <h3 className="text-xs uppercase tracking-widest text-brand-blue font-semibold">Sample Channels</h3>
-              </div>
 
-              <div className="flex flex-col gap-3">
-                {[
-                  { name: "TechReviewHQ", category: "Technology", subs: "1.2M" },
-                  { name: "DailyVlogz", category: "Lifestyle", subs: "850K" },
-                  { name: "CodeWithMe", category: "Education", subs: "2.5M" },
-                ].map((channel, idx) => (
-                  <motion.div 
-                    key={idx}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.2 + (idx * 0.1) }}
-                    className="p-3 rounded-xl border border-border bg-[var(--rw-surface-hover)]/50 hover:bg-brand-blue/5 hover:border-brand-blue/20 transition-colors flex items-start gap-3"
-                  >
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-blue to-brand-sky flex items-center justify-center text-white font-bold text-xs shrink-0">
-                      {channel.name.charAt(0)}
-                    </div>
-                    <div className="overflow-hidden w-full">
-                      <div className="text-sm font-semibold text-brand-dark truncate">{channel.name}</div>
-                      <div className="text-xs text-gray-500 truncate flex items-center gap-1 mt-0.5">
-                        <Users className="w-3 h-3 text-brand-sky" />
-                        {channel.subs} subscribers
-                      </div>
-                      <div className="text-[11px] text-gray-400 truncate mt-0.5 uppercase tracking-wider font-medium">
-                        {channel.category}
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
             </motion.div>
-          )}
+          )} */}
         </div>
       </div>
 
       {!isSearching && resultData && resultData.length === 0 && (
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0 }} animate={{ opacity: 1 }}
           className="bg-surface rounded-2xl p-12 border border-border flex flex-col items-center justify-center text-center"
         >
@@ -420,10 +387,10 @@ export default function YoutubeView() {
       {resultData && resultData.length > 0 && !isSearching && (
         <>
           <RippleArrivalSignal isActive={true} />
-          <YoutubeResultsBottomSheet 
-            isOpen={isSheetOpen} 
+          <YoutubeResultsBottomSheet
+            isOpen={isSheetOpen}
             onOpen={() => setIsSheetOpen(true)}
-            onClose={() => setIsSheetOpen(false)} 
+            onClose={() => setIsSheetOpen(false)}
             onExport={handleExportCsv}
             data={resultData}
           />
