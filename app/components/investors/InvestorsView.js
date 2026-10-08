@@ -17,6 +17,7 @@ export default function InvestorsView() {
   const [industry, setIndustry] = useState("");
   const [targetAudience, setTargetAudience] = useState("");
   const [investmentStage, setInvestmentStage] = useState("");
+  const [country, setCountry] = useState("");
   const [investorLimit, setInvestorLimit] = useState(10);
   const [isSearching, setIsSearching] = useState(false);
   const [results, setResults] = useState(null);
@@ -38,7 +39,7 @@ export default function InvestorsView() {
     setIsSheetOpen(false);
 
     try {
-      const data = await discoverInvestorsV2(companyDescription, industry, targetAudience, investmentStage, investorLimit);
+      const data = await discoverInvestorsV2(companyDescription, industry, targetAudience, investmentStage, investorLimit, country || null);
       setResults(data);
       if (data.investors && data.investors.length > 0) {
         setSuccessMsg(`Successfully discovered ${data.investors.length} relevant investors!`);
@@ -229,25 +230,48 @@ export default function InvestorsView() {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-1.5 mt-2">
-                <label className="text-[13px] font-semibold text-brand-dark uppercase tracking-wide">
-                  Investment Stage
-                </label>
-                <select
-                  required
-                  value={investmentStage}
-                  onChange={(e) => setInvestmentStage(e.target.value)}
-                  className="w-full px-4 py-3 text-sm bg-surface border border-border rounded-xl focus:outline-none focus:border-[#4ec8ef] focus:ring-4 focus:ring-[#4ec8ef]/10 transition-all hover:border-[#4ec8ef]/40 text-brand-dark font-medium"
-                >
-                  <option value="" disabled>Select target stage</option>
-                  {[
-                    "Pre Seed Round", "Seed Round", "Series A", "Series B", "Series C", "Series D", 
-                    "Venture Round", "Angel Round", "Convertible Note", "Grant", "Debt Financing", 
-                    "Private Equity Round", "Corporate Round"
-                  ].map(stage => (
-                    <option key={stage} value={stage}>{stage}</option>
-                  ))}
-                </select>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                <div className="flex flex-col gap-1.5 relative">
+                  <label className="text-[13px] font-semibold text-brand-dark uppercase tracking-wide">
+                    Investment Stage
+                  </label>
+                  <select
+                    required
+                    value={investmentStage}
+                    onChange={(e) => setInvestmentStage(e.target.value)}
+                    className="w-full px-4 py-3 text-sm bg-surface border border-border rounded-xl focus:outline-none focus:border-[#4ec8ef] focus:ring-4 focus:ring-[#4ec8ef]/10 transition-all hover:border-[#4ec8ef]/40 text-brand-dark font-medium"
+                  >
+                    <option value="" disabled>Select target stage</option>
+                    {[
+                      "Pre Seed Round", "Seed Round", "Series A", "Series B", "Series C", "Series D", 
+                      "Venture Round", "Angel Round", "Convertible Note", "Grant", "Debt Financing", 
+                      "Private Equity Round", "Corporate Round"
+                    ].map(stage => (
+                      <option key={stage} value={stage}>{stage}</option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div className="flex flex-col gap-1.5 relative">
+                  <label className="text-[13px] font-semibold text-brand-dark uppercase tracking-wide flex items-center justify-between">
+                    <span>Country</span>
+                    <span className="text-[10px] text-gray-400 font-normal normal-case">Optional</span>
+                  </label>
+                  <select
+                    value={country}
+                    onChange={(e) => setCountry(e.target.value)}
+                    className="w-full px-4 py-3 text-sm bg-surface border border-border rounded-xl focus:outline-none focus:border-[#4ec8ef] focus:ring-4 focus:ring-[#4ec8ef]/10 transition-all hover:border-[#4ec8ef]/40 text-brand-dark font-medium"
+                  >
+                    <option value="">Any country</option>
+                    {[
+                      "United States", "United Kingdom", "Canada", "Germany", "France", 
+                      "India", "Australia", "Singapore", "Israel", "Switzerland", "Netherlands",
+                      "Sweden", "Spain", "Italy", "Japan", "South Korea"
+                    ].map(c => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
               <div className="mb-2">
@@ -348,6 +372,12 @@ export default function InvestorsView() {
                     <TrendingUp className="w-4 h-4 text-gray-400" />
                     Stage: {investmentStage}
                   </p>
+                  {results.metadata?.country_filter && (
+                    <p className="flex items-center gap-2 text-gray-600 font-medium text-sm">
+                      <Globe className="w-4 h-4 text-gray-400" />
+                      Country: {results.metadata.country_filter}
+                    </p>
+                  )}
                   {results.metadata?.eligibility_stats && (
                     <div className="flex flex-col gap-1.5 mt-2">
                       <p className="flex items-center justify-between text-gray-600 font-medium text-xs">

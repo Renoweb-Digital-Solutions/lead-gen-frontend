@@ -145,11 +145,27 @@ function DetailDrawer({ data, onClose }) {
   if (!data) return null;
 
   const renderField = (label, value) => {
-    if (!value || value === "Unknown" || value === "None") return null;
+    if (!value || value === "Unknown" || value === "None" || (typeof value === 'object' && Object.keys(value).length === 0)) return null;
+    
+    let displayValue = value;
+    if (typeof value === 'object') {
+      if (Array.isArray(value)) {
+        displayValue = value.join(', ');
+      } else {
+        displayValue = (
+          <ul className="list-disc pl-4 space-y-1">
+            {Object.entries(value).map(([k, v]) => (
+              <li key={k}><span className="font-medium text-[var(--rw-text)]">{k}:</span> {v}</li>
+            ))}
+          </ul>
+        );
+      }
+    }
+    
     return (
       <div className="mb-6">
         <h4 className="text-xs font-bold text-[var(--rw-text-muted)] uppercase tracking-wider mb-2">{label}</h4>
-        <p className="text-sm text-[var(--rw-text)] leading-relaxed">{typeof value === 'object' ? JSON.stringify(value) : String(value)}</p>
+        <div className="text-sm text-[var(--rw-text-secondary)] leading-relaxed">{displayValue}</div>
       </div>
     );
   };
@@ -195,9 +211,9 @@ function DetailDrawer({ data, onClose }) {
             
             {/* Action Links */}
             <div className="flex items-center gap-3 mb-8">
-              {(data.linkedin || data.linkedin_url) && (
-                <a href={data.linkedin || data.linkedin_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs font-semibold text-brand-sky hover:text-brand-blue bg-brand-blue/10 px-3 py-1.5 rounded-md transition-colors">
-                  <ExternalLink className="w-3.5 h-3.5" /> LinkedIn
+              {(data.profile_url || data.linkedin || data.linkedin_url) && (
+                <a href={data.profile_url || data.linkedin || data.linkedin_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs font-semibold text-brand-sky hover:text-brand-blue bg-brand-blue/10 px-3 py-1.5 rounded-md transition-colors">
+                  <ExternalLink className="w-3.5 h-3.5" /> Profile
                 </a>
               )}
               {(data.website || data.firm_website) && (
@@ -207,7 +223,7 @@ function DetailDrawer({ data, onClose }) {
               )}
               {data.source && (
                 <span className="flex items-center gap-1.5 text-xs font-semibold text-[var(--rw-text-secondary)] bg-[var(--rw-surface-hover)] px-3 py-1.5 rounded-md">
-                  <Info className="w-3.5 h-3.5" /> Source: {data.source}
+                  <Info className="w-3.5 h-3.5" /> Source: {Array.isArray(data.source) ? data.source.join(", ") : data.source}
                 </span>
               )}
             </div>
@@ -231,6 +247,12 @@ function DetailDrawer({ data, onClose }) {
             {renderField("Eligibility Criteria", data.eligibility_criteria)}
             
             {renderField("Investment Stages", data.investment_stage || data.stages)}
+            
+            {data.extra_details?.portfolio_companies_count && renderField("Portfolio Companies", data.extra_details.portfolio_companies_count)}
+            
+            {data.extra_details?.deals_count && renderField("Total Deals", data.extra_details.deals_count)}
+            
+            {data.extra_details?.stages_breakdown && renderField("Deals by Stage", data.extra_details.stages_breakdown)}
 
           </div>
         </motion.div>
@@ -273,6 +295,17 @@ export default function InvestorResultsTable({ data }) {
       cellRenderer: FocusCellRenderer,
       minWidth: 220,
       flex: 1.5,
+    },
+    {
+      headerName: "Check Size",
+      field: "check_size",
+      minWidth: 160,
+      flex: 1,
+      cellRenderer: (params) => (
+        <div className="flex items-center h-full">
+          <span className="text-sm font-medium text-[var(--rw-text-secondary)]">{params.value || "—"}</span>
+        </div>
+      )
     },
     {
       headerName: "Location",

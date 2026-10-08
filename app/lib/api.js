@@ -750,7 +750,7 @@ export async function discoverInvestors(companyDescription, industry, targetAudi
   return res.json();
 }
 
-export async function discoverInvestorsV2(companyDescription, industry, targetAudience, investmentStage, investorLimit = 50) {
+export async function discoverInvestorsV2(companyDescription, industry, targetAudience, investmentStage, investorLimit = 50, country = null) {
   const res = await fetchWithAuth(`/investors_v2/discover`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -759,7 +759,8 @@ export async function discoverInvestorsV2(companyDescription, industry, targetAu
       industry,
       target_audience: targetAudience,
       investment_stage: investmentStage,
-      investor_limit: investorLimit
+      investor_limit: investorLimit,
+      country
     }),
   });
 
