@@ -24,14 +24,7 @@ import { useRouter } from "next/navigation";
  * PROPS OUTGOING: None.
  */
 
-const MODULES = [
-  { id: "leadgen", label: "Lead Gen Pipeline", icon: Target },
-  { id: "gmaps", label: "Google Maps", icon: Map },
-  { id: "youtube", label: "YouTube Scraper", icon: Activity },
-  { id: "instagram", label: "Instagram Scraper", icon: Camera },
-  { id: "b2b", label: "B2B Scraper", icon: Menu }, // using existing imports for icons
-  { id: "investors", label: "Investor Data", icon: Activity },
-];
+import { PIPELINES as MODULES } from "../lib/pipelinesConfig";
 
 export default function Header({ onClearAll, activeModule, onModuleChange, onToggleSidebar, isDark, onToggleTheme }) {
   const [health, setHealth] = useState(null);

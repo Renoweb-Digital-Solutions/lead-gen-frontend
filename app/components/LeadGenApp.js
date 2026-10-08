@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Papa from "papaparse";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
@@ -30,6 +30,7 @@ const ICON_MAP = {
 import { useSessionState } from "../hooks/useSessionState";
 import { startPipelineJob, downloadBlob } from "../lib/api";
 import { STEPS } from "../lib/constants";
+import { PIPELINES } from "../lib/pipelinesConfig";
 
 /**
  * Component: LeadGenApp
@@ -54,6 +55,13 @@ export default function LeadGenApp() {
   const { formState, updateField, updateFields, clearAll } = useFormState();
   const [activeStep, setActiveStep] = useSessionState("renoweb-active-step", 0);
   const [activeModule, setActiveModule] = useSessionState("renoweb-active-module", "leadgen");
+  
+  useEffect(() => {
+    if (PIPELINES.length > 0 && !PIPELINES.some(p => p.id === activeModule)) {
+      setActiveModule(PIPELINES[0].id);
+    }
+  }, [activeModule, setActiveModule]);
+
   const [showClearModal, setShowClearModal] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [exportResults, setExportResults] = useState({});

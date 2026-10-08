@@ -6,7 +6,7 @@ import { useAuth } from "../lib/AuthContext";
 import { useRouter } from "next/navigation";
 import { STEPS } from "../lib/constants";
 import { useSessionState } from "../hooks/useSessionState";
-
+import { PIPELINES } from "../lib/pipelinesConfig";
 const ICON_MAP = {
   Users: Users,
   Building2: Building2,
@@ -94,48 +94,19 @@ export default function Sidebar({
 
         {/* Mobile Top Navigation */}
         <div className="lg:hidden flex flex-col gap-1 mb-6 pb-6 border-b border-border">
-          <button 
-             onClick={() => { onModuleChange?.('leadgen'); onClose?.(); }}
-             className={`flex items-center gap-3 p-3 rounded-xl transition-all ${activeModule === 'leadgen' ? 'bg-[var(--rw-surface-hover)] text-brand-blue font-bold shadow-sm' : 'text-gray-500 hover:bg-[var(--rw-surface-hover)] font-medium'}`}
-          >
-             <Target className="w-5 h-5" />
-             <span className="text-[14px]">Lead Gen Pipeline</span>
-          </button>
-          <button 
-             onClick={() => { onModuleChange?.('gmaps'); onClose?.(); }}
-             className={`flex items-center gap-3 p-3 rounded-xl transition-all ${activeModule === 'gmaps' ? 'bg-[var(--rw-surface-hover)] text-brand-blue font-bold shadow-sm' : 'text-gray-500 hover:bg-[var(--rw-surface-hover)] font-medium'}`}
-          >
-             <Map className="w-5 h-5" />
-             <span className="text-[14px]">Google Maps</span>
-          </button>
-          <button 
-             onClick={() => { onModuleChange?.('youtube'); onClose?.(); }}
-             className={`flex items-center gap-3 p-3 rounded-xl transition-all ${activeModule === 'youtube' ? 'bg-[var(--rw-surface-hover)] text-brand-blue font-bold shadow-sm' : 'text-gray-500 hover:bg-[var(--rw-surface-hover)] font-medium'}`}
-          >
-             <Activity className="w-5 h-5" />
-             <span className="text-[14px]">YouTube Scraper</span>
-          </button>
-          <button 
-             onClick={() => { onModuleChange?.('instagram'); onClose?.(); }}
-             className={`flex items-center gap-3 p-3 rounded-xl transition-all ${activeModule === 'instagram' ? 'bg-[var(--rw-surface-hover)] text-brand-blue font-bold shadow-sm' : 'text-gray-500 hover:bg-[var(--rw-surface-hover)] font-medium'}`}
-          >
-             <Camera className="w-5 h-5" />
-             <span className="text-[14px]">Instagram Scraper</span>
-          </button>
-          <button 
-             onClick={() => { onModuleChange?.('b2b'); onClose?.(); }}
-             className={`flex items-center gap-3 p-3 rounded-xl transition-all ${activeModule === 'b2b' ? 'bg-[var(--rw-surface-hover)] text-brand-blue font-bold shadow-sm' : 'text-gray-500 hover:bg-[var(--rw-surface-hover)] font-medium'}`}
-          >
-             <Menu className="w-5 h-5" />
-             <span className="text-[14px]">B2B Scraper</span>
-          </button>
-          <button 
-             onClick={() => { onModuleChange?.('investors'); onClose?.(); }}
-             className={`flex items-center gap-3 p-3 rounded-xl transition-all ${activeModule === 'investors' ? 'bg-[var(--rw-surface-hover)] text-brand-blue font-bold shadow-sm' : 'text-gray-500 hover:bg-[var(--rw-surface-hover)] font-medium'}`}
-          >
-             <Activity className="w-5 h-5" />
-             <span className="text-[14px]">Investor Pipeline</span>
-          </button>
+          {PIPELINES.map((module) => {
+            const Icon = module.icon;
+            return (
+              <button 
+                 key={module.id}
+                 onClick={() => { onModuleChange?.(module.id); onClose?.(); }}
+                 className={`flex items-center gap-3 p-3 rounded-xl transition-all ${activeModule === module.id ? 'bg-[var(--rw-surface-hover)] text-brand-blue font-bold shadow-sm' : 'text-gray-500 hover:bg-[var(--rw-surface-hover)] font-medium'}`}
+              >
+                 <Icon className="w-5 h-5" />
+                 <span className="text-[14px]">{module.label}</span>
+              </button>
+            );
+          })}
           
           <div className="h-px w-full bg-gray-200/60 my-2" />
           
