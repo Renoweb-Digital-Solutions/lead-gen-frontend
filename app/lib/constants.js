@@ -115,11 +115,14 @@ export const PERSON_TITLES = [
   "Chief Operating Officer",
   "Chief Technology Officer",
   "Chief Marketing Officer",
+  "CHRO",
+  "Chief HR Officer",
   "Director Of Marketing",
   "Digital Marketing Manager",
   "Business Development Manager",
   "Head Of Marketing",
   "Head Of Sales",
+  "HR Head",
   "Product Manager",
   "Project Manager",
   "Frontend Developer",
@@ -145,6 +148,7 @@ export const PERSON_TITLES = [
   "Brand Manager",
   "Data Analyst",
   "Software Engineer",
+  "Talent Acquisition Head",
 ];
 
 // ─── Countries ────────────────────────────────────────────
