@@ -93,6 +93,15 @@
   --color-slate-900: var(--rw-text);
   --color-blue-50: rgba(48, 143, 239, 0.1);
   --color-blue-100: rgba(48, 143, 239, 0.2);
+
+  /* Brand Colors for better contrast in dark mode */
+  --rw-deep-blue: #60a5fa;
+  --rw-royal-blue: #818cf8;
+  --rw-bright-blue: #38bdf8;
+  
+  /* Preserve original button gradients so white text remains readable */
+  --rw-gradient-primary: linear-gradient(135deg, #023dbb, #308fef);
+  --rw-gradient-hero: linear-gradient(135deg, #023dbb 0%, #4460ef 50%, #308fef 100%);
 }
 
 /* ── Tailwind v4 Theme ───────────────────────────────────── */
@@ -101,11 +110,11 @@
   --color-foreground: var(--rw-text);
   --color-surface: var(--rw-surface);
   --color-border: var(--rw-border);
-  --color-brand-blue: #023dbb;
-  --color-brand-indigo: #4460ef;
-  --color-brand-sky: #308fef;
-  --color-brand-cyan: #4ec8ef;
-  --color-brand-amber: #ffc857;
+  --color-brand-blue: var(--rw-deep-blue);
+  --color-brand-indigo: var(--rw-royal-blue);
+  --color-brand-sky: var(--rw-bright-blue);
+  --color-brand-cyan: var(--rw-cyan);
+  --color-brand-amber: var(--rw-yellow);
   --color-brand-dark: var(--rw-dark);
   --shadow-sm: var(--rw-shadow-sm);
   --shadow-md: var(--rw-shadow-md);

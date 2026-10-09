@@ -10,6 +10,7 @@ export default function MultiSelect({
   onChange,
   placeholder = "Select options...",
   searchable = true,
+  dropUp = false,
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -26,6 +27,19 @@ export default function MultiSelect({
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
+
+  // Elevate the parent card's z-index when this dropdown is open
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const card = containerRef.current.closest('.rw-card-wrapper');
+    if (!card) return;
+    
+    if (isOpen) {
+      card.style.setProperty('z-index', '100', 'important');
+    } else {
+      card.style.removeProperty('z-index');
+    }
+  }, [isOpen]);
 
   const filtered = options.filter((opt) =>
     opt.toLowerCase().includes(search.toLowerCase())
@@ -87,7 +101,10 @@ export default function MultiSelect({
         </button>
 
         {isOpen && (
-          <div className="rw-dropdown-menu">
+          <div 
+            className="rw-dropdown-menu"
+            style={dropUp ? { bottom: "calc(100% + 4px)", top: "auto" } : {}}
+          >
             {searchable && (
               <div className="rw-dropdown-search">
                 <input

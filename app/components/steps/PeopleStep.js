@@ -15,8 +15,8 @@ import {
   SENIORITY_OPTIONS,
   PERSON_FUNCTIONS,
   PERSON_TITLES,
-  COUNTRIES,
 } from "../../lib/constants";
+import { Country, State, City } from "country-state-city";
 
 const sectionVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -27,7 +27,7 @@ const Card = ({ title, children, zIndex }) => (
   <motion.div 
     variants={sectionVariants}
     style={{ zIndex }}
-    className={`relative bg-surface rounded-2xl p-6 lg:p-7 border border-border shadow-sm hover:shadow-lg hover:-translate-y-[2px] transition-all duration-200 mb-6`}
+    className={`rw-card-wrapper relative bg-surface rounded-2xl p-6 lg:p-7 border border-border shadow-sm hover:shadow-lg hover:-translate-y-[2px] transition-all duration-200 mb-6`}
   >
     <div className="flex items-center gap-2.5 mb-6 pb-3 border-b border-brand-blue/5">
       <div className="w-1 h-3.5 bg-gradient-to-b from-brand-blue to-brand-cyan rounded-full" />
@@ -38,6 +38,33 @@ const Card = ({ title, children, zIndex }) => (
 );
 
 export default function PeopleStep({ formState, updateField }) {
+  // Cascading Location Logic
+  const countryOptions = Country.getAllCountries().map(c => ({
+    label: c.name,
+    value: c.name,
+    isoCode: c.isoCode
+  }));
+
+  const selectedCountryName = formState.personLocationCountryIncludes?.[0];
+  const selectedCountry = countryOptions.find(c => c.value === selectedCountryName);
+  const selectedCountryIso = selectedCountry?.isoCode;
+
+  const stateOptions = selectedCountryIso 
+    ? State.getStatesOfCountry(selectedCountryIso).map(s => ({
+        label: s.name,
+        value: s.name,
+        isoCode: s.isoCode
+      }))
+    : [];
+
+  const selectedStateName = formState.personLocationStateIncludes?.[0];
+  const selectedState = stateOptions.find(s => s.value === selectedStateName);
+  const selectedStateIso = selectedState?.isoCode;
+
+  // MultiSelect expects an array of strings
+  const cityOptions = (selectedCountryIso && selectedStateIso)
+    ? City.getCitiesOfState(selectedCountryIso, selectedStateIso).map(c => c.name)
+    : [];
   return (
     <motion.div
       initial="hidden"
@@ -157,24 +184,36 @@ export default function PeopleStep({ formState, updateField }) {
       {/* ── Location ────────────────────────────────────────── */}
       <Card title="Person Location" zIndex={20}>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          <MultiSelect
+          <SearchableDropdown
             label="Country"
-            options={COUNTRIES}
-            selected={formState.personLocationCountryIncludes}
-            onChange={(val) => updateField("personLocationCountryIncludes", val)}
-            placeholder="Select countries..."
+            options={countryOptions}
+            value={selectedCountryName || null}
+            onChange={(val) => {
+              updateField("personLocationCountryIncludes", val ? [val] : []);
+              updateField("personLocationStateIncludes", []);
+              updateField("personLocationCityIncludes", []);
+            }}
+            placeholder="Select a country..."
+            dropUp={true}
           />
-          <TagInput
+          <SearchableDropdown
             label="State / Region"
-            tags={formState.personLocationStateIncludes}
-            onChange={(val) => updateField("personLocationStateIncludes", val)}
-            placeholder="e.g. California"
+            options={stateOptions}
+            value={selectedStateName || null}
+            onChange={(val) => {
+              updateField("personLocationStateIncludes", val ? [val] : []);
+              updateField("personLocationCityIncludes", []);
+            }}
+            placeholder={selectedCountryIso ? "Select a state..." : "Select a country first"}
+            dropUp={true}
           />
-          <TagInput
+          <MultiSelect
             label="City"
-            tags={formState.personLocationCityIncludes}
+            options={cityOptions}
+            selected={formState.personLocationCityIncludes}
             onChange={(val) => updateField("personLocationCityIncludes", val)}
-            placeholder="e.g. Los Angeles"
+            placeholder={selectedStateIso ? "Select cities..." : "Select a state first"}
+            dropUp={true}
           />
         </div>
       </Card>
