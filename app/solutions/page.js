@@ -6,7 +6,8 @@ import Footer from '@/app/components/landing/Footer';
 import AuthModal from '@/app/components/AuthModal';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Briefcase, MapPin, Video, Building, LineChart, CheckCircle2 } from 'lucide-react';
+import { Briefcase, MapPin, Video, Building, LineChart, CheckCircle2, Target } from 'lucide-react';
+import Link from 'next/link';
 
 export default function SolutionsPage() {
     const [authModalOpen, setAuthModalOpen] = useState(false);
@@ -15,69 +16,46 @@ export default function SolutionsPage() {
 
     const solutions = [
         {
-            id: 'sales',
-            title: 'Sales Teams & SDRs',
-            hero: 'Stop guessing who to call.',
-            narrative: 'Build hyper-targeted, verified prospect lists by title, seniority, and industry in minutes instead of days of manual research. Feed these verified contacts directly into your outbound sequences.',
-            icon: Briefcase,
+            id: 'sales-teams',
+            title: 'Sales Teams',
+            hero: 'Outbound prospecting, AI-scored pipeline, hiring-signal prioritization.',
+            narrative: 'Sales teams use Simpleads for outbound prospecting and pipeline prioritization. Combine People Search, Company Intelligence, and AI Scoring to build lists that are already ICP-fit.',
+            icon: Target,
             color: 'blue',
             bgGlow: 'from-blue-500/20 to-indigo-500/20',
             activeColor: 'bg-blue-50 text-blue-600 border-blue-200',
             gradientText: 'from-blue-600 to-indigo-600',
-            benefits: ['Verified direct dials & emails', 'Filter by seniority & department', 'Export directly to CRM'],
-            image: '/features_images/lead-gen.png'
+            benefits: ['Hyper-Targeted Prospect Lists', 'Hiring-Signal Prioritization', 'AI Scoring Pipeline', 'Direct CRM Exports'],
+            image: '/features_images/ai_lead_scoring/from_raw_leads_to_qualified_prospects.png',
+            link: '/solutions/sales-teams'
         },
         {
-            id: 'local',
-            title: 'Local Service & Agencies',
-            hero: 'Dominate your city, block by block.',
-            narrative: 'Use the Google Maps engine to find every relevant local business in a region—contractors, agencies, franchises—and reach decision-makers directly before your competitors even know they exist.',
-            icon: MapPin,
+            id: 'recruiters',
+            title: 'Recruiters & Staffing Agencies',
+            hero: 'Hiring-signal leads for business development, not just candidate sourcing.',
+            narrative: 'Recruiters and staffing agencies use the same hiring-signal data to find new business. Find companies actively hiring, cross-reference job data and build client outreach lists.',
+            icon: Briefcase,
             color: 'teal',
-            bgGlow: 'from-teal-500/20 to-cyan-500/20',
+            bgGlow: 'from-teal-500/20 to-emerald-500/20',
             activeColor: 'bg-teal-50 text-teal-600 border-teal-200',
-            gradientText: 'from-teal-600 to-cyan-600',
-            benefits: ['AI-suggested niche keywords', 'Extract business phone numbers', 'Identify local market gaps'],
-            image: '/features_images/gmaps.png'
-        },
-        {
-            id: 'creators',
-            title: 'Content Creators & Scouts',
-            hero: 'Find your next collaborator first.',
-            narrative: 'Use the YouTube and Instagram scrapers to identify creators by niche and audience, complete with contact info. Stop manually scrolling and start building strategic partnerships at scale.',
-            icon: Video,
-            color: 'red',
-            bgGlow: 'from-red-500/20 to-rose-500/20',
-            activeColor: 'bg-red-50 text-red-600 border-red-200',
-            gradientText: 'from-red-600 to-rose-600',
-            benefits: ['Extract public emails instantly', 'Target by specific niche keywords', 'Pull follower lists automatically'],
-            image: '/features_images/yt.png'
-        },
-        {
-            id: 'b2b',
-            title: 'B2B Wholesalers',
-            hero: 'Source and sell smarter.',
-            narrative: 'Use the directory scraper to pull verified supplier and buyer data from major B2B marketplaces like IndiaMART and Yellow Pages. Expand your distribution network with unprecedented speed.',
-            icon: Building,
-            color: 'indigo',
-            bgGlow: 'from-indigo-500/20 to-violet-500/20',
-            activeColor: 'bg-indigo-50 text-indigo-600 border-indigo-200',
-            gradientText: 'from-indigo-600 to-violet-600',
-            benefits: ['Bulk directory extraction', 'Discover new suppliers', 'Verified business contact data'],
-            image: '/features_images/b2b.png'
+            gradientText: 'from-teal-600 to-emerald-600',
+            benefits: ['Business Development', 'Open Role Filtering', 'Hiring Manager Contact Details', 'Client Sourcing Tool'],
+            image: '/features_images/active_job_signals/job_activity_filters_dashboard.png',
+            link: '/solutions/recruiters'
         },
         {
             id: 'agencies',
-            title: 'Growth Agencies',
-            hero: 'One platform, every client\'s TAM.',
-            narrative: 'Position SimpleAds as the single tool your agency uses across all client verticals. Instead of stitching together five different expensive scraper subscriptions, manage all list building under one roof.',
-            icon: LineChart,
+            title: 'Marketing & Growth Agencies',
+            hero: 'Local and B2B client prospecting for new-business outreach.',
+            narrative: 'Marketing and growth agencies use Google Maps Search and firmographic filtering to build local and B2B client lists in one platform.',
+            icon: MapPin,
             color: 'purple',
             bgGlow: 'from-purple-500/20 to-fuchsia-500/20',
             activeColor: 'bg-purple-50 text-purple-600 border-purple-200',
             gradientText: 'from-purple-600 to-fuchsia-600',
-            benefits: ['Cross-niche targeting', 'Reduce software overhead', 'Infinite TAM generation'],
-            image: '/features_images/lead-gen.png'
+            benefits: ['Local Client Acquisition', 'Google Maps Search', 'B2B Prospecting', 'Clean Agency Reporting'],
+            image: '/features_images/google_maps_search/discover_local_businesses_map.png',
+            link: '/solutions/agencies'
         }
     ];
 
@@ -131,15 +109,19 @@ export default function SolutionsPage() {
                 <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-bl from-brand-sky/10 to-transparent blur-3xl pointer-events-none rounded-full" />
                 
                 <div className="max-w-4xl mx-auto text-center relative z-10">
+                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-blue-600 font-semibold text-sm mb-6">
+                        <Briefcase className="w-4 h-4" />
+                        Solutions By Team
+                    </div>
                     <h1 className="solutions-hero text-5xl md:text-6xl lg:text-7xl font-display font-extrabold text-brand-dark tracking-tight leading-[1.05] mb-8">
-                        Built for teams that <br className="hidden md:block" />
+                        One Platform, <br className="hidden md:block" />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#023dbb] to-[#4ec8ef]">
-                            refuse to settle.
+                            Three Core Use Cases.
                         </span>
                     </h1>
                     
                     <p className="solutions-hero text-xl text-slate-500 max-w-2xl mx-auto font-medium">
-                        Explore how different industries use SimpleAds to uncover hidden prospects, dominate their local markets, and scale revenue predictably.
+                        The same pipeline, three very different jobs to be done. See how each team actually uses Simpleads day to day.
                     </p>
                 </div>
             </section>
@@ -204,10 +186,13 @@ export default function SolutionsPage() {
                                     ))}
                                 </ul>
 
-                                <div className="pt-4">
+                                <div className="pt-4 flex items-center gap-4">
                                     <button onClick={() => setAuthModalOpen(true)} className={`px-8 py-4 rounded-xl text-white font-bold bg-gradient-to-r ${activeSolution.gradientText} shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300`}>
-                                        Start Building Lists
+                                        Start Free
                                     </button>
+                                    <Link href={activeSolution.link} className={`px-6 py-4 rounded-xl font-bold bg-slate-50 text-slate-700 hover:bg-slate-100 transition-colors`}>
+                                        View Full Solution
+                                    </Link>
                                 </div>
                             </div>
 
@@ -250,6 +235,17 @@ export default function SolutionsPage() {
                     50% { transform: translateY(-10px); }
                 }
             `}</style>
+
+            <section className="py-24 px-6 bg-[#0a1128] text-center relative overflow-hidden">
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#1E61ED]/20 via-[#0a1128] to-[#0a1128] pointer-events-none" />
+                <div className="max-w-3xl mx-auto relative z-10 fade-up-item">
+                    <h2 className="text-4xl md:text-5xl font-display font-bold text-white mb-6">Not sure which fits? Start free and find out.</h2>
+                    <p className="text-xl text-slate-400 mb-10">Every solution runs on the same pipeline.</p>
+                    <button onClick={() => setAuthModalOpen(true)} className="px-10 py-5 rounded-2xl bg-[#1E61ED] text-white font-bold text-lg hover:bg-blue-600 transition-colors shadow-lg hover:shadow-blue-500/25">
+                        Start Free — No Card Required
+                    </button>
+                </div>
+            </section>
 
             <Footer />
         </div>
