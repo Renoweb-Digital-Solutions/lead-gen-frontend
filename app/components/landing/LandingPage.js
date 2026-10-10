@@ -43,8 +43,9 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-white text-brand-dark overflow-x-hidden font-sans selection:bg-brand-cyan/30 selection:text-brand-dark">
+    <main className="min-h-screen bg-white text-brand-dark font-sans selection:bg-brand-cyan/30 selection:text-brand-dark">
       <HeroSection />
+      <div className="overflow-x-hidden">
       <ProblemSection />
       <HowItWorks />
       <FeatureBento />
@@ -52,8 +53,9 @@ export default function LandingPage() {
       <Testimonials />
       <Pricing />
       <FAQ />
-      <FinalCTA />
-      <Footer />
+        <FinalCTA />
+        <Footer />
+      </div>
     </main>
   );
 }

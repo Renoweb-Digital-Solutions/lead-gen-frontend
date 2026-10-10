@@ -1,0 +1,195 @@
+{
+  "slug": "simpleads-vs-lusha",
+  "meta": {
+    "title": "Simpleads vs Lusha: Full Pipeline vs Chrome-Extension Contact Reveal",
+    "description": "Compare Simpleads and Lusha on data coverage, hiring signals, firmographic filtering, AI scoring and pricing, feature by feature."
+  },
+  "hub": {
+    "competitor": "Lusha",
+    "description": "Full Pipeline vs Chrome-Extension Contact Reveal"
+  },
+  "sections": [
+    {
+      "type": "hero",
+      "data": {
+        "title": "Simpleads vs Lusha: Full Pipeline vs Chrome-Extension Contact Reveal",
+        "intro": "Lusha is built around a simple, effective core: a Chrome extension that reveals verified emails and direct dials while you browse LinkedIn or a company website, backed by a 300M+ contact database. Simpleads is built differently — a guided pipeline where you filter first (title, seniority, company, hiring signals) and then export a scored list, rather than revealing contacts one profile at a time.\nIndependent testing has also flagged a real gap between Lusha's claimed accuracy and its actual lookup coverage — in one March 2026 test of 300 B2B contacts, Lusha returned an email for only 31% of lookups, even though the emails it did find were accurate. That's a coverage problem, not just an accuracy one, and it's worth factoring into a credit-based pricing decision.",
+        "prosCons": [
+          {
+            "title": "Simpleads",
+            "items": [
+              "Filter-first pipeline: People, Company, Jobs, Scoring, Export",
+              "Firmographic + hiring-signal filtering built in",
+              "Plan-based pricing, not per-credit lookup"
+            ]
+          },
+          {
+            "title": "Lusha",
+            "items": [
+              "Chrome extension reveals contacts on LinkedIn/company sites",
+              "300M+ contact database, credit-based pricing ($37-$300/user/mo)",
+              "31% email-lookup coverage in independent March 2026 testing"
+            ]
+          }
+        ],
+        "cta": "Build a Filtered List Free →"
+      }
+    },
+    {
+      "type": "comparisonTable",
+      "data": {
+        "title": "At a Glance",
+        "intro": "Lusha's strength is a fast, browser-based reveal workflow for contacts you've already found one at a time. Simpleads' strength is filtering a large pool of leads down to the right ones — by title, company, and hiring activity — before you ever spend a credit or an export.",
+        "headers": ["Category", "Simpleads", "Lusha"],
+        "rows": [
+          ["Primary purpose", "Filter-first pipeline: build and score a targeted list before export", "Chrome-extension contact reveal, one profile at a time"],
+          ["Core workflow", "Set filters across People/Company/Jobs, then export a scored list", "Browse LinkedIn or a website, click reveal on a specific profile"],
+          ["Firmographic filtering", "Industry, employee count, domain, keywords built into Company step", "Limited firmographic filtering vs. contact-reveal focus"],
+          ["Hiring-signal cross-referencing", "Built-in Jobs step: filter by title, location, recency", "Not a core, built-in feature"],
+          ["AI lead scoring", "Scores leads against your company description and target roles", "Not offered — Lusha reveals contacts, it doesn't rank them"],
+          ["Local business / Google Maps search", "Dedicated Google Maps Search workflow included", "Not offered"],
+          ["Pricing model", "Plan-based (Starter/Pro/Enterprise), unlimited filtering within plan limits", "Credit-based per contact reveal ($37-$300/user/mo)"],
+          ["Independently tested coverage", "N/A — filter-based results, not per-lookup reveal", "31% email-lookup success rate in a March 2026 independent test"]
+        ]
+      }
+    },
+    {
+      "type": "prosCons",
+      "data": {
+        "title": "Contact Discovery: Filter-First vs. Reveal-One-at-a-Time",
+        "content": "The two tools solve the “who do I contact” problem in fundamentally different orders.",
+        "columns": [
+          {
+            "title": "Simpleads",
+            "items": [
+              "Set People Search filters (title, seniority, contact status) once",
+              "Get a full filtered list with a Live Estimator showing size before you commit",
+              "No per-contact credit spend just to see if a lookup will succeed"
+            ]
+          },
+          {
+            "title": "Lusha",
+            "items": [
+              "Reveal contacts one at a time via the Chrome extension while browsing",
+              "Credits spent per successful reveal — unsuccessful lookups still cost time",
+              "Independent testing found only 31% of lookups returned an email at all"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "prosCons",
+      "data": {
+        "title": "Firmographic and Company-Level Filtering",
+        "content": "Simpleads treats company targeting as a first-class step; Lusha's core product is contact-focused.",
+        "columns": [
+          {
+            "title": "Simpleads",
+            "items": [
+              "Dedicated Company Intelligence step: industry, employee count, domain, keywords",
+              "Exact/Phrase and Strict/Contains match modes for precise account targeting"
+            ]
+          },
+          {
+            "title": "Lusha",
+            "items": [
+              "Some company data included, but firmographic filtering is not the core product focus",
+              "Better suited to contact-level lookup than building a filtered account list"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "prosCons",
+      "data": {
+        "title": "Hiring Signals and AI Scoring",
+        "content": "Neither of Lusha's core strengths (extension speed, phone accuracy) extends into buying-intent signals or lead ranking.",
+        "columns": [
+          {
+            "title": "Simpleads",
+            "items": [
+              "Jobs step cross-references leads against live job postings",
+              "AI Scoring ranks leads by relevance to your company and target roles"
+            ]
+          },
+          {
+            "title": "Lusha",
+            "items": [
+              "No built-in hiring-signal cross-referencing",
+              "No lead-scoring or ranking mechanism — contacts are revealed, not ranked"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "prosCons",
+      "data": {
+        "title": "Pricing Predictability",
+        "content": "Credit-based pricing can work well for light, occasional lookups, but gets expensive and unpredictable at volume, especially with a documented ~31% success rate on lookups.",
+        "columns": [
+          {
+            "title": "Simpleads",
+            "items": [
+              "Plan-based pricing with clear monthly lead limits",
+              "No per-lookup credit risk — filtering doesn't cost credits the way a failed reveal does"
+            ]
+          },
+          {
+            "title": "Lusha",
+            "items": [
+              "Credit-based, $37-$300/user/month depending on tier",
+              "Credits can be spent on lookups that return no usable data"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "list",
+      "data": {
+        "title": "Choose Simpleads If...",
+        "items": [
+          "You want to filter a large list down to the right leads before spending any credits or time",
+          "Hiring-signal cross-referencing and firmographic filtering matter to your targeting",
+          "You're prospecting local businesses as well as B2B contacts (Google Maps Search)",
+          "Predictable, plan-based pricing matters more than per-lookup credits"
+        ]
+      }
+    },
+    {
+      "type": "cta",
+      "data": {
+        "title": "Filter first. Stop paying credits on failed lookups.",
+        "content": "Plan-based pricing, no per-reveal credit risk.",
+        "cta": "Build a Filtered List Free"
+      }
+    },
+    {
+      "type": "faq",
+      "data": {
+        "title": "Frequently Asked Questions",
+        "items": [
+          {
+            "q": "Is Simpleads a Lusha alternative?",
+            "a": "Yes — Simpleads covers the same core need (finding verified B2B contacts) through a filter-first pipeline rather than a one-at-a-time Chrome-extension reveal."
+          },
+          {
+            "q": "How accurate is Lusha's contact data compared to Simpleads?",
+            "a": "Independent testing in March 2026 found Lusha returned an email for only 31% of 300 lookups, though the emails it did find were largely accurate. Simpleads' People Search lets you filter by verified Email/Phone status before exporting, rather than paying credits per lookup attempt."
+          },
+          {
+            "q": "Does Lusha offer hiring-signal data like Simpleads?",
+            "a": "No — Lusha's core product is contact reveal and database lookup; it doesn't include a built-in job-posting cross-reference feature."
+          },
+          {
+            "q": "Which is cheaper, Simpleads or Lusha?",
+            "a": "Lusha's credit-based pricing runs $37-$300/user/month depending on tier and credit volume. Simpleads uses plan-based pricing with clear monthly limits — compare current rates on each pricing page for your specific usage pattern."
+          }
+        ]
+      }
+    }
+  ]
+}

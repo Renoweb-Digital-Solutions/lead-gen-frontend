@@ -1,0 +1,194 @@
+{
+  "slug": "simpleads-vs-zoominfo",
+  "meta": {
+    "title": "Simpleads vs ZoomInfo: Transparent Pricing, Real-Time Data",
+    "description": "See how Simpleads compares to ZoomInfo on pricing, contract flexibility, hiring signals, AI scoring and Google Maps local search, feature by feature."
+  },
+  "hub": {
+    "competitor": "ZoomInfo",
+    "description": "Transparent Pricing, Real-Time Data"
+  },
+  "sections": [
+    {
+      "type": "hero",
+      "data": {
+        "title": "Simpleads vs ZoomInfo: Transparent Pricing, Real-Time Data",
+        "intro": "ZoomInfo is the enterprise standard for B2B contact and intent data — 321M+ professional profiles, deep US org-chart data, and pricing to match (custom quotes typically starting around $14,995/year, no free tier). Simpleads targets the same core job — finding and scoring the right leads — with published Starter/Pro pricing and no multi-year commitment required to get started.\nThis isn't really a like-for-like database comparison. It's a question of whether your team needs ZoomInfo's enterprise data depth and budget to match, or a faster, self-serve pipeline a small team can run without a dedicated data-ops hire.",
+        "prosCons": [
+          {
+            "title": "Simpleads",
+            "items": [
+              "Published Starter/Pro/Enterprise tiers, self-serve onboarding",
+              "Real-time hiring-signal cross-referencing built in",
+              "No multi-year contract required to start"
+            ]
+          },
+          {
+            "title": "ZoomInfo",
+            "items": [
+              "321M+ profiles, deep US direct-dial/org-chart data",
+              "Custom enterprise pricing (~$14,995/yr+), no free tier",
+              "Sales-led onboarding, typically longer to first export"
+            ]
+          }
+        ],
+        "cta": "See Full Pricing →"
+      }
+    },
+    {
+      "type": "comparisonTable",
+      "data": {
+        "title": "At a Glance",
+        "intro": "ZoomInfo's data scope and historical depth are built for large enterprise data teams with the budget to match. Simpleads trades some of that raw scope for a faster, self-serve pipeline a small team can run without a dedicated data-ops person.",
+        "headers": ["Category", "Simpleads", "ZoomInfo"],
+        "rows": [
+          ["Primary purpose", "Real-time lead discovery, scoring and export pipeline", "Enterprise-grade B2B contact and intent-data platform"],
+          ["Pricing model", "Published Starter/Pro tiers, usage-based Enterprise", "Custom enterprise contracts, typically multi-year commitments"],
+          ["Free tier", "Yes — self-serve, start filtering and exporting immediately", "No free tier; sales-led onboarding"],
+          ["Contact database size", "250M+ professionals", "321M+ profiles, deep US direct-dial coverage"],
+          ["Hiring-signal cross-referencing", "Built into the core pipeline as the Jobs step", "Intent data available, positioned as a premium capability"],
+          ["Local business / Google Maps search", "Dedicated Google Maps Search workflow included", "Not a core offering"],
+          ["Setup time to first export", "Minutes — self-serve, no sales call required", "Longer — typically requires a sales-led onboarding process"]
+        ]
+      }
+    },
+    {
+      "type": "prosCons",
+      "data": {
+        "title": "Contract Flexibility and Pricing",
+        "content": "ZoomInfo is widely known for multi-year contract structures common at enterprise data-provider scale. Simpleads publishes Starter and Pro pricing directly.",
+        "columns": [
+          {
+            "title": "Simpleads",
+            "items": [
+              "Published, self-serve Starter and Pro tiers",
+              "Enterprise available for custom scoring/API access without a mandatory multi-year term",
+              "No sales call required to see pricing or start using the product"
+            ]
+          },
+          {
+            "title": "ZoomInfo",
+            "items": [
+              "Custom quotes, typically starting around $14,995/year",
+              "No published self-serve pricing",
+              "Sales-led onboarding process before first use"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "prosCons",
+      "data": {
+        "title": "Data Scope vs. Workflow Speed",
+        "content": "ZoomInfo's data scope and historical depth are built for large enterprise data teams. Simpleads trades some of that raw scope for a faster, self-serve pipeline.",
+        "columns": [
+          {
+            "title": "Simpleads",
+            "items": [
+              "250M+ professionals with title/seniority/verified-contact filtering",
+              "Full pipeline (People, Company, Jobs, Scoring, Export) usable without a dedicated data-ops person",
+              "Live Estimator shows list size before committing to an export"
+            ]
+          },
+          {
+            "title": "ZoomInfo",
+            "items": [
+              "321M+ profiles with deep US direct-dial and org-chart data",
+              "Strong historical depth for large-scale enterprise research",
+              "Typically requires more setup and internal process to operationalize"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "prosCons",
+      "data": {
+        "title": "Hiring Signals and Intent Data",
+        "content": "Both platforms recognize the value of intent/hiring data; the delivery mechanism and pricing tier differ.",
+        "columns": [
+          {
+            "title": "Simpleads",
+            "items": [
+              "Jobs step is a standard, included part of the core pipeline",
+              "Filter by title, location and recency without a separate purchase"
+            ]
+          },
+          {
+            "title": "ZoomInfo",
+            "items": [
+              "Intent data is available, but typically positioned as a premium, higher-tier capability",
+              "Depth and breadth of intent data can exceed Simpleads' for enterprise-scale needs"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "prosCons",
+      "data": {
+        "title": "Local Business Prospecting",
+        "content": "ZoomInfo is built primarily around B2B contact and company intelligence rather than hyper-local business search.",
+        "columns": [
+          {
+            "title": "Simpleads",
+            "items": [
+              "Dedicated Google Maps Search for city/state/region-level prospecting",
+              "Same Export step as the rest of the pipeline"
+            ]
+          },
+          {
+            "title": "ZoomInfo",
+            "items": [
+              "Not a core focus of the ZoomInfo platform"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "list",
+      "data": {
+        "title": "Choose Simpleads If...",
+        "items": [
+          "You want self-serve access and published pricing without a sales call",
+          "Your team doesn't have the budget or need for a multi-year enterprise data contract",
+          "Hiring-signal cross-referencing and local search matter alongside core contact data"
+        ]
+      }
+    },
+    {
+      "type": "cta",
+      "data": {
+        "title": "Skip the sales call. See pricing now.",
+        "content": "Self-serve Starter and Pro plans, published.",
+        "cta": "See Full Pricing"
+      }
+    },
+    {
+      "type": "faq",
+      "data": {
+        "title": "Frequently Asked Questions",
+        "items": [
+          {
+            "q": "What's a more affordable alternative to ZoomInfo for mid-market teams?",
+            "a": "Simpleads publishes Starter and Pro pricing directly and offers a self-serve onboarding path, without requiring a custom enterprise contract to get started."
+          },
+          {
+            "q": "How does Simpleads compare to ZoomInfo on pricing and contracts?",
+            "a": "ZoomInfo is typically sold via custom, multi-year enterprise contracts starting around $14,995/year with no free tier; Simpleads publishes tiered pricing with a usage-based Enterprise option and a self-serve start."
+          },
+          {
+            "q": "Is there a ZoomInfo alternative with self-serve, transparent pricing?",
+            "a": "Yes — Simpleads' Starter and Pro tiers are self-serve with published pricing; only large custom deployments require a sales conversation."
+          },
+          {
+            "q": "Does Simpleads have the same data depth as ZoomInfo?",
+            "a": "Not quite — ZoomInfo's 321M+ profiles and US direct-dial/org-chart depth are built for enterprise-scale research. Simpleads' 250M+ professional database is paired with real-time hiring-signal cross-referencing and local search instead."
+          }
+        ]
+      }
+    }
+  ]
+}

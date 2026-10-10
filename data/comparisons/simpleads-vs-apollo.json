@@ -1,0 +1,220 @@
+{
+  "slug": "simpleads-vs-apollo",
+  "meta": {
+    "title": "Simpleads vs Apollo.io: Real-Time Data vs Static Database",
+    "description": "Compare Simpleads and Apollo.io on data freshness, hiring signal cross-referencing, AI scoring, Google Maps search and pricing, feature by feature."
+  },
+  "hub": {
+    "competitor": "Apollo.io",
+    "description": "Real-Time Data vs a Static Database"
+  },
+  "sections": [
+    {
+      "type": "hero",
+      "data": {
+        "title": "Simpleads vs Apollo.io: Real-Time Data vs a Static Database",
+        "intro": "Apollo.io built one of the largest B2B contact databases on the market — 275M+ contacts, plus a full engagement suite with sequencing and a dialer bundled in. Simpleads takes a narrower, sharper approach: a five-step real-time pipeline (People, Company, Jobs, Scoring, Export) that cross-references hiring signals and re-scores relevance on every run, instead of serving from a periodically-refreshed database.\nBoth are strong tools. The right one depends on whether you need Apollo's database scale and built-in sequencing, or Simpleads' tighter real-time targeting, hiring-signal cross-referencing and local (Google Maps) coverage.",
+        "prosCons": [
+          {
+            "title": "Simpleads",
+            "items": [
+              "Real-time 5-step pipeline (People, Company, Jobs, Scoring, Export)",
+              "Built-in hiring-signal cross-referencing",
+              "Dedicated Google Maps Search for local prospecting"
+            ]
+          },
+          {
+            "title": "Apollo.io",
+            "items": [
+              "275M+ contact database, mature and broad",
+              "Built-in email sequencing and dialer",
+              "No native Google Maps / local business search"
+            ]
+          }
+        ],
+        "cta": "Run Your First Search Free →"
+      }
+    },
+    {
+      "type": "comparisonTable",
+      "data": {
+        "title": "At a Glance",
+        "intro": "Both tools generate B2B lead lists sales teams can act on immediately. The core difference: Apollo prioritizes database scale and an all-in-one engagement suite; Simpleads prioritizes real-time accuracy, hiring-signal cross-referencing, and local business coverage.",
+        "headers": ["Category", "Simpleads", "Apollo.io"],
+        "rows": [
+          ["Primary purpose", "Real-time lead discovery, scoring and export pipeline", "Large contact database plus built-in outbound engagement suite"],
+          ["Data freshness", "Re-checked on each pipeline run, incl. hiring signals", "Large static database, refreshed on Apollo's own update cycle"],
+          ["Contact database size", "250M+ professionals, filtered by title/seniority/contact status", "275M+ contacts — larger raw scale"],
+          ["Hiring-signal cross-referencing", "Built-in Jobs step: filter by title, location, recency", "Not a core, built-in cross-referencing feature"],
+          ["AI lead scoring", "Scores relevance to your company description + target roles", "Available via Apollo's own scoring/enrichment tooling"],
+          ["Local business / Google Maps search", "Dedicated Google Maps Search workflow included", "Not a core offering"],
+          ["Email sequencing & dialer", "Not included — Simpleads is a sourcing pipeline, not an outreach tool", "Built-in: sequences, dialer, AI assistant"],
+          ["Export & CRM push", "CSV, ZIP bundle, or direct HubSpot/Salesforce push", "CRM integrations plus native sequencing"]
+        ]
+      }
+    },
+    {
+      "type": "prosCons",
+      "data": {
+        "title": "Contact Database Depth and Freshness",
+        "content": "Apollo's database is genuinely larger and more mature, with a longer track record of coverage across roles and industries. Simpleads covers 250M+ professionals with the same title/seniority/verified-contact filtering, prioritizing real-time re-verification over raw database size.",
+        "columns": [
+          {
+            "title": "Simpleads",
+            "items": [
+              "250M+ professionals, filtered by title, seniority, department, location",
+              "Verified Email/Has Email/Has Phone status checked per run",
+              "Include Similar Titles + Include Title Variants catch role synonyms automatically"
+            ]
+          },
+          {
+            "title": "Apollo.io",
+            "items": [
+              "275M+ contacts, broader raw coverage",
+              "Data accuracy independently estimated at 65-80% in third-party testing",
+              "Refreshed on Apollo's own database update cycle, not per-search"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "prosCons",
+      "data": {
+        "title": "Hiring Signals and Buying Intent",
+        "content": "This is where the two diverge most sharply. Simpleads' Jobs step is a built-in, filterable cross-reference against live job postings — a native part of the core pipeline, not an add-on.",
+        "columns": [
+          {
+            "title": "Simpleads",
+            "items": [
+              "Include Jobs Data toggle cross-references your lead list against live postings",
+              "Filter by Job Title, Job Location, and Job Recency (e.g. “Past 7 days”)",
+              "Fail Open Jobs keeps the pipeline running even if one query errors"
+            ]
+          },
+          {
+            "title": "Apollo.io",
+            "items": [
+              "Job-posting cross-referencing is not a core, comparable built-in feature",
+              "Intent signals exist elsewhere in Apollo's broader platform, not as a dedicated filterable module"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "prosCons",
+      "data": {
+        "title": "AI Lead Scoring",
+        "content": "Both platforms recognize the value of ranking leads, but the mechanism differs.",
+        "columns": [
+          {
+            "title": "Simpleads",
+            "items": [
+              "Describe your company once; leads scored against your stated Target Roles",
+              "Job-posting urgency (language + recency) factors into the same score",
+              "Sample Matches preview lets you sanity-check the ranking before export"
+            ]
+          },
+          {
+            "title": "Apollo.io",
+            "items": [
+              "Apollo offers its own scoring and enrichment workflows within its broader platform",
+              "Scoring is one part of a much larger feature set (sequencing, dialer, conversation intelligence)"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "prosCons",
+      "data": {
+        "title": "Local Business Prospecting",
+        "content": "Simpleads includes a dedicated Google Maps Search workflow for city- and region-level business prospecting; Apollo is built primarily around the global professional contact database.",
+        "columns": [
+          {
+            "title": "Simpleads",
+            "items": [
+              "Dedicated Google Maps Search tab alongside the core pipeline",
+              "Same Export step (CSV/ZIP/CRM push) as every other module"
+            ]
+          },
+          {
+            "title": "Apollo.io",
+            "items": [
+              "Not a core focus of the Apollo.io platform",
+              "No dedicated local/Maps-based business search workflow"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "prosCons",
+      "data": {
+        "title": "Outreach and Sequencing",
+        "content": "Apollo's built-in engagement suite is a genuine advantage if you want sourcing and outreach in one tool.",
+        "columns": [
+          {
+            "title": "Simpleads",
+            "items": [
+              "Not included by design — Simpleads is a sourcing and scoring pipeline",
+              "Exports feed directly into HubSpot, Salesforce, or your outreach tool of choice"
+            ]
+          },
+          {
+            "title": "Apollo.io",
+            "items": [
+              "Built-in email sequencing, dialer and AI assistant",
+              "One platform for both finding and contacting leads"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "list",
+      "data": {
+        "title": "Choose Simpleads If...",
+        "items": [
+          "You want real-time, re-verified contact and hiring-signal data over a larger static database",
+          "Job-posting cross-referencing (who's actively hiring) matters to your targeting",
+          "You need local/Google Maps business search alongside B2B contact data",
+          "You already have a sequencing tool and just need a cleaner sourcing pipeline"
+        ]
+      }
+    },
+    {
+      "type": "cta",
+      "data": {
+        "title": "See the real-time difference for yourself.",
+        "content": "Run your first search free — no card required.",
+        "cta": "Start Free — No Card Required"
+      }
+    },
+    {
+      "type": "faq",
+      "data": {
+        "title": "Frequently Asked Questions",
+        "items": [
+          {
+            "q": "What's a good alternative to Apollo.io with real-time data verification?",
+            "a": "Simpleads re-checks contact and hiring-signal data on each pipeline run rather than serving purely from a static, periodically-refreshed database."
+          },
+          {
+            "q": "How does Simpleads compare to Apollo.io for hiring signal data?",
+            "a": "Simpleads includes a built-in Jobs step that cross-references your lead list against live job postings — not a core, comparable feature in Apollo.io."
+          },
+          {
+            "q": "Which tool is better for local business prospecting, Simpleads or Apollo?",
+            "a": "Simpleads includes a dedicated Google Maps Search workflow for local business prospecting; this isn't a core focus of Apollo.io's platform."
+          },
+          {
+            "q": "Does Simpleads include email sequencing like Apollo?",
+            "a": "No — Simpleads is a sourcing, scoring and export pipeline. Exports push directly into HubSpot, Salesforce, or the sequencing tool of your choice, including Apollo itself."
+          }
+        ]
+      }
+    }
+  ]
+}

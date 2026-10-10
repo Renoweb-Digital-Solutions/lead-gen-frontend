@@ -1,0 +1,171 @@
+{
+  "slug": "simpleads-vs-outscraper",
+  "meta": {
+    "title": "Simpleads vs Outscraper & PhantomBuster: Local Lead Gen Compared",
+    "description": "Compare Simpleads to Outscraper and PhantomBuster for Google Maps local business search, contact enrichment and CRM-ready exports, feature by feature."
+  },
+  "hub": {
+    "competitor": "Outscraper & PhantomBuster",
+    "description": "Local Lead Gen Compared"
+  },
+  "sections": [
+    {
+      "type": "hero",
+      "data": {
+        "title": "Simpleads vs Outscraper & PhantomBuster: Local Lead Gen Compared",
+        "intro": "Outscraper and PhantomBuster are purpose-built scraping tools — powerful for pulling raw Google Maps or LinkedIn data at scale, but built as extraction utilities rather than a scored, CRM-ready lead pipeline. Simpleads' Google Maps Search covers the same local-business use case as one workflow inside a broader B2B platform, with AI scoring and CRM export built in.",
+        "prosCons": [
+          {
+            "title": "Simpleads",
+            "items": [
+              "Google Maps Search as one workflow in a full B2B lead platform",
+              "Built-in AI Scoring ranks leads by relevance and urgency",
+              "Direct HubSpot/Salesforce push, plus CSV/ZIP"
+            ]
+          },
+          {
+            "title": "Outscraper & PhantomBuster",
+            "items": [
+              "Purpose-built scraping utilities for Maps, LinkedIn and other sources",
+              "Raw extraction at scale — scoring and enrichment are on you",
+              "Requires proxy/rate-limit configuration for larger jobs"
+            ]
+          }
+        ],
+        "cta": "Try Google Maps Search Free →"
+      }
+    },
+    {
+      "type": "comparisonTable",
+      "data": {
+        "title": "At a Glance",
+        "intro": "Outscraper and PhantomBuster excel at raw, large-scale, configurable extraction across many data sources. Simpleads takes the specific local-business use case and wraps it in the same firmographic filtering, AI scoring and CRM export used across the rest of the platform.",
+        "headers": ["Category", "Simpleads", "Outscraper & PhantomBuster"],
+        "rows": [
+          ["Primary purpose", "Google Maps Search is one workflow inside a full B2B lead platform", "Purpose-built scraping utilities for Maps, LinkedIn and other sources"],
+          ["Lead scoring", "Built-in AI Scoring ranks leads by relevance and urgency", "Not a core feature — raw extraction, scoring is on you"],
+          ["CRM export", "Direct HubSpot/Salesforce push, plus CSV/ZIP", "Raw data export; CRM integration typically requires extra setup"],
+          ["Setup / technical overhead", "Guided dashboard workflow, no configuration required", "Proxy, rate-limit and output-structuring configuration for larger jobs"],
+          ["B2B contact/company filtering", "Full People + Company Intelligence filters in the same platform", "Not a core capability — separate tools needed for B2B contact filtering"],
+          ["Hiring-signal cross-referencing", "Built-in Jobs step", "Not offered"],
+          ["Data source breadth", "B2B people/company data + Google Maps", "Broader raw source coverage: Maps, LinkedIn, and many other platforms"]
+        ]
+      }
+    },
+    {
+      "type": "prosCons",
+      "data": {
+        "title": "Raw Extraction vs. a Scored Pipeline",
+        "content": "Outscraper and PhantomBuster excel at pulling raw data at scale from Google Maps, LinkedIn and other sources — genuinely useful for teams building custom scraping workflows.",
+        "columns": [
+          {
+            "title": "Simpleads",
+            "items": [
+              "Google Maps Search wrapped in the same guided pipeline as People/Company/Jobs/Scoring/Export",
+              "Results scored by AI relevance before you ever export",
+              "No separate scraper configuration required"
+            ]
+          },
+          {
+            "title": "Outscraper & PhantomBuster",
+            "items": [
+              "Highly configurable raw extraction across many platforms beyond Google Maps",
+              "Output requires your own structuring, deduping and scoring",
+              "More flexible for fully custom, large-scale scraping projects"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "prosCons",
+      "data": {
+        "title": "Setup and Technical Overhead",
+        "content": "Scraping tools often require more configuration — selecting proxies, handling rate limits, structuring the raw output yourself.",
+        "columns": [
+          {
+            "title": "Simpleads",
+            "items": [
+              "Google Maps Search is a guided workflow inside the same dashboard as the rest of the pipeline",
+              "No proxy or rate-limit configuration needed"
+            ]
+          },
+          {
+            "title": "Outscraper & PhantomBuster",
+            "items": [
+              "Proxy and rate-limit handling typically required for larger extraction jobs",
+              "More technical setup, but more raw flexibility as a tradeoff"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "prosCons",
+      "data": {
+        "title": "B2B Contact and Company Data Beyond Google Maps",
+        "content": "This is where Simpleads' broader platform becomes the differentiator for teams that need more than local business listings.",
+        "columns": [
+          {
+            "title": "Simpleads",
+            "items": [
+              "Full People Search (title, seniority, verified contact status) in the same platform",
+              "Company Intelligence filtering (industry, size, domain, keywords)",
+              "Hiring-signal cross-referencing via the Jobs step"
+            ]
+          },
+          {
+            "title": "Outscraper & PhantomBuster",
+            "items": [
+              "Primarily focused on raw extraction, not B2B contact/company filtering by title or seniority",
+              "Would require pairing with a separate B2B data tool for that use case"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "list",
+      "data": {
+        "title": "Choose Simpleads If...",
+        "items": [
+          "The job is building a scored, exportable local or B2B lead list, not raw large-scale extraction",
+          "You want CRM-ready output without a separate enrichment or scoring step",
+          "You also need B2B people/company filtering alongside local business data"
+        ]
+      }
+    },
+    {
+      "type": "cta",
+      "data": {
+        "title": "Skip the scraper setup. Get a scored list instead.",
+        "content": "Google Maps Search, built into the full pipeline.",
+        "cta": "Try Google Maps Search Free"
+      }
+    },
+    {
+      "type": "faq",
+      "data": {
+        "title": "Frequently Asked Questions",
+        "items": [
+          {
+            "q": "What's a good alternative to Outscraper for Google Maps lead generation?",
+            "a": "Simpleads' Google Maps Search covers local business discovery as a guided workflow, with AI Scoring and CRM export built in — no scraper configuration required."
+          },
+          {
+            "q": "How does Simpleads compare to PhantomBuster for local business scraping?",
+            "a": "PhantomBuster is a general-purpose scraping utility; Simpleads' Google Maps Search is purpose-built for local lead generation within a full B2B platform."
+          },
+          {
+            "q": "Is there a tool that combines Google Maps data with B2B contact enrichment?",
+            "a": "Yes — Simpleads runs Google Maps Search alongside the same People Search and Company Intelligence filters used for B2B prospecting."
+          },
+          {
+            "q": "Do I need to configure proxies or rate limits with Simpleads?",
+            "a": "No — Google Maps Search runs as a guided dashboard workflow with no proxy or rate-limit configuration required, unlike raw scraping tools."
+          }
+        ]
+      }
+    }
+  ]
+}

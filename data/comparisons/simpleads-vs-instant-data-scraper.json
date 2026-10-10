@@ -1,0 +1,194 @@
+{
+  "slug": "simpleads-vs-instant-data-scraper",
+  "meta": {
+    "title": "Simpleads vs Instant Data Scraper: Scored Pipeline vs Free Raw Scraping",
+    "description": "Compare Simpleads' Google Maps Search to Instant Data Scraper's free Chrome extension on filtering, scoring, CRM export and result limits."
+  },
+  "hub": {
+    "competitor": "Instant Data Scraper",
+    "description": "Scored Pipeline vs Free Raw Scraping"
+  },
+  "sections": [
+    {
+      "type": "hero",
+      "data": {
+        "title": "Simpleads vs Instant Data Scraper: Scored Pipeline vs Free Raw Scraping",
+        "intro": "Instant Data Scraper is a genuinely useful, completely free Chrome extension — it uses AI to auto-detect tables and lists on whatever page is currently open, and exports to CSV or XLSX with zero setup. For Google Maps specifically, it scrolls automatically but hits Google's own ceiling of roughly 120 results per search, and the raw output typically needs manual cleanup (stray columns, HTML fragments, map coordinates mixed in with business data).\nSimpleads' Google Maps Search is a different kind of tool: a guided, filterable workflow that's part of a larger B2B pipeline, with AI scoring and direct CRM export — built for repeatable local prospecting rather than a one-off page scrape.",
+        "prosCons": [
+          {
+            "title": "Simpleads",
+            "items": [
+              "Guided Google Maps Search workflow, part of a full B2B pipeline",
+              "AI Scoring ranks results by relevance before export",
+              "Direct HubSpot/Salesforce push, no manual cleanup needed"
+            ]
+          },
+          {
+            "title": "Instant Data Scraper",
+            "items": [
+              "Completely free, zero-setup Chrome extension",
+              "Auto-detects tables/lists on the currently open page",
+              "~120-result ceiling per Google Maps search; output needs manual cleanup"
+            ]
+          }
+        ],
+        "cta": "Try Google Maps Search Free →"
+      }
+    },
+    {
+      "type": "comparisonTable",
+      "data": {
+        "title": "At a Glance",
+        "intro": "Instant Data Scraper is the fastest possible way to grab whatever's visible on a page, for free, right now. Simpleads' Google Maps Search is built for a different job: a repeatable, filtered, scored local-lead workflow that plugs into the rest of a B2B pipeline.",
+        "headers": ["Category", "Simpleads", "Instant Data Scraper"],
+        "rows": [
+          ["Primary purpose", "Guided local business search as part of a full B2B lead pipeline", "Free, general-purpose page scraper (tables/lists on any site)"],
+          ["Cost", "Plan-based pricing (free tier available)", "Completely free, no account required"],
+          ["Setup required", "None — guided dashboard workflow", "None — install extension and click"],
+          ["Google Maps result limit", "Not capped by Simpleads' own workflow design", "~120 results per search, a limit set by Google Maps itself"],
+          ["Output cleanliness", "Structured, filtered fields ready for use", "Requires manual cleanup — extra columns, HTML fragments, coordinates"],
+          ["AI lead scoring", "Ranks results by relevance to your company and target roles", "Not offered — raw, unranked extraction only"],
+          ["CRM export", "Direct HubSpot/Salesforce push, plus CSV/ZIP", "CSV/XLSX only; no CRM integration"],
+          ["B2B contact/company filtering", "Full People + Company Intelligence in the same platform", "Not offered — limited to whatever's visible on the current page"]
+        ]
+      }
+    },
+    {
+      "type": "prosCons",
+      "data": {
+        "title": "Cost and Setup",
+        "content": "Instant Data Scraper's biggest advantage is genuinely being free with zero setup — worth acknowledging directly rather than downplaying.",
+        "columns": [
+          {
+            "title": "Simpleads",
+            "items": [
+              "Free tier available; paid plans unlock full pipeline volume",
+              "No installation — runs as a hosted dashboard"
+            ]
+          },
+          {
+            "title": "Instant Data Scraper",
+            "items": [
+              "Completely free, no account or payment required at any tier",
+              "Install the Chrome extension and start immediately, no configuration"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "prosCons",
+      "data": {
+        "title": "Result Limits and Data Completeness",
+        "content": "Google Maps itself caps visible results at roughly 120 per search — a limit Instant Data Scraper inherits since it only reads what's rendered on the page.",
+        "columns": [
+          {
+            "title": "Simpleads",
+            "items": [
+              "Google Maps Search is not constrained by what's visually rendered on a single page load"
+            ]
+          },
+          {
+            "title": "Instant Data Scraper",
+            "items": [
+              "Capped at ~120 results per search by Google Maps' own page structure",
+              "Only extracts what's currently visible/loaded on the page"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "prosCons",
+      "data": {
+        "title": "Output Cleanliness",
+        "content": "Because Instant Data Scraper auto-detects any table-like structure, it often grabs more than intended.",
+        "columns": [
+          {
+            "title": "Simpleads",
+            "items": [
+              "Structured, purpose-built fields for business name, contact info, location",
+              "No manual column cleanup required before use"
+            ]
+          },
+          {
+            "title": "Instant Data Scraper",
+            "items": [
+              "Frequently captures extra columns (partial HTML, map coordinates) alongside real business data",
+              "Manual review and cleanup typically needed before the export is usable"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "prosCons",
+      "data": {
+        "title": "Scoring, Filtering and CRM Integration",
+        "content": "This is the core structural gap — Instant Data Scraper has no concept of relevance, filtering criteria, or CRM export beyond a flat file.",
+        "columns": [
+          {
+            "title": "Simpleads",
+            "items": [
+              "AI Scoring ranks Google Maps and B2B leads by relevance before export",
+              "Direct HubSpot/Salesforce push",
+              "Combinable with People/Company/Jobs filters in the same pipeline"
+            ]
+          },
+          {
+            "title": "Instant Data Scraper",
+            "items": [
+              "No filtering beyond what's visible on the page — no title, industry, or relevance criteria",
+              "No scoring or ranking of results",
+              "CSV/XLSX export only; no CRM integration"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "list",
+      "data": {
+        "title": "Choose Simpleads If...",
+        "items": [
+          "You need more than ~120 local results, filtered and scored, on a repeatable basis",
+          "You want output that's clean and structured without manual review",
+          "Local leads need to combine with B2B contact, firmographic or hiring-signal data",
+          "A direct CRM push matters more than a flat CSV file"
+        ]
+      }
+    },
+    {
+      "type": "cta",
+      "data": {
+        "title": "Beyond 120 results, without the cleanup.",
+        "content": "Filtered, scored, CRM-ready Google Maps leads.",
+        "cta": "Try Google Maps Search Free"
+      }
+    },
+    {
+      "type": "faq",
+      "data": {
+        "title": "Frequently Asked Questions",
+        "items": [
+          {
+            "q": "Is Simpleads better than Instant Data Scraper for Google Maps?",
+            "a": "For repeatable, scored, CRM-ready local prospecting, yes. For a single free one-off extraction under Google's ~120-result page limit, Instant Data Scraper is a genuinely useful free option."
+          },
+          {
+            "q": "Does Instant Data Scraper have a result limit on Google Maps?",
+            "a": "Yes — it's constrained by Google Maps' own page structure, which typically renders around 120 results per search before requiring a new search."
+          },
+          {
+            "q": "Does Instant Data Scraper score or filter leads?",
+            "a": "No — it extracts whatever table-like data is visible on the current page with no relevance scoring, title filtering, or ranking."
+          },
+          {
+            "q": "Can I export Instant Data Scraper results straight to my CRM?",
+            "a": "No — it exports to CSV or XLSX only. Simpleads supports a direct one-click push to HubSpot and Salesforce alongside CSV/ZIP export."
+          }
+        ]
+      }
+    }
+  ]
+}

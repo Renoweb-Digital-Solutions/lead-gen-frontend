@@ -1,6 +1,9 @@
+"use client";
+
 import React from 'react'
 import Link from 'next/link'
-import { ArrowRight, ChevronRight, Menu, X, ChevronDown, LayoutDashboard, Users, Building2, Briefcase, BrainCircuit, MapPin } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { ArrowRight, ChevronRight, Menu, X, ChevronDown, LayoutDashboard, Users, Building2, Briefcase, BrainCircuit, MapPin, Video, LineChart, BookOpen, Camera } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { AnimatedGroup } from '@/components/ui/animated-group'
 import { cn } from '@/lib/utils'
@@ -291,6 +294,40 @@ const menuItems = [
             }
         ]
     },
+    { 
+        name: 'Tools', 
+        href: '#',
+        dropdown: [
+            { 
+                name: 'YouTube Lead Scraper', 
+                description: 'Find leads from YouTube channels and keywords', 
+                href: '/features/youtube-lead-scraper',
+                icon: Video,
+                iconBg: 'bg-red-100/50 text-red-600'
+            },
+            { 
+                name: 'Investor Data Pipeline', 
+                description: 'Discover relevant investors for your startup', 
+                href: '/features/investor-data',
+                icon: LineChart,
+                iconBg: 'bg-green-100/50 text-green-600'
+            },
+            { 
+                name: 'B2B Directory Scraper', 
+                description: 'Find business prospects from directories', 
+                href: '/features/b2b-directory-scraper',
+                icon: BookOpen,
+                iconBg: 'bg-yellow-100/50 text-yellow-600'
+            },
+            { 
+                name: 'Instagram Lead Scraper', 
+                description: 'Extract leads from Instagram profiles', 
+                href: '/features/instagram-lead-scraper',
+                icon: Camera,
+                iconBg: 'bg-pink-100/50 text-pink-600'
+            }
+        ]
+    },
     { name: 'Solutions', href: '/solutions' },
     { name: 'Pricing', href: '/pricing' },
     { name: 'Changelog', href: '/changelog' },
@@ -303,6 +340,7 @@ const brandNames = [
 
 export const HeroHeader = ({ onLoginClick }) => {
     const [menuState, setMenuState] = React.useState(false)
+    const [openDropdown, setOpenDropdown] = React.useState(null)
     const [isScrolled, setIsScrolled] = React.useState(false)
     const { token } = useAuth();
 
@@ -314,12 +352,19 @@ export const HeroHeader = ({ onLoginClick }) => {
         return () => window.removeEventListener('scroll', handleScroll)
     }, [])
     return (
-        <header>
+        <header className="relative z-50 w-full h-[60px] lg:h-[72px]">
             <nav
                 data-state={menuState && 'active'}
-                className="fixed z-20 w-full px-2 group">
-                <div className={cn('mx-auto mt-2 max-w-6xl px-6 transition-all duration-300 lg:px-12', isScrolled && 'bg-background/50 max-w-4xl rounded-2xl border backdrop-blur-lg lg:px-5')}>
-                    <div className="relative flex flex-wrap items-center justify-between gap-6 py-3 lg:gap-0 lg:py-4">
+                className={cn(
+                    "w-full px-2 lg:px-4 group z-50",
+                    isScrolled ? "fixed top-0 left-0 right-0 animate-in slide-in-from-top-2 duration-300" : "absolute top-0 left-0 right-0"
+                )}>
+                <div className={cn('mx-auto transition-all duration-300 py-3 lg:py-4', 
+                    isScrolled 
+                        ? 'scrolled-nav-pill mt-2 lg:mt-4 max-w-4xl bg-background/90 rounded-2xl border backdrop-blur-lg lg:px-5 px-6' 
+                        : 'mt-2 lg:mt-4 max-w-6xl px-4 lg:px-12'
+                )}>
+                    <div className="relative flex flex-wrap items-center justify-between gap-6 lg:gap-0">
                         <div className="flex w-full justify-between lg:w-auto">
                             <Link
                                 href="/"
@@ -340,21 +385,21 @@ export const HeroHeader = ({ onLoginClick }) => {
                         <div className="absolute inset-0 m-auto hidden size-fit lg:block">
                             <ul className="flex gap-8 text-sm font-semibold">
                                 {menuItems.map((item, index) => (
-                                    <li key={index} className="relative group">
+                                    <li key={index} className="relative group/item">
                                         <Link
                                             href={item.href}
-                                            className="text-slate-700 hover:text-[#023dbb] flex items-center gap-1.5 py-2 group-hover:text-[#023dbb] transition-colors">
+                                            className="text-slate-700 hover:text-[#023dbb] flex items-center gap-1.5 py-2 group-hover/item:text-[#023dbb] transition-colors">
                                             <span>{item.name}</span>
                                             {item.dropdown && (
-                                                <ChevronDown className="w-4 h-4 opacity-70 group-hover:-rotate-180 transition-transform duration-300" />
+                                                <ChevronDown className="w-4 h-4 opacity-70 group-hover/item:-rotate-180 transition-transform duration-300" />
                                             )}
                                         </Link>
                                         {/* Active underline for dropdown trigger */}
                                         {item.dropdown && (
-                                            <div className="absolute -bottom-1 left-0 right-0 h-0.5 bg-[#023dbb] scale-x-0 group-hover:scale-x-100 transition-transform origin-left rounded-full" />
+                                            <div className="absolute -bottom-1 left-0 right-0 h-0.5 bg-[#023dbb] scale-x-0 group-hover/item:scale-x-100 transition-transform origin-left rounded-full" />
                                         )}
                                         {item.dropdown && (
-                                            <div className="absolute left-1/2 -translate-x-1/2 top-full hidden group-hover:block w-[400px] pt-4 z-50">
+                                            <div className="absolute left-1/2 -translate-x-1/2 top-full hidden group-hover/item:block w-[400px] pt-4 z-50">
                                                 <div className="bg-[#f8f9fa] border border-slate-100 rounded-[28px] shadow-2xl p-4 grid gap-1 relative overflow-hidden">
                                                     {/* subtle background styling */}
                                                     <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full blur-3xl -z-10" />
@@ -393,40 +438,57 @@ export const HeroHeader = ({ onLoginClick }) => {
                                 <ul className="space-y-4 text-base font-semibold">
                                     {menuItems.map((item, index) => (
                                         <li key={index} className="flex flex-col">
-                                            <div className="flex items-center justify-between">
-                                                <Link
-                                                    href={item.href}
-                                                    className="text-slate-700 hover:text-[#023dbb] block duration-150">
-                                                    <span>{item.name}</span>
-                                                </Link>
-                                                {item.dropdown && (
-                                                    <ChevronDown className="w-5 h-5 text-slate-400" />
+                                            <div className="flex items-center justify-between w-full">
+                                                {item.dropdown ? (
+                                                    <button
+                                                        onClick={() => setOpenDropdown(openDropdown === index ? null : index)}
+                                                        className="flex items-center justify-between w-full text-left text-slate-700 hover:text-[#023dbb] duration-150 py-2">
+                                                        <span>{item.name}</span>
+                                                        <ChevronDown className={cn("w-5 h-5 text-slate-400 transition-transform", openDropdown === index && "rotate-180")} />
+                                                    </button>
+                                                ) : (
+                                                    <Link
+                                                        href={item.href}
+                                                        className="text-slate-700 hover:text-[#023dbb] block duration-150 py-2 w-full">
+                                                        <span>{item.name}</span>
+                                                    </Link>
                                                 )}
                                             </div>
                                             {item.dropdown && (
-                                                <div className="flex flex-col mt-4 space-y-2 bg-[#f8f9fa] rounded-2xl p-3 border border-slate-100">
-                                                    {item.dropdown.map((dropItem, dropIndex) => {
-                                                        const Icon = dropItem.icon;
-                                                        return (
-                                                            <Link
-                                                                key={dropIndex}
-                                                                href={dropItem.href}
-                                                                className="flex items-center gap-3 p-2 rounded-xl hover:bg-white transition-colors">
-                                                                <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center shrink-0", dropItem.iconBg)}>
-                                                                    <Icon className="w-4 h-4" />
-                                                                </div>
-                                                                <div className="flex flex-col">
-                                                                    <span className="text-sm font-bold text-slate-900">
-                                                                        {dropItem.name}
-                                                                    </span>
-                                                                    <span className="text-[11px] text-slate-500 font-medium truncate max-w-[200px]">
-                                                                        {dropItem.description}
-                                                                    </span>
-                                                                </div>
-                                                            </Link>
-                                                        )
-                                                    })}
-                                                </div>
+                                                <AnimatePresence>
+                                                    {openDropdown === index && (
+                                                        <motion.div 
+                                                            initial={{ height: 0, opacity: 0 }}
+                                                            animate={{ height: "auto", opacity: 1 }}
+                                                            exit={{ height: 0, opacity: 0 }}
+                                                            className="overflow-hidden"
+                                                        >
+                                                            <div className="flex flex-col mt-4 space-y-2 bg-[#f8f9fa] rounded-2xl p-3 border border-slate-100">
+                                                                {item.dropdown.map((dropItem, dropIndex) => {
+                                                                    const Icon = dropItem.icon;
+                                                                    return (
+                                                                        <Link
+                                                                            key={dropIndex}
+                                                                            href={dropItem.href}
+                                                                            className="flex items-center gap-3 p-2 rounded-xl hover:bg-white transition-colors">
+                                                                            <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center shrink-0", dropItem.iconBg)}>
+                                                                                <Icon className="w-4 h-4" />
+                                                                            </div>
+                                                                            <div className="flex flex-col">
+                                                                                <span className="text-sm font-bold text-slate-900">
+                                                                                    {dropItem.name}
+                                                                                </span>
+                                                                                <span className="text-[11px] text-slate-500 font-medium truncate max-w-[200px]">
+                                                                                    {dropItem.description}
+                                                                                </span>
+                                                                            </div>
+                                                                        </Link>
+                                                                    )
+                                                                })}
+                                                            </div>
+                                                        </motion.div>
+                                                    )}
+                                                </AnimatePresence>
                                             )}
                                         </li>
                                     ))}

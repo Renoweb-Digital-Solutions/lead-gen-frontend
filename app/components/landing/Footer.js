@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
@@ -27,11 +29,11 @@ export default function Footer({ theme = "light" }) {
 
   return (
     <footer className={`${bgClass} border-t pt-16 pb-8 transition-colors duration-300`}>
-      <div className="max-w-6xl mx-auto px-6">
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-12 mb-16">
+      <div className="max-w-[1400px] mx-auto px-6 lg:px-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-8 lg:gap-10 mb-16">
           
           {/* Brand & Newsletter */}
-          <div className="md:col-span-2">
+          <div className="sm:col-span-2">
             <Link href="/" className={`inline-block text-2xl font-display font-bold ${textDarkClass} mb-6 tracking-tight`}>
               RENO<span className={brandBlueClass}>WEB</span>
             </Link>
@@ -66,12 +68,36 @@ export default function Footer({ theme = "light" }) {
           </div>
 
           <div>
+            <h4 className={`font-bold ${textDarkClass} mb-4 text-sm uppercase tracking-wider`}>Tools</h4>
+            <ul className={`space-y-3 text-sm`}>
+              <li><Link href="/features/youtube-lead-scraper" className={`${textMutedHoverClass} transition-colors`}>YouTube Scraper</Link></li>
+              <li><Link href="/features/investor-data" className={`${textMutedHoverClass} transition-colors`}>Investor Data</Link></li>
+              <li><Link href="/features/b2b-directory-scraper" className={`${textMutedHoverClass} transition-colors`}>B2B Directory</Link></li>
+              <li><Link href="/features/instagram-lead-scraper" className={`${textMutedHoverClass} transition-colors`}>Instagram Scraper</Link></li>
+            </ul>
+          </div>
+
+          <div>
             <h4 className={`font-bold ${textDarkClass} mb-4 text-sm uppercase tracking-wider`}>Resources</h4>
             <ul className={`space-y-3 text-sm`}>
               <li><Link href="#" className={`${textMutedHoverClass} transition-colors`}>Documentation</Link></li>
               <li><Link href="#" className={`${textMutedHoverClass} transition-colors`}>Blog</Link></li>
               <li><Link href="#" className={`${textMutedHoverClass} transition-colors`}>Community</Link></li>
               <li><Link href="#" className={`${textMutedHoverClass} transition-colors`}>Help Center</Link></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className={`font-bold ${textDarkClass} mb-4 text-sm uppercase tracking-wider`}>Compare</h4>
+            <ul className={`space-y-3 text-sm`}>
+              <li><Link href="/compare" className={`${textMutedHoverClass} transition-colors`}>Compare Hub</Link></li>
+              <li><Link href="/compare/simpleads-vs-apollo" className={`${textMutedHoverClass} transition-colors`}>vs Apollo.io</Link></li>
+              <li><Link href="/compare/simpleads-vs-zoominfo" className={`${textMutedHoverClass} transition-colors`}>vs ZoomInfo</Link></li>
+              <li><Link href="/compare/simpleads-vs-outscraper" className={`${textMutedHoverClass} transition-colors`}>vs Outscraper</Link></li>
+              <li><Link href="/compare/simpleads-vs-lusha" className={`${textMutedHoverClass} transition-colors`}>vs Lusha</Link></li>
+              <li><Link href="/compare/simpleads-vs-saleshandy" className={`${textMutedHoverClass} transition-colors`}>vs Saleshandy</Link></li>
+              <li><Link href="/compare/simpleads-vs-growmeorganic" className={`${textMutedHoverClass} transition-colors`}>vs GrowMeOrganic</Link></li>
+              <li><Link href="/compare/simpleads-vs-instant-data-scraper" className={`${textMutedHoverClass} transition-colors`}>vs Instant Data Scraper</Link></li>
             </ul>
           </div>
 

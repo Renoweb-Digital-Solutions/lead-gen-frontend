@@ -1218,3 +1218,89 @@ body {
 [data-theme='dark'] {
   --rw-sidebar-shimmer: none;
 }
+@property --bl-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.border-light {
+  position: relative;
+  border-radius: inherit;
+}
+
+.border-light::before,
+.border-light::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(
+    from var(--bl-angle, 0deg) at 50% 50%,
+    transparent 0%,
+    var(--glow-mid, rgba(255,255,255,0.2)) 60%,
+    var(--glow-core, rgba(255,255,255,0.8)) 100%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  pointer-events: none;
+  animation: border-light-spin var(--bl-duration, 8s) linear infinite;
+  animation-delay: var(--bl-delay, 0s);
+  animation-direction: var(--bl-direction, normal);
+}
+
+.border-light.data-live::before,
+.border-light.data-live::after {
+  opacity: 0.8;
+}
+
+/* Secondary glow copy */
+.border-light::after {
+  padding: 3px;
+  opacity: 0;
+  animation-duration: var(--bl-duration, 8s);
+}
+.border-light.data-live::after {
+  opacity: 0.25;
+}
+
+.border-light:hover::before,
+.border-light:hover::after {
+  --bl-duration: 4s;
+  opacity: 1;
+}
+
+@keyframes border-light-spin {
+  100% {
+    --bl-angle: 360deg;
+  }
+}
+
+/* Method B: Vertical Page Rails */
+.border-light-y {
+  position: relative;
+  overflow: hidden;
+}
+.border-light-y::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 150px;
+  background: linear-gradient(to bottom, transparent, var(--glow-core), transparent);
+  opacity: 0.8;
+  animation: border-light-y-travel var(--bl-duration, 10s) linear infinite;
+  animation-delay: var(--bl-delay, 0s);
+}
+@keyframes border-light-y-travel {
+  0% { transform: translateY(-150px); }
+  100% { transform: translateY(100vh); }
+}
+
+
+.rounded-inherit { border-radius: inherit; }
+

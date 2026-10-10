@@ -1,0 +1,191 @@
+{
+  "slug": "simpleads-vs-saleshandy",
+  "meta": {
+    "title": "Simpleads vs Saleshandy: Purpose-Built Sourcing vs an Outreach Tool's Lead Finder",
+    "description": "Compare Simpleads and Saleshandy's Lead Finder on data depth, hiring signals, firmographic filtering, AI scoring and pricing structure."
+  },
+  "hub": {
+    "competitor": "Saleshandy",
+    "description": "Purpose-Built Sourcing vs an Outreach Tool's Lead Finder"
+  },
+  "sections": [
+    {
+      "type": "hero",
+      "data": {
+        "title": "Simpleads vs Saleshandy: Purpose-Built Sourcing vs an Outreach Tool's Lead Finder",
+        "intro": "Saleshandy is primarily a cold-email outreach and sequencing platform — automated sequences, sender rotation, a unified inbox, deliverability tooling — with a newer Lead Finder bolted on as a separate, credit-metered product. Simpleads is built the other way around: sourcing and scoring is the entire product, not an add-on to an outreach tool.\nThat distinction matters for pricing and depth. Saleshandy's Lead Finder credits are a small bundled allotment on most plans, with heavier list-building requiring a separate $29-$199/month add-on or an upgrade tier. Simpleads' full pipeline — People, Company, Jobs, Scoring, Export — is the core product from the start.",
+        "prosCons": [
+          {
+            "title": "Simpleads",
+            "items": [
+              "Sourcing and scoring is the whole product, not an add-on",
+              "Hiring-signal cross-referencing built into the core pipeline",
+              "AI Scoring ranks leads by relevance and urgency"
+            ]
+          },
+          {
+            "title": "Saleshandy",
+            "items": [
+              "Primarily a cold-email sequencing platform (700M+ contact Lead Finder is a newer, separate product)",
+              "Lead Finder credits are a small bundled allotment; heavier use costs extra",
+              "No hiring-signal cross-referencing or AI relevance scoring"
+            ]
+          }
+        ],
+        "cta": "Source Leads Without an Outreach Tool →"
+      }
+    },
+    {
+      "type": "comparisonTable",
+      "data": {
+        "title": "At a Glance",
+        "intro": "If you need email sequencing and deliverability tooling as your primary workflow, Saleshandy is a strong, affordably-priced choice with a lead finder attached. If sourcing, filtering and scoring the right leads is the primary job, Simpleads is purpose-built for that instead of bolted onto an outreach product.",
+        "headers": ["Category", "Simpleads", "Saleshandy"],
+        "rows": [
+          ["Primary purpose", "Purpose-built lead sourcing, scoring and export pipeline", "Cold-email outreach and sequencing platform with an add-on Lead Finder"],
+          ["Core pricing metric", "Plan-based, by monthly lead/export volume", "Active prospects + monthly email cap (outreach); separate credits (Lead Finder)"],
+          ["Lead Finder / People Search depth", "Full pipeline: title, seniority, verified contact status, firmographics", "700M+ contact database, credit-metered, filters are secondary to the outreach product"],
+          ["Hiring-signal cross-referencing", "Built-in Jobs step: filter by title, location, recency", "Not offered"],
+          ["AI lead scoring", "Scores leads against your company description and target roles", "Not offered — AI features are focused on email copywriting, not lead ranking"],
+          ["Local business / Google Maps search", "Dedicated Google Maps Search workflow included", "Not offered"],
+          ["Email sequencing", "Not included — Simpleads exports feed your outreach tool of choice", "Core product: sequences, sender rotation, unified inbox, deliverability testing"]
+        ]
+      }
+    },
+    {
+      "type": "prosCons",
+      "data": {
+        "title": "What Each Product Actually Is",
+        "content": "This is the clearest way to see the difference: one is an outreach platform with a data product attached, the other is a data product with no outreach features at all.",
+        "columns": [
+          {
+            "title": "Simpleads",
+            "items": [
+              "100% of the product is sourcing, filtering, scoring and exporting leads",
+              "No email-sending infrastructure to configure or maintain"
+            ]
+          },
+          {
+            "title": "Saleshandy",
+            "items": [
+              "Core product is multi-step email sequences, sender rotation, and a unified inbox",
+              "Lead Finder is a separate, newer, credit-metered addition to that core product"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "prosCons",
+      "data": {
+        "title": "Lead Data Depth and Filtering",
+        "content": "Saleshandy's Lead Finder database is large (700M+ contacts) but filtering depth takes a back seat to the outreach product it supports.",
+        "columns": [
+          {
+            "title": "Simpleads",
+            "items": [
+              "Full People + Company Intelligence filtering: title, seniority, industry, employee count, domain, keywords",
+              "Include Similar Titles/Title Variants catch role synonyms automatically"
+            ]
+          },
+          {
+            "title": "Saleshandy",
+            "items": [
+              "700M+ contact database, larger raw scale",
+              "Advanced search filters exist, but the product's design center is outreach, not sourcing precision"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "prosCons",
+      "data": {
+        "title": "Hiring Signals and AI Scoring",
+        "content": "Neither is part of Saleshandy's feature set — its AI capabilities are focused on email copy generation, not lead qualification.",
+        "columns": [
+          {
+            "title": "Simpleads",
+            "items": [
+              "Jobs step cross-references leads against live job postings by title, location, recency",
+              "AI Scoring ranks leads by relevance and urgency before export"
+            ]
+          },
+          {
+            "title": "Saleshandy",
+            "items": [
+              "No hiring-signal cross-referencing feature",
+              "AI features focus on sequence/copy generation, not lead ranking or scoring"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "prosCons",
+      "data": {
+        "title": "Pricing Structure",
+        "content": "Saleshandy is genuinely affordable for outreach — but the Lead Finder's credit-based, capped-then-paid structure adds a second bill to track.",
+        "columns": [
+          {
+            "title": "Simpleads",
+            "items": [
+              "Single plan-based pricing structure for the full sourcing pipeline",
+              "No separate credit purchase required to keep sourcing leads"
+            ]
+          },
+          {
+            "title": "Saleshandy",
+            "items": [
+              "Outreach plans start at $25/mo, but a functional setup with Lead Finder often runs $83+/mo",
+              "Lead Finder credits are a small bundled allotment on most tiers; heavier use requires a $29-$199/mo add-on or an upgrade"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "list",
+      "data": {
+        "title": "Choose Simpleads If...",
+        "items": [
+          "Sourcing and scoring the right leads is your primary job, not sending email sequences",
+          "You want hiring-signal cross-referencing and firmographic filtering as standard, not an upsell",
+          "You already have (or don't need) an outreach/sequencing tool and just need better sourcing"
+        ]
+      }
+    },
+    {
+      "type": "cta",
+      "data": {
+        "title": "Better sourcing, whatever you use to send.",
+        "content": "Filter, score and export — no outreach tool required.",
+        "cta": "Source Leads Without an Outreach Tool"
+      }
+    },
+    {
+      "type": "faq",
+      "data": {
+        "title": "Frequently Asked Questions",
+        "items": [
+          {
+            "q": "Is Simpleads a Saleshandy alternative?",
+            "a": "For the sourcing piece, yes — Simpleads' full pipeline (People, Company, Jobs, Scoring, Export) is a purpose-built alternative to Saleshandy's add-on Lead Finder. Simpleads doesn't include email sequencing, which remains Saleshandy's core strength."
+          },
+          {
+            "q": "Does Saleshandy's Lead Finder include hiring-signal or scoring data?",
+            "a": "No — Saleshandy's Lead Finder is a credit-metered contact database; it doesn't cross-reference job postings or score leads by relevance the way Simpleads does."
+          },
+          {
+            "q": "Can I use Simpleads and Saleshandy together?",
+            "a": "Yes — many teams source and score leads in Simpleads, then load the resulting list into Saleshandy for sequencing and deliverability management."
+          },
+          {
+            "q": "Is Saleshandy's Lead Finder cheaper than Simpleads?",
+            "a": "Saleshandy's Lead Finder starts at $24/month, but a functional outreach + Lead Finder setup often runs $83+/month once add-ons are included. Compare that against Simpleads' plan-based pricing for your specific lead volume."
+          }
+        ]
+      }
+    }
+  ]
+}
