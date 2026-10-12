@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Network, Building, BookOpen, Loader2 } from "lucide-react";
+import { Network, Building, BookOpen, Loader2, Globe } from "lucide-react";
 
 const DIR_META = {
+  europages: { name: "Europages", color: "#059669", icon: Globe, glow: "rgba(5, 150, 105, 0.4)" },
   yellowpages: { name: "Yellow Pages", color: "#eab308", icon: BookOpen, glow: "rgba(234, 179, 8, 0.4)" },
   indiamart: { name: "IndiaMART", color: "#2563eb", icon: Building, glow: "rgba(37, 99, 235, 0.4)" },
 };

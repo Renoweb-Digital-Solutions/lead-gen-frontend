@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Loader2, Building, MapPin, Download, BookOpen, ExternalLink, Phone, Mail, X } from "lucide-react";
+import { Search, Loader2, Building, MapPin, Download, BookOpen, ExternalLink, Phone, Mail, X, Globe, ChevronDown } from "lucide-react";
 import TagInput from "../inputs/TagInput";
 import DirectoryNetworkPanel from "./DirectoryNetworkPanel";
 import ExportProgress from "../ExportProgress";
@@ -14,8 +14,70 @@ import { useAuth } from "../../lib/AuthContext";
 
 const DIRECTORIES = [
   { id: "yellowpages", label: "Yellow Pages (US)", icon: BookOpen, color: "text-yellow-600", bg: "bg-yellow-100", border: "border-yellow-200" },
-  { id: "indiamart", label: "IndiaMART (B2B)", icon: Building, color: "text-blue-600", bg: "bg-blue-100", border: "border-blue-200" }
+  { id: "indiamart", label: "IndiaMART (B2B)", icon: Building, color: "text-blue-600", bg: "bg-blue-100", border: "border-blue-200" },
+  { id: "europages", label: "Europages (Europe)", icon: Globe, color: "text-emerald-600", bg: "bg-emerald-100", border: "border-emerald-200" }
 ];
+
+const EUROPAGES_COUNTRIES = {
+  "AL": "Albania",
+  "AT": "Austria",
+  "BY": "Belarus",
+  "BE": "Belgium",
+  "BA": "Bosnia and Herzegovina",
+  "BG": "Bulgaria",
+  "HR": "Croatia",
+  "CY": "Cyprus",
+  "CZ": "Czechia",
+  "DK": "Denmark",
+  "EE": "Estonia",
+  "FI": "Finland",
+  "FR": "France",
+  "DE": "Germany",
+  "GR": "Greece",
+  "HU": "Hungary",
+  "IS": "Iceland",
+  "IE": "Ireland",
+  "IT": "Italy",
+  "LV": "Latvia",
+  "LT": "Lithuania",
+  "LU": "Luxembourg",
+  "MT": "Malta",
+  "MD": "Moldova",
+  "MC": "Monaco",
+  "ME": "Montenegro",
+  "NL": "Netherlands",
+  "MK": "North Macedonia",
+  "NO": "Norway",
+  "PL": "Poland",
+  "PT": "Portugal",
+  "RO": "Romania",
+  "RU": "Russia",
+  "RS": "Serbia",
+  "SK": "Slovakia",
+  "SI": "Slovenia",
+  "ES": "Spain",
+  "SE": "Sweden",
+  "CH": "Switzerland",
+  "TR": "Turkey",
+  "UA": "Ukraine",
+  "GB": "United Kingdom"
+};
+
+function europagesTableRow(row) {
+  // Older results kept in session storage already contain coordinates.
+  let mapsUrl = row.google_maps_url || "";
+  if (!mapsUrl) {
+    const lat = Number(row.latitude);
+    const lng = Number(row.longitude);
+    const hasCoordinates = row.latitude !== "" && row.latitude != null && row.longitude !== "" && row.longitude != null;
+    const validCoordinates = hasCoordinates && Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180;
+    const query = validCoordinates
+      ? `${row.latitude},${row.longitude}`
+      : (row.address || row.city) ? [row.name, row.address, row.city, row.zip_code, row.country].filter(Boolean).join(", ") : "";
+    if (query) mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+  }
+  return { ...row, google_maps_url: mapsUrl };
+}
 
 export default function B2BView() {
   const { isSuspended } = useAuth();
@@ -23,7 +85,17 @@ export default function B2BView() {
   const [directory, setDirectory] = useSessionState("b2b-directory", "yellowpages");
   const [keywords, setKeywords] = useSessionState("b2b-keywords", []);
   const [location, setLocation] = useSessionState("b2b-location", "");
+  const [countries, setCountries] = useState([]);
+  const [enrichEmails, setEnrichEmails] = useState(false);
+  const [countrySearch, setCountrySearch] = useState("");
+  const [progress, setProgress] = useState(null);
+  const [resultDirectory, setResultDirectory] = useSessionState("b2b-result-directory", "yellowpages");
+  const [resultCsv, setResultCsv] = useSessionState("b2b-result-csv", null);
   const [maxResults, setMaxResults] = useSessionState("b2b-max-results", 20);
+  const isEuropages = directory === "europages";
+  const hasKeywords = keywords.some(keyword => keyword.trim());
+  const validMaxResults = Number.isInteger(Number(maxResults)) && Number(maxResults) >= 1 && Number(maxResults) <= 100;
+  const canExtract = hasKeywords && validMaxResults && (isEuropages ? countries.length > 0 : Boolean(location.trim()));
 
   // ─── Pagination State ─────────────────────────────────────
   const [currentPage, setCurrentPage] = useState(1);
@@ -51,7 +123,15 @@ export default function B2BView() {
       setErrorMsg("Please add at least one keyword (e.g. 'plumber', 'software')");
       return;
     }
-    if (!location.trim()) {
+    if (isEuropages && countries.length === 0) {
+      setErrorMsg("Please select at least one European country");
+      return;
+    }
+    if (!validMaxResults) {
+      setErrorMsg("Max Results must be a whole number from 1 to 100");
+      return;
+    }
+    if (!isEuropages && !location.trim()) {
       setErrorMsg("Please enter a location");
       return;
     }
@@ -60,6 +140,9 @@ export default function B2BView() {
     setErrorMsg(null);
     setSuccessMsg(null);
     setResultData(null);
+    setResultCsv(null);
+    setResultDirectory(directory);
+    setProgress(null);
     setIsSheetOpen(false);
     setCurrentPage(1);
 
@@ -67,8 +150,10 @@ export default function B2BView() {
       const jobData = await fetchB2BLeads({
         targetDirectory: directory,
         searchKeywords: keywords,
-        location: location.trim(),
-        maxResultsPerKeyword: Number(maxResults)
+        maxResultsPerKeyword: Number(maxResults),
+        ...(isEuropages
+          ? { countries, enrich_emails: enrichEmails }
+          : { location: location.trim() })
       });
 
       const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
@@ -83,6 +168,7 @@ export default function B2BView() {
       ws.onmessage = (event) => {
         try {
           const msg = JSON.parse(event.data);
+          setProgress({ message: msg.message, percent: msg.percent });
           
           if (msg.status === "completed") {
             ws.close();
@@ -90,7 +176,8 @@ export default function B2BView() {
               let result = msg.data || [];
               const rows = Array.isArray(result) ? result : (result.data || []);
               setResultData(rows);
-              setSuccessMsg(`Found ${rows.length} B2B leads from ${directory}!`);
+              setResultCsv(msg.csv ?? null);
+              setSuccessMsg(msg.message || `Found ${rows.length} B2B leads from ${directory}!`);
             } catch (err) {
               setErrorMsg(err.message || "Failed to process final B2B leads.");
             } finally {
@@ -134,14 +221,14 @@ export default function B2BView() {
   };
 
   const handleExportCsv = () => {
-    if (!resultData || resultData.length === 0) return;
+    if (!resultData || (resultData.length === 0 && resultCsv === null)) return;
     try {
       // Find all unique keys across all objects for dynamic columns
       const allKeys = new Set();
       resultData.forEach(row => Object.keys(row).forEach(k => allKeys.add(k)));
       const headers = Array.from(allKeys);
       
-      const csvContent = [
+      const csvContent = resultCsv ?? [
         headers.join(","),
         ...resultData.map((row) =>
           headers
@@ -158,7 +245,7 @@ export default function B2BView() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `b2b_leads_${directory}.csv`;
+      a.download = `b2b_leads_${resultDirectory}.csv`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -236,6 +323,12 @@ export default function B2BView() {
         )}
       </AnimatePresence>
 
+      {resultData?.length === 0 && resultCsv !== null && !isSearching && (
+        <button type="button" onClick={handleExportCsv} className="mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-border text-sm text-brand-dark">
+          <Download className="w-4 h-4" /> Download empty CSV
+        </button>
+      )}
+
       {/* ── ZONE 1: Search Form & Directory Network ─────────────────────────── */}
       <div className="mb-8 grid grid-cols-1 lg:grid-cols-[55%_45%] gap-6 items-stretch">
         <div className="flex flex-col">
@@ -255,7 +348,7 @@ export default function B2BView() {
           <label className="text-[13px] font-semibold text-brand-dark block mb-3 uppercase tracking-wide">
             Select Data Source Directory
           </label>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {DIRECTORIES.map((dir) => {
               const isActive = directory === dir.id;
               const Icon = dir.icon;
@@ -263,9 +356,14 @@ export default function B2BView() {
                 <button
                   key={dir.id}
                   type="button"
-                  onClick={() => setDirectory(dir.id)}
+                  onClick={() => {
+                    setDirectory(dir.id);
+                    setCountrySearch("");
+                    setErrorMsg(null);
+                  }}
+                  disabled={isSearching}
                   className={`
-                    relative p-4 rounded-xl flex items-center gap-4 text-left transition-all border-2
+                    relative p-3 rounded-xl flex items-center gap-3 text-left transition-all border-2 disabled:opacity-60
                     ${isActive 
                       ? `${dir.border} ${dir.bg} shadow-sm ring-4 ring-opacity-20 ring-brand-blue` 
                       : "border-border hover:border-border bg-surface"
@@ -301,6 +399,20 @@ export default function B2BView() {
                 </div>
               </motion.div>
             )}
+            {isEuropages && (
+              <motion.div
+                key="europages-note"
+                initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                animate={{ opacity: 1, height: "auto", marginTop: 16 }}
+                exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                className="overflow-hidden"
+              >
+                <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold px-4 py-3 rounded-xl flex items-center gap-2">
+                  <Globe className="w-4 h-4 shrink-0" />
+                  Europages covers European companies. Select one or more countries.
+                </div>
+              </motion.div>
+            )}
           </AnimatePresence>
         </div>
 
@@ -314,8 +426,65 @@ export default function B2BView() {
               placeholder="e.g. software, textiles..."
               icon={Search}
             />
+            {isEuropages && !hasKeywords && (
+              <p className="mt-2 text-xs text-amber-700">Add at least one keyword and press Enter.</p>
+            )}
           </div>
 
+          {isEuropages ? (
+            <div className="flex-1 relative group min-w-0">
+              <label className="text-[13px] font-semibold text-brand-dark block mb-1.5 uppercase tracking-wide">
+                Countries
+              </label>
+              <details className="relative">
+                <summary className="list-none cursor-pointer px-4 py-2.5 text-sm bg-surface border border-border rounded-xl flex items-center justify-between gap-2 text-brand-dark">
+                  {countries.length ? `${countries.length} selected` : "Select countries"}
+                  <ChevronDown className="w-4 h-4 shrink-0" />
+                </summary>
+                <div className="absolute top-full mt-2 left-0 w-full min-w-[220px] z-30 bg-surface border border-border rounded-xl shadow-lg p-3">
+                  <input
+                    type="search"
+                    aria-label="Search European countries"
+                    className="w-full px-3 py-2 text-sm bg-surface border border-border rounded-lg text-brand-dark"
+                    value={countrySearch}
+                    onChange={e => setCountrySearch(e.target.value)}
+                    placeholder="Search countries..."
+                  />
+                  <div className="max-h-56 overflow-y-auto mt-2">
+                    {Object.entries(EUROPAGES_COUNTRIES)
+                      .filter(([code, name]) => `${code} ${name}`.toLowerCase().includes(countrySearch.toLowerCase()))
+                      .map(([code, name]) => (
+                        <label key={code} className="flex items-center gap-2 py-2 text-sm text-brand-dark cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={countries.includes(code)}
+                            onChange={e => setCountries(e.target.checked ? [...countries, code] : countries.filter(c => c !== code))}
+                          />
+                          {name}
+                        </label>
+                      ))}
+                    {!Object.entries(EUROPAGES_COUNTRIES).some(([code, name]) => `${code} ${name}`.toLowerCase().includes(countrySearch.toLowerCase())) && (
+                      <p className="text-xs text-gray-500 py-2">No countries match your search.</p>
+                    )}
+                  </div>
+                </div>
+              </details>
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {countries.map(code => (
+                  <button
+                    key={code}
+                    type="button"
+                    onClick={() => setCountries(countries.filter(c => c !== code))}
+                    aria-label={`Remove ${EUROPAGES_COUNTRIES[code]}`}
+                    className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 px-2 py-1 text-xs"
+                  >
+                    {EUROPAGES_COUNTRIES[code]} <X className="w-3 h-3" />
+                  </button>
+                ))}
+              </div>
+              {countries.length === 0 && <p className="mt-2 text-xs text-amber-700">Select at least one country.</p>}
+            </div>
+          ) : (
           <div className="flex-1 relative group">
             <label className="text-[13px] font-semibold text-brand-dark block mb-1.5 uppercase tracking-wide">
               Location
@@ -334,6 +503,8 @@ export default function B2BView() {
             </div>
           </div>
 
+          )}
+
           <div className="flex-1 relative group">
             <label className="text-[13px] font-semibold text-brand-dark block mb-1.5 uppercase tracking-wide">
               Max Results
@@ -348,6 +519,14 @@ export default function B2BView() {
             />
           </div>
         </div>
+
+        {!validMaxResults && <p className="mb-3 text-xs text-amber-700">Max Results must be a whole number from 1 to 100.</p>}
+        {isEuropages && (
+          <label className="flex items-center gap-2 text-sm text-brand-dark mb-6 cursor-pointer">
+            <input type="checkbox" checked={enrichEmails} onChange={e => setEnrichEmails(e.target.checked)} />
+            Find emails (extra cost, slower)
+          </label>
+        )}
 
         <div className="flex justify-end pt-4 border-t border-border gap-3">
           {isSearching && (
@@ -365,12 +544,12 @@ export default function B2BView() {
           <motion.button
             type="button"
             onClick={handleSearch}
-            disabled={isSearching || isSuspended}
+            disabled={isSearching || isSuspended || !canExtract}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             className={`
               relative px-8 py-3.5 rounded-xl text-white font-bold text-[15px] tracking-wide flex items-center justify-center gap-2 overflow-hidden transition-all duration-300 min-w-[220px]
-              ${(isSearching || isSuspended)
+              ${(isSearching || isSuspended || !canExtract)
                 ? "bg-brand-sky shadow-inner pointer-events-none"
                 : "bg-gradient-to-r from-brand-blue to-brand-cyan shadow-md hover:shadow-lg"
               }
@@ -392,6 +571,11 @@ export default function B2BView() {
         </div>
           </motion.div>
           <div className="mt-4">
+            {isSearching && progress?.message && (
+              <p role="status" aria-live="polite" className="mb-2 text-sm text-gray-500">
+                {progress.message}{progress.percent != null ? ` (${progress.percent}%)` : ""}
+              </p>
+            )}
             <ExportProgress isActive={isSearching} logType="b2b" />
           </div>
         </div>
@@ -413,9 +597,9 @@ export default function B2BView() {
             onOpen={() => setIsSheetOpen(true)}
             onClose={() => setIsSheetOpen(false)} 
             onExport={handleExportCsv}
-            data={resultData}
-            extraExcludeColumns={directory === "indiamart" ? ["price", "Price"] : []}
-            subtitle={`${resultData.length} local businesses from ${directory} ready for export`}
+            data={resultDirectory === "europages" ? resultData.map(europagesTableRow) : resultData}
+            extraExcludeColumns={resultDirectory === "indiamart" ? ["price", "Price"] : resultDirectory === "europages" ? ["latitude", "longitude"] : []}
+            subtitle={`${resultData.length} businesses from ${resultDirectory} ready for export`}
           />
         </>
       )}
