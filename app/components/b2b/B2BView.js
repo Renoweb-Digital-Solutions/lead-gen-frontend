@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Loader2, Building, MapPin, Download, BookOpen, ExternalLink, Phone, Mail, X, Globe, ChevronDown } from "lucide-react";
+import { Search, Loader2, Building, MapPin, Download, BookOpen, ExternalLink, Phone, Mail, X, Globe, ChevronDown, Check, CheckCircle2, AlertCircle, Info } from "lucide-react";
+import styles from "./B2BView.module.css";
 import TagInput from "../inputs/TagInput";
 import DirectoryNetworkPanel from "./DirectoryNetworkPanel";
 import ExportProgress from "../ExportProgress";
@@ -13,9 +14,9 @@ import { useSessionState } from "../../hooks/useSessionState";
 import { useAuth } from "../../lib/AuthContext";
 
 const DIRECTORIES = [
-  { id: "yellowpages", label: "Yellow Pages (US)", icon: BookOpen, color: "text-yellow-600", bg: "bg-yellow-100", border: "border-yellow-200" },
-  { id: "indiamart", label: "IndiaMART (B2B)", icon: Building, color: "text-blue-600", bg: "bg-blue-100", border: "border-blue-200" },
-  { id: "europages", label: "Europages (Europe)", icon: Globe, color: "text-emerald-600", bg: "bg-emerald-100", border: "border-emerald-200" }
+  { id: "yellowpages", label: "Yellow Pages (US)", description: "Local businesses", icon: BookOpen, accent: "#d97706", tint: "rgba(245, 158, 11, 0.1)" },
+  { id: "indiamart", label: "IndiaMART (B2B)", description: "Wholesale suppliers", icon: Building, accent: "#3b82f6", tint: "rgba(59, 130, 246, 0.1)" },
+  { id: "europages", label: "Europages (Europe)", description: "European companies", icon: Globe, accent: "#10b981", tint: "rgba(16, 185, 129, 0.1)" }
 ];
 
 const EUROPAGES_COUNTRIES = {
@@ -256,7 +257,7 @@ export default function B2BView() {
   };
 
   return (
-    <div className="rw-main-content w-full relative min-h-screen pb-20">
+    <div className={`${styles.root} rw-main-content w-full relative min-h-screen pb-20`}>
       {/* Page header */}
       <div className="mb-8 animate-[rw-fadeInUp_0.3s_ease-out]">
         <div className="flex items-center gap-3 mb-1">
@@ -280,18 +281,18 @@ export default function B2BView() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="mb-6 p-4 bg-red-50/80 backdrop-blur border border-red-200 rounded-xl shadow-sm flex items-start gap-3 relative"
+            className={`${styles.alert} ${styles.errorAlert}`}
+            role="alert"
           >
-            <div className="mt-0.5 bg-red-100 text-red-600 p-1 rounded-full shrink-0">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-            </div>
+            <div className={styles.alertIcon}><AlertCircle className="w-5 h-5" /></div>
             <div className="pr-6">
-              <h4 className="text-sm font-bold text-red-800 m-0">Error</h4>
-              <p className="text-sm text-red-700 mt-1 mb-0">{errorMsg}</p>
+              <h4 className={`${styles.alertTitle} text-sm font-semibold m-0`}>Error</h4>
+              <p className={`${styles.alertMessage} text-sm mt-1 mb-0`}>{errorMsg}</p>
             </div>
             <button 
               onClick={() => setErrorMsg(null)}
-              className="absolute top-4 right-4 text-red-400 hover:text-red-700 transition-colors"
+              className={styles.dismiss}
+              aria-label="Dismiss error"
             >
               <X className="w-4 h-4" />
             </button>
@@ -304,18 +305,18 @@ export default function B2BView() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="mb-6 p-4 bg-emerald-50/80 backdrop-blur border border-emerald-200 rounded-xl shadow-sm flex items-start gap-3 relative"
+            className={styles.alert}
+            role="status"
           >
-             <div className="mt-0.5 bg-emerald-100 text-emerald-600 p-1 rounded-full shrink-0">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            </div>
+            <div className={styles.alertIcon}><CheckCircle2 className="w-5 h-5" /></div>
             <div className="pr-6">
-              <h4 className="text-sm font-bold text-emerald-800 m-0">Success</h4>
-              <p className="text-sm text-emerald-700 mt-1 mb-0">{successMsg}</p>
+              <h4 className={`${styles.alertTitle} text-sm font-semibold m-0`}>Extraction complete</h4>
+              <p className={`${styles.alertMessage} text-sm mt-1 mb-0`}>{successMsg}</p>
             </div>
             <button 
               onClick={() => setSuccessMsg(null)}
-              className="absolute top-4 right-4 text-emerald-400 hover:text-emerald-700 transition-colors"
+              className={styles.dismiss}
+              aria-label="Dismiss success message"
             >
               <X className="w-4 h-4" />
             </button>
@@ -362,23 +363,18 @@ export default function B2BView() {
                     setErrorMsg(null);
                   }}
                   disabled={isSearching}
-                  className={`
-                    relative p-3 rounded-xl flex items-center gap-3 text-left transition-all border-2 disabled:opacity-60
-                    ${isActive 
-                      ? `${dir.border} ${dir.bg} shadow-sm ring-4 ring-opacity-20 ring-brand-blue` 
-                      : "border-border hover:border-border bg-surface"
-                    }
-                  `}
+                  aria-pressed={isActive}
+                  className={styles.sourceCard}
+                  style={{ "--directory-accent": dir.accent, "--directory-tint": dir.tint }}
                 >
-                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${isActive ? "bg-surface/60 shadow-sm" : "bg-[var(--rw-surface-hover)]"}`}>
-                    <Icon className={`w-5 h-5 ${isActive ? dir.color : "text-gray-400"}`} />
+                  <div className={styles.sourceIcon}>
+                    <Icon className="w-[18px] h-[18px]" />
                   </div>
-                  <div>
-                    <h4 className={`font-bold text-[15px] ${isActive ? "text-brand-dark" : "text-gray-600"}`}>{dir.label}</h4>
+                  <div className="min-w-0">
+                    <h4 className={styles.sourceName}>{dir.label}</h4>
+                    <p className={styles.sourceDescription}>{dir.description}</p>
                   </div>
-                  {isActive && (
-                    <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-brand-blue"></div>
-                  )}
+                  {isActive && <Check className={`${styles.selectedMark} w-3 h-3`} />}
                 </button>
               );
             })}
@@ -391,10 +387,8 @@ export default function B2BView() {
                 exit={{ opacity: 0, height: 0, marginTop: 0 }}
                 className="overflow-hidden"
               >
-                <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 text-xs font-semibold px-4 py-3 rounded-xl flex items-center gap-2">
-                  <span className="shrink-0 bg-yellow-100 p-1 rounded-full text-yellow-700">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                  </span>
+                <div className={`${styles.note} ${styles.yellowNote}`}>
+                  <Info className="w-4 h-4" />
                   Please note that Yellow Pages data extraction is currently limited to locations within the United States.
                 </div>
               </motion.div>
@@ -407,7 +401,7 @@ export default function B2BView() {
                 exit={{ opacity: 0, height: 0, marginTop: 0 }}
                 className="overflow-hidden"
               >
-                <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold px-4 py-3 rounded-xl flex items-center gap-2">
+                <div className={styles.note}>
                   <Globe className="w-4 h-4 shrink-0" />
                   Europages covers European companies. Select one or more countries.
                 </div>
@@ -476,7 +470,7 @@ export default function B2BView() {
                     type="button"
                     onClick={() => setCountries(countries.filter(c => c !== code))}
                     aria-label={`Remove ${EUROPAGES_COUNTRIES[code]}`}
-                    className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 px-2 py-1 text-xs"
+                    className={`${styles.countryChip} inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs transition-colors`}
                   >
                     {EUROPAGES_COUNTRIES[code]} <X className="w-3 h-3" />
                   </button>

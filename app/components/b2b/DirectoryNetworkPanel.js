@@ -1,5 +1,6 @@
 "use client";
 
+import styles from "./B2BView.module.css";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Network, Building, BookOpen, Loader2, Globe } from "lucide-react";
@@ -126,7 +127,7 @@ export default function DirectoryNetworkPanel({ status, selectedDirectory, busin
               key="complete"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="mt-3 bg-emerald-50/90 backdrop-blur-md border border-emerald-200 rounded-xl p-4 inline-flex items-center gap-4 shadow-md pointer-events-auto"
+              className={`${styles.completeBadge} mt-3 rounded-xl p-4 inline-flex items-center gap-4 shadow-sm pointer-events-auto`}
             >
               <div className="w-10 h-10 rounded-full bg-[#10b981]/20 flex items-center justify-center shrink-0">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-[#10b981]">
@@ -135,11 +136,11 @@ export default function DirectoryNetworkPanel({ status, selectedDirectory, busin
                 </svg>
               </div>
               <div>
-                <div className="text-[#10b981] text-[10px] uppercase tracking-[0.2em] font-bold mb-1">
+                <div className={`${styles.completeLabel} text-[10px] uppercase tracking-[0.2em] font-bold mb-1`}>
                   Extraction Complete
                 </div>
-                <div className="text-emerald-900 text-2xl font-bold font-display tabular-nums leading-none">
-                  {businessCount} <span className="text-sm font-sans font-medium text-emerald-700 tracking-normal">businesses found</span>
+                <div className="text-brand-dark text-2xl font-bold font-display tabular-nums leading-none">
+                  {businessCount} <span className="text-sm font-sans font-medium text-[var(--rw-text-secondary)] tracking-normal">businesses found</span>
                 </div>
               </div>
             </motion.div>

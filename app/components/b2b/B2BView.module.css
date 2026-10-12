@@ -1,0 +1,131 @@
+.root {
+  --b2b-success-text: #047857;
+  --b2b-error-text: #b91c1c;
+}
+
+:global([data-theme="dark"]) .root {
+  --b2b-success-text: #6ee7b7;
+  --b2b-error-text: #fca5a5;
+}
+
+.alert {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  position: relative;
+  padding: 20px 54px 20px 20px;
+  margin-bottom: 24px;
+  border: 1px solid rgba(16, 185, 129, 0.22);
+  border-left: 3px solid #10b981;
+  border-radius: 16px;
+  background: linear-gradient(110deg, rgba(16, 185, 129, 0.09), transparent 65%), var(--rw-surface);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+}
+
+.alertIcon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 12px;
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--b2b-success-text);
+}
+
+.alertTitle { color: var(--rw-text); }
+.alertMessage { color: var(--rw-text-secondary); line-height: 1.6; }
+
+.dismiss {
+  position: absolute;
+  top: 50%;
+  right: 16px;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  color: var(--rw-text-secondary);
+  transition: background 160ms, color 160ms;
+}
+.dismiss:hover { background: var(--rw-surface-hover); color: var(--rw-text); }
+.dismiss:focus-visible { outline: 2px solid var(--rw-bright-blue); outline-offset: 2px; }
+
+.errorAlert {
+  border-color: rgba(239, 68, 68, 0.24);
+  border-left-color: #ef4444;
+  background: linear-gradient(110deg, rgba(239, 68, 68, 0.08), transparent 65%), var(--rw-surface);
+}
+.errorAlert .alertIcon { color: var(--b2b-error-text); background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); }
+
+.sourceCard {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  min-height: 84px;
+  padding: 14px 12px;
+  border: 1px solid var(--rw-border);
+  border-radius: 13px;
+  background: var(--rw-surface);
+  text-align: left;
+  transition: border-color 180ms, background 180ms, box-shadow 180ms, transform 180ms;
+}
+.sourceCard:hover:not(:disabled) {
+  border-color: var(--directory-accent);
+  background: linear-gradient(115deg, var(--directory-tint), transparent), var(--rw-surface);
+  transform: translateY(-1px);
+}
+.sourceCard[aria-pressed="true"] {
+  border-color: var(--directory-accent);
+  background: linear-gradient(115deg, var(--directory-tint), transparent 95%), var(--rw-surface);
+  box-shadow: 0 0 0 3px var(--directory-tint);
+}
+.sourceCard:focus-visible { outline: 2px solid var(--directory-accent); outline-offset: 4px; }
+.sourceCard:disabled { opacity: 0.6; }
+
+.sourceIcon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: var(--rw-surface-hover);
+  color: var(--rw-text-secondary);
+}
+.sourceCard[aria-pressed="true"] .sourceIcon { background: var(--directory-tint); color: var(--directory-accent); }
+.sourceName { margin: 0; color: var(--rw-text); font-size: 13px; line-height: 1.4; font-weight: 650; }
+.sourceDescription { margin-top: 4px; color: var(--rw-text-secondary); font-size: 10px; line-height: 1.4; }
+.selectedMark { position: absolute; right: 8px; top: 7px; color: var(--directory-accent); }
+
+.note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid rgba(16, 185, 129, 0.18);
+  border-radius: 11px;
+  background: rgba(16, 185, 129, 0.06);
+  color: var(--rw-text-secondary);
+  font-size: 12px;
+  line-height: 1.6;
+}
+.note > svg { color: var(--b2b-success-text); flex-shrink: 0; }
+.yellowNote { border-color: rgba(245, 158, 11, 0.2); background: rgba(245, 158, 11, 0.06); }
+.yellowNote > svg { color: #d97706; }
+.countryChip {
+  color: var(--b2b-success-text);
+  background: rgba(16, 185, 129, 0.09);
+  border: 1px solid rgba(16, 185, 129, 0.24);
+}
+.countryChip:hover { background: rgba(16, 185, 129, 0.17); }
+
+.completeBadge {
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  background: linear-gradient(120deg, rgba(16, 185, 129, 0.12), transparent), var(--rw-surface);
+}
+.completeLabel { color: var(--b2b-success-text); }
