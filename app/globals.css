@@ -27,6 +27,7 @@
   --rw-success: #10b981;
   --rw-error: #ef4444;
   --rw-warning: var(--rw-yellow);
+  --scroll-accent: var(--rw-deep-blue, #023dbb);
 
   /* ── Gradients ─────────────────────────────────────────── */
   --rw-gradient-primary: linear-gradient(135deg, var(--rw-deep-blue), var(--rw-bright-blue));
@@ -135,6 +136,14 @@ html {
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+[data-theme="dark"] html,
+.dark html {
+  scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
 }
 
 body {
@@ -149,22 +158,153 @@ body {
    SCROLLBAR
    ═══════════════════════════════════════════════════════════ */
 
+/* Track: transparent with 1px hairline on inner edge for a defined lane */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
   background: transparent;
+  box-shadow: inset 1px 0 0 rgba(148, 163, 184, 0.2);
 }
 
+[data-theme="dark"] ::-webkit-scrollbar-track,
+.dark ::-webkit-scrollbar-track {
+  box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.08);
+}
+
+/* Thumb: fully rounded pill, 2px transparent border with background-clip: padding-box for floating look */
 ::-webkit-scrollbar-thumb {
-  background: var(--rw-border);
-  border-radius: var(--rw-radius-full);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  border-radius: 9999px;
+  min-height: 40px;
+  /* Slate-300 with faint vertical tonal gradient (~8% lighter at top) */
+  background-image: linear-gradient(180deg, #d3dce6 0%, #aebdd0 100%);
+  background-color: #cbd5e1;
 }
 
+/* Dark mode thumb: white at 22% opacity with slight vertical tonal gradient */
+[data-theme="dark"] ::-webkit-scrollbar-thumb,
+.dark ::-webkit-scrollbar-thumb {
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.26) 0%, rgba(255, 255, 255, 0.20) 100%);
+  background-color: rgba(255, 255, 255, 0.22);
+}
+
+/* Thumb Hover: shifts to --scroll-accent with subtle vertical tonal gradient */
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--rw-text-muted);
+  background-image: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--scroll-accent, #023dbb) 92%, white 8%) 0%,
+    var(--scroll-accent, #023dbb) 100%
+  );
+  background-color: var(--scroll-accent, #023dbb);
+}
+
+/* Thumb Active: being dragged deepens slightly */
+::-webkit-scrollbar-thumb:active {
+  background-image: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--scroll-accent, #023dbb) 88%, black 12%) 0%,
+    color-mix(in srgb, var(--scroll-accent, #023dbb) 75%, black 25%) 100%
+  );
+  background-color: color-mix(in srgb, var(--scroll-accent, #023dbb) 80%, black 20%);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   INNER SCROLL CONTAINER UTILITY (.scroll-styled, 6px size)
+   ═══════════════════════════════════════════════════════════ */
+
+.scroll-styled {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+[data-theme="dark"] .scroll-styled,
+.dark .scroll-styled {
+  scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
+}
+
+.scroll-styled::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scroll-styled::-webkit-scrollbar-track {
+  background: transparent;
+  box-shadow: inset 1px 0 0 rgba(148, 163, 184, 0.12);
+}
+
+[data-theme="dark"] .scroll-styled::-webkit-scrollbar-track,
+.dark .scroll-styled::-webkit-scrollbar-track {
+  box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.05);
+}
+
+.scroll-styled::-webkit-scrollbar-thumb {
+  border: 1px solid transparent;
+  background-clip: padding-box;
+  border-radius: 9999px;
+  background-image: linear-gradient(180deg, #d3dce6 0%, #aebdd0 100%);
+  background-color: #cbd5e1;
+}
+
+[data-theme="dark"] .scroll-styled::-webkit-scrollbar-thumb,
+.dark .scroll-styled::-webkit-scrollbar-thumb {
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.26) 0%, rgba(255, 255, 255, 0.20) 100%);
+  background-color: rgba(255, 255, 255, 0.22);
+}
+
+.scroll-styled::-webkit-scrollbar-thumb:hover {
+  background-image: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--scroll-accent, #023dbb) 92%, white 8%) 0%,
+    var(--scroll-accent, #023dbb) 100%
+  );
+  background-color: var(--scroll-accent, #023dbb);
+}
+
+.scroll-styled::-webkit-scrollbar-thumb:active {
+  background-image: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--scroll-accent, #023dbb) 88%, black 12%) 0%,
+    color-mix(in srgb, var(--scroll-accent, #023dbb) 75%, black 25%) 100%
+  );
+  background-color: color-mix(in srgb, var(--scroll-accent, #023dbb) 80%, black 20%);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   READING-PROGRESS RAIL RESPONSIVE & HIGH CONTRAST FALLBACKS
+   ═══════════════════════════════════════════════════════════ */
+
+@media (max-width: 639px), (pointer: coarse) {
+  .reading-progress-rail {
+    display: none !important;
+  }
+}
+
+@media (forced-colors: active) {
+  html,
+  body,
+  .scroll-styled {
+    scrollbar-color: auto;
+    scrollbar-width: auto;
+  }
+  ::-webkit-scrollbar {
+    width: auto;
+    height: auto;
+  }
+  ::-webkit-scrollbar-track {
+    box-shadow: none;
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    border: none;
+    background: ButtonText;
+  }
+  .reading-progress-rail {
+    display: none !important;
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════

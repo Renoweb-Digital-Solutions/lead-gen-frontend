@@ -4,14 +4,17 @@ import { useEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { HeroSection } from "@/components/ui/hero-section-1";
-import ProblemSection from "./ProblemSection";
-import HowItWorks from "./HowItWorks";
-import FeatureBento from "./FeatureBento";
-import StatsSection from "./StatsSection";
-import Testimonials from "./Testimonials";
-import Pricing from "./Pricing";
-import FAQ from "./FAQ";
-import FinalCTA from "./FinalCTA";
+import PipelineSteps from "./PipelineSteps";
+import FeatureQuestionsGrid from "./FeatureQuestionsGrid";
+import LeadGenVsQual from "./LeadGenVsQual";
+import ActiveJobSignalsBlock from "./ActiveJobSignalsBlock";
+import AiQualificationBlock from "./AiQualificationBlock";
+import MultiSourceDiscovery from "./MultiSourceDiscovery";
+import SellingWaysBlock from "./SellingWaysBlock";
+import WorkflowTestimonials from "./WorkflowTestimonials";
+import TrustTransparencyBand from "./TrustTransparencyBand";
+import PipelineFinalCTA from "./PipelineFinalCTA";
+import HomepageFAQ from "./HomepageFAQ";
 import Footer from "./Footer";
 import { useAuth } from "../../lib/AuthContext";
 import { useRouter } from "next/navigation";
@@ -36,7 +39,6 @@ export default function LandingPage() {
       toggleActions: "play none none reverse",
     });
 
-    // We can run an initial fade-in or just rely on ScrollTrigger for sections
     return () => {
       ScrollTrigger.getAll().forEach(t => t.kill());
     };
@@ -46,14 +48,17 @@ export default function LandingPage() {
     <main className="min-h-screen bg-white text-brand-dark font-sans selection:bg-brand-cyan/30 selection:text-brand-dark">
       <HeroSection />
       <div className="overflow-x-hidden">
-      <ProblemSection />
-      <HowItWorks />
-      <FeatureBento />
-      <StatsSection />
-      <Testimonials />
-      <Pricing />
-      <FAQ />
-        <FinalCTA />
+        <PipelineSteps />
+        <FeatureQuestionsGrid />
+        <LeadGenVsQual />
+        <ActiveJobSignalsBlock />
+        <AiQualificationBlock />
+        <MultiSourceDiscovery />
+        <SellingWaysBlock />
+        <WorkflowTestimonials />
+        <TrustTransparencyBand />
+        <PipelineFinalCTA />
+        <HomepageFAQ />
         <Footer />
       </div>
     </main>

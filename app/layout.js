@@ -22,6 +22,7 @@ export const metadata = {
 
 import ClientProviders from "./ClientProviders";
 import BetaBanner from "./components/BetaBanner";
+import ScrollProgressLine from "./components/ScrollProgressLine";
 import { AnalyticsProvider } from "./components/AnalyticsProvider";
 
 export default function RootLayout({ children }) {
@@ -31,6 +32,7 @@ export default function RootLayout({ children }) {
       <body>
         <AnalyticsProvider>
           <BetaBanner />
+          <ScrollProgressLine />
           <ClientProviders>
             {children}
           </ClientProviders>

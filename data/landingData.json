@@ -1,0 +1,522 @@
+{
+  "pipelineSteps": [
+    {
+      "step": "01",
+      "name": "People",
+      "badge": "Prospect Discovery",
+      "icon": "Users",
+      "lead": "Find professionals using filters such as:",
+      "filters": [
+        "Job title",
+        "Similar titles and title variants",
+        "Seniority",
+        "Function / department",
+        "Location",
+        "Email availability/status",
+        "Phone availability"
+      ],
+      "summary": "Use the available profile and contact information to build a relevant prospect set.",
+      "href": "/features/people-search"
+    },
+    {
+      "step": "02",
+      "name": "Company",
+      "badge": "Account Context",
+      "icon": "Building2",
+      "lead": "Narrow accounts using company-level context such as:",
+      "filters": [
+        "Company name or domain",
+        "Industry",
+        "Company keywords",
+        "Broad or exact keyword matching",
+        "Location"
+      ],
+      "summary": "This lets you build an account list based on the businesses you actually want to reach.",
+      "href": "/features/company-intelligence"
+    },
+    {
+      "step": "03",
+      "name": "Jobs",
+      "badge": "Active Signals",
+      "icon": "Briefcase",
+      "lead": "Cross-reference your prospects and companies with Active Job Signals. Filter job activity by:",
+      "filters": [
+        "Job title",
+        "Location",
+        "Recency",
+        "Job-data availability"
+      ],
+      "summary": "Recent hiring activity can be a useful business signal. It may indicate expansion, a new initiative or changing business needs — but it is a signal, not proof of buying intent.",
+      "href": "/features/activejobsignals"
+    },
+    {
+      "step": "04",
+      "name": "Scoring",
+      "badge": "AI Qualification",
+      "icon": "Sparkles",
+      "lead": "Give SimpLeads context about your business and target roles. AI Lead Qualification evaluates available information against:",
+      "filters": [
+        "Need",
+        "Urgency",
+        "Relevance",
+        "Authority"
+      ],
+      "summary": "The result is not simply another contact list. It helps you understand which leads deserve priority.",
+      "href": "/features/ai-lead-scoring"
+    },
+    {
+      "step": "05",
+      "name": "Export",
+      "badge": "Workflow Output",
+      "icon": "Download",
+      "lead": "Once your list is ready, export the data in the format you need:",
+      "filters": [
+        "Full Bundle",
+        "Summary CSV",
+        "Leads Only",
+        "Jobs Only"
+      ],
+      "summary": "Take the qualified list into your existing workflow without claiming unsupported direct CRM integrations.",
+      "href": "/dashboard"
+    }
+  ],
+  "featureQuestions": [
+    {
+      "question": "Who should you contact?",
+      "title": "People Search",
+      "body": "Search for relevant professionals by title, seniority, function, location and available contact information.",
+      "cta": "Explore People Search →",
+      "href": "/features/people-search",
+      "icon": "Users",
+      "badge": "Prospect Identity"
+    },
+    {
+      "question": "Which companies are worth targeting?",
+      "title": "Company Intelligence",
+      "body": "Filter businesses using industry, keywords, domain, name matching and location to narrow your target accounts.",
+      "cta": "Explore Company Intelligence →",
+      "href": "/features/company-intelligence",
+      "icon": "Building2",
+      "badge": "Account Fit"
+    },
+    {
+      "question": "Why might this company matter now?",
+      "title": "Active Job Signals",
+      "body": "Use recent job activity as a business-intelligence signal to identify companies that may be expanding or changing.",
+      "cta": "Explore Active Job Signals →",
+      "href": "/features/activejobsignals",
+      "icon": "Briefcase",
+      "badge": "Hiring Context"
+    },
+    {
+      "question": "Who should you contact first?",
+      "title": "AI Lead Qualification",
+      "body": "Evaluate leads against Need, Urgency, Relevance and Authority instead of treating every contact equally.",
+      "cta": "Explore AI Lead Qualification →",
+      "href": "/features/ai-lead-scoring",
+      "icon": "Sparkles",
+      "badge": "Priority Scoring"
+    },
+    {
+      "question": "Where else can you find prospects?",
+      "title": "Multi-Source Discovery",
+      "body": "Go beyond the core pipeline with dedicated discovery tools for:",
+      "list": [
+        "Google Maps",
+        "Instagram",
+        "YouTube",
+        "B2B directories",
+        "IndiaMART",
+        "Yellow Pages",
+        "Investor discovery"
+      ],
+      "cta": "Explore Discovery Tools →",
+      "href": "/features",
+      "icon": "Compass",
+      "badge": "Specialized Sources"
+    },
+    {
+      "question": "How do you take the results forward?",
+      "title": "Export",
+      "body": "Choose the output you need through Full Bundle, Summary CSV, Leads Only or Jobs Only.",
+      "cta": "Explore Export →",
+      "href": "/dashboard",
+      "icon": "Download",
+      "badge": "Clean Output"
+    }
+  ],
+  "discoveryTools": [
+    {
+      "id": "google-maps",
+      "title": "Google Maps Search",
+      "desc": "Discover local businesses using business keywords and location, with AI-assisted keyword suggestions to expand your search.",
+      "tag": "Local Businesses & Stores",
+      "cta": "Try Google Maps Search →",
+      "href": "/features/google-maps-search",
+      "icon": "MapPin",
+      "colSpanLg": "lg:col-span-2",
+      "colSpanMd": "md:col-span-1",
+      "cardHoverBg": "from-emerald-500/[0.05] via-teal-500/[0.03] to-transparent",
+      "topLineGradient": "from-emerald-500 via-teal-400 to-cyan-500",
+      "iconTileBase": "bg-emerald-50/80 text-emerald-600 border-emerald-200/60",
+      "iconTileHover": "group-hover:bg-gradient-to-r group-hover:from-emerald-600 group-hover:to-teal-600 group-hover:text-white group-hover:border-emerald-500",
+      "tagHover": "group-hover:text-emerald-700 group-hover:border-emerald-200 group-hover:bg-emerald-50/80",
+      "linkHover": "group-hover:text-emerald-700",
+      "numeralHover": "group-hover:text-emerald-950/[0.09]",
+      "focusRing": "focus-within:ring-emerald-500"
+    },
+    {
+      "id": "instagram",
+      "title": "Instagram Lead Scraper",
+      "desc": "Extract supported lead information from Instagram sources such as followers and other supported profile-based sources.",
+      "tag": "Social Profile Audiences",
+      "cta": "Explore Instagram Lead Scraper →",
+      "href": "/features/instagram-lead-scraper",
+      "icon": "Camera",
+      "colSpanLg": "lg:col-span-2",
+      "colSpanMd": "md:col-span-1",
+      "cardHoverBg": "from-rose-500/[0.06] via-pink-500/[0.04] to-purple-500/[0.03]",
+      "topLineGradient": "from-amber-400 via-rose-500 to-purple-600",
+      "iconTileBase": "bg-rose-50/80 text-rose-600 border-rose-200/60",
+      "iconTileHover": "group-hover:bg-gradient-to-tr group-hover:from-amber-500 group-hover:via-rose-500 group-hover:to-purple-600 group-hover:text-white group-hover:border-rose-400",
+      "tagHover": "group-hover:text-rose-700 group-hover:border-rose-200 group-hover:bg-rose-50/80",
+      "linkHover": "group-hover:text-rose-600",
+      "numeralHover": "group-hover:text-rose-950/[0.09]",
+      "focusRing": "focus-within:ring-rose-500"
+    },
+    {
+      "id": "youtube",
+      "title": "YouTube Lead Scraper",
+      "desc": "Discover leads, emails and relevant social information through YouTube searches using targeted keywords and supported extraction options.",
+      "tag": "Video Creator Ecosystem",
+      "cta": "Explore YouTube Lead Scraper →",
+      "href": "/features/youtube-lead-scraper",
+      "icon": "Video",
+      "colSpanLg": "lg:col-span-2",
+      "colSpanMd": "md:col-span-1",
+      "cardHoverBg": "from-red-500/[0.05] via-rose-500/[0.03] to-transparent",
+      "topLineGradient": "from-red-600 via-rose-500 to-orange-500",
+      "iconTileBase": "bg-red-50/80 text-red-600 border-red-200/60",
+      "iconTileHover": "group-hover:bg-gradient-to-r group-hover:from-red-600 group-hover:to-rose-600 group-hover:text-white group-hover:border-red-500",
+      "tagHover": "group-hover:text-red-700 group-hover:border-red-200 group-hover:bg-red-50/80",
+      "linkHover": "group-hover:text-red-600",
+      "numeralHover": "group-hover:text-red-950/[0.09]",
+      "focusRing": "focus-within:ring-red-500"
+    },
+    {
+      "id": "directory",
+      "title": "B2B Directory Scraper",
+      "desc": "Search supported directories including Yellow Pages in the US and IndiaMART for B2B discovery.",
+      "tag": "Yellow Pages & IndiaMART",
+      "cta": "Explore B2B Directory Search →",
+      "href": "/features/b2b-directory-scraper",
+      "icon": "BookOpen",
+      "colSpanLg": "lg:col-span-3",
+      "colSpanMd": "md:col-span-1",
+      "cardHoverBg": "from-amber-500/[0.06] via-yellow-500/[0.03] to-transparent",
+      "topLineGradient": "from-amber-500 via-yellow-400 to-orange-400",
+      "iconTileBase": "bg-amber-50/80 text-amber-600 border-amber-200/60",
+      "iconTileHover": "group-hover:bg-gradient-to-r group-hover:from-amber-500 group-hover:to-yellow-500 group-hover:text-white group-hover:border-amber-400",
+      "tagHover": "group-hover:text-amber-800 group-hover:border-amber-200 group-hover:bg-amber-50/80",
+      "linkHover": "group-hover:text-amber-700",
+      "numeralHover": "group-hover:text-amber-950/[0.09]",
+      "focusRing": "focus-within:ring-amber-500"
+    },
+    {
+      "id": "investor",
+      "title": "Investor Data Pipeline",
+      "desc": "Discover potentially relevant investors using company description, industry, target audience and investment-stage context.",
+      "tag": "Angels & Venture Capital",
+      "cta": "Explore Investor Data →",
+      "href": "/features/investor-data",
+      "icon": "Coins",
+      "colSpanLg": "lg:col-span-3",
+      "colSpanMd": "md:col-span-2",
+      "cardHoverBg": "from-indigo-500/[0.05] via-violet-500/[0.04] to-transparent",
+      "topLineGradient": "from-blue-600 via-indigo-500 to-violet-500",
+      "iconTileBase": "bg-indigo-50/80 text-indigo-600 border-indigo-200/60",
+      "iconTileHover": "group-hover:bg-gradient-to-r group-hover:from-blue-600 group-hover:to-indigo-600 group-hover:text-white group-hover:border-indigo-400",
+      "tagHover": "group-hover:text-indigo-700 group-hover:border-indigo-200 group-hover:bg-indigo-50/80",
+      "linkHover": "group-hover:text-indigo-700",
+      "numeralHover": "group-hover:text-indigo-950/[0.09]",
+      "focusRing": "focus-within:ring-indigo-500"
+    }
+  ],
+  "audiences": [
+    {
+      "id": "sales-gtm",
+      "title": "Sales & GTM Teams",
+      "description": "Build targeted prospect lists, understand account context, use Active Job Signals and prioritize leads before outreach.",
+      "linkText": "Explore Sales & GTM →",
+      "href": "/solutions/sales-teams",
+      "icon": "Users2",
+      "span": "col-span-1 sm:col-span-1 lg:col-span-3",
+      "orientation": "horizontal",
+      "cornerClass": "card-cut-a",
+      "edge": "left"
+    },
+    {
+      "id": "agencies",
+      "title": "Lead Generation & Marketing Agencies",
+      "description": "Create focused prospect lists for clients across industries, locations and business types without relying on one discovery source.",
+      "linkText": "Explore Agency Lead Generation →",
+      "href": "/solutions/agencies",
+      "icon": "Building",
+      "span": "col-span-1 sm:col-span-1 lg:col-span-3",
+      "orientation": "horizontal",
+      "cornerClass": "card-cut-b",
+      "edge": "bottom"
+    },
+    {
+      "id": "local-service",
+      "title": "Local & Service Businesses",
+      "description": "Use Google Maps Search and location-based discovery to identify businesses and decision-makers in specific markets.",
+      "linkText": "Explore Local & Service Businesses →",
+      "href": "/solutions",
+      "icon": "Store",
+      "span": "col-span-1 sm:col-span-1 lg:col-span-2",
+      "orientation": "vertical",
+      "cornerClass": "card-cut-a",
+      "edge": "left"
+    },
+    {
+      "id": "recruiters",
+      "title": "Recruiters & Staffing Teams",
+      "description": "Use company and Active Job Signal data to identify businesses that are actively hiring and may have relevant staffing needs.",
+      "linkText": "Explore Recruiters & Staffing →",
+      "href": "/solutions/recruiters",
+      "icon": "UserCheck2",
+      "span": "col-span-1 sm:col-span-1 lg:col-span-2",
+      "orientation": "vertical",
+      "cornerClass": "card-cut-b",
+      "edge": "bottom"
+    },
+    {
+      "id": "founders",
+      "title": "Founders & Small Teams",
+      "description": "Build targeted prospect lists and prioritize outreach without needing a large prospecting operation.",
+      "linkText": "Explore Founders & Small Teams →",
+      "href": "/solutions",
+      "icon": "Rocket",
+      "span": "col-span-1 sm:col-span-2 lg:col-span-2",
+      "orientation": "vertical",
+      "cornerClass": "card-cut-a",
+      "edge": "left"
+    }
+  ],
+  "testimonials": [
+    {
+      "id": "rahul-mehta",
+      "headline": "“We stopped treating every contact like an opportunity.”",
+      "body": "SimpLeads helped us narrow our searches, understand the companies behind our prospects, and prioritize the leads that actually matched our target profile.",
+      "name": "Rahul Mehta",
+      "role": "VP Sales, B2B SaaS Company",
+      "initials": "RM"
+    },
+    {
+      "id": "sarah-williams",
+      "headline": "“The qualification layer makes a real difference.”",
+      "body": "Finding contacts was never the hardest part. Knowing who deserved our attention was. The AI qualification workflow gives our team a much better starting point for outreach.",
+      "name": "Sarah Williams",
+      "role": "Head of Growth, Technology Company",
+      "initials": "SW"
+    },
+    {
+      "id": "daniel-carter",
+      "headline": "“One workflow instead of jumping between multiple tools.”",
+      "body": "We can move from people search to company research, job signals and scoring without constantly switching between different platforms. It makes prospecting much easier to manage.",
+      "name": "Daniel Carter",
+      "role": "Sales Director, B2B Services Firm",
+      "initials": "DC"
+    },
+    {
+      "id": "arjun-kapoor",
+      "headline": "“Active Job Signals give us another reason to prioritize an account.”",
+      "body": "We use recent hiring activity as an additional business signal when deciding which companies to approach. It adds useful context to our prospecting process.",
+      "name": "Arjun Kapoor",
+      "role": "Founder, Staffing Agency",
+      "initials": "AK"
+    },
+    {
+      "id": "priya-shah",
+      "headline": "“Google Maps Search is surprisingly useful for local prospecting.”",
+      "body": "We work with businesses across specific cities and regions, and being able to discover local companies alongside our broader prospecting workflow saves us a lot of manual research.",
+      "name": "Priya Shah",
+      "role": "Agency Owner, Digital Marketing Agency",
+      "initials": "PS"
+    },
+    {
+      "id": "michael-brown",
+      "headline": "“We can build a much more focused prospect list.”",
+      "body": "Instead of starting with a huge database and figuring everything out afterward, we can define our target by role, company characteristics, location and other filters before exporting.",
+      "name": "Michael Brown",
+      "role": "SDR Manager, SaaS Company",
+      "initials": "MB"
+    },
+    {
+      "id": "neha-verma",
+      "headline": "“The scoring helps us decide where to start.”",
+      "body": "Our team doesn’t want another spreadsheet full of names. We need to know which prospects deserve attention first. SimpLeads gives us a structured way to prioritize them.",
+      "name": "Neha Verma",
+      "role": "Growth Lead, B2B Startup",
+      "initials": "NV"
+    },
+    {
+      "id": "amit-roy",
+      "headline": "“Useful for agency prospecting across different industries.”",
+      "body": "Every client has a different ICP. The combination of people, company and discovery tools makes it easier for us to build targeted lists for different campaigns.",
+      "name": "Amit Roy",
+      "role": "Founder, Lead Generation Agency",
+      "initials": "AR"
+    },
+    {
+      "id": "james-anderson",
+      "headline": "“The export workflow keeps things simple.”",
+      "body": "Once we’ve finished filtering and qualifying our prospects, we can choose the output we need instead of manually cleaning and rebuilding multiple lists.",
+      "name": "James Anderson",
+      "role": "RevOps Manager, Business Services Company",
+      "initials": "JA"
+    },
+    {
+      "id": "karan-malhotra",
+      "headline": "“It changes the question from ‘How many leads?’ to ‘Which leads?’”",
+      "body": "That is probably the biggest difference for us. SimpLeads isn’t just about generating a bigger list; it helps us think about relevance, urgency and which opportunities deserve our attention.",
+      "name": "Karan Malhotra",
+      "role": "Founder, B2B Growth Company",
+      "initials": "KM"
+    }
+  ],
+  "faqs": [
+    {
+      "q": "What is SimpLeads?",
+      "a": "SimpLeads is a lead intelligence and qualification platform that helps you find people and companies, identify Active Job Signals, qualify leads and prioritize which prospects deserve attention."
+    },
+    {
+      "q": "What is the five-step SimpLeads pipeline?",
+      "a": "The core pipeline has exactly five stages: People → Company → Jobs → Scoring → Export. Google Maps, Instagram, YouTube, B2B Directory and Investor Data are separate discovery tools, not additional stages of the core pipeline."
+    },
+    {
+      "q": "How is SimpLeads different from a normal lead generation tool?",
+      "a": "Traditional lead generation primarily focuses on finding contacts. SimpLeads adds company context, Active Job Signals and AI Lead Qualification to help determine which contacts should be prioritized."
+    },
+    {
+      "q": "What does AI Lead Qualification evaluate?",
+      "a": "The qualification framework considers available information across Need, Urgency, Relevance and Authority. It is designed to help prioritize opportunities rather than simply generate a larger contact list."
+    },
+    {
+      "q": "Does SimpLeads provide BANT qualification?",
+      "a": "SimpLeads is being developed toward broader BANT-style qualification. Need, Authority and timing/urgency can be part of the qualification framework, while Budget / financial qualification is currently in development."
+    },
+    {
+      "q": "What are Active Job Signals?",
+      "a": "Active Job Signals use recent job activity as a business-intelligence signal. Hiring activity can provide useful context about a company’s expansion or changing needs, but it does not guarantee buying intent."
+    },
+    {
+      "q": "Can I search local businesses?",
+      "a": "Yes. SimpLeads includes a separate Google Maps Search tool for discovering local businesses using keywords and location."
+    },
+    {
+      "q": "Can I search Instagram, YouTube and B2B directories?",
+      "a": "Yes. SimpLeads includes separate discovery tools for Instagram, YouTube and supported B2B directories, including IndiaMART and Yellow Pages."
+    },
+    {
+      "q": "What export formats are available?",
+      "a": "The current export options include Full Bundle, Summary CSV, Leads Only and Jobs Only."
+    },
+    {
+      "q": "Is SimpLeads currently available?",
+      "a": "SimpLeads is currently in public beta. Some features are experimental, and AI-generated content may occasionally make mistakes."
+    }
+  ],
+  "nonGuarantees": [
+    "Complete data coverage",
+    "Guaranteed email deliverability",
+    "Perfect contact accuracy",
+    "Guaranteed buying intent",
+    "Guaranteed conversion"
+  ],
+  "qualificationCriteria": [
+    {
+      "id": "need",
+      "index": "01",
+      "name": "Need",
+      "question": "Does the available information suggest a relevant business need?",
+      "icon": "Target",
+      "tag": "Business Problem Fit"
+    },
+    {
+      "id": "urgency",
+      "index": "02",
+      "name": "Urgency",
+      "question": "Is there a signal that the opportunity may require attention now?",
+      "icon": "Zap",
+      "tag": "Timing & Actionability"
+    },
+    {
+      "id": "relevance",
+      "index": "03",
+      "name": "Relevance",
+      "question": "Does the company and person match your target profile?",
+      "icon": "CheckCircle2",
+      "tag": "ICP Alignment"
+    },
+    {
+      "id": "authority",
+      "index": "04",
+      "name": "Authority",
+      "question": "Is this person or role relevant to the decision-making process?",
+      "icon": "UserCheck",
+      "tag": "Decision Influence"
+    }
+  ],
+  "qualificationSampleProspects": [
+    {
+      "id": "prospect-1",
+      "name": "Elena Rostova",
+      "role": "VP of Engineering",
+      "company": "Apex Systems",
+      "initials": "ER",
+      "scores": {
+        "need": 92,
+        "urgency": 88,
+        "relevance": 95,
+        "authority": 90
+      },
+      "compositeScore": 91,
+      "tier": "HIGH PRIORITY",
+      "tierStyles": "bg-emerald-50 text-emerald-700 border-emerald-200"
+    },
+    {
+      "id": "prospect-2",
+      "name": "Marcus Vance",
+      "role": "Director of IT",
+      "company": "CloudScale Networks",
+      "initials": "MV",
+      "scores": {
+        "need": 74,
+        "urgency": 68,
+        "relevance": 84,
+        "authority": 76
+      },
+      "compositeScore": 76,
+      "tier": "MEDIUM",
+      "tierStyles": "bg-blue-50 text-[#023dbb] border-blue-200"
+    },
+    {
+      "id": "prospect-3",
+      "name": "Chloe Bennett",
+      "role": "Operations Manager",
+      "company": "Beacon Logistics",
+      "initials": "CB",
+      "scores": {
+        "need": 52,
+        "urgency": 44,
+        "relevance": 62,
+        "authority": 50
+      },
+      "compositeScore": 52,
+      "tier": "LOWER",
+      "tierStyles": "bg-slate-100 text-slate-600 border-slate-200"
+    }
+  ]
+}

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 
-const TONE_MAP = {
+export const TONE_MAP = {
   youtube: { core: '#ef4444', mid: 'rgba(239, 68, 68, 0.35)', edge: 'rgba(153, 27, 27, 0.05)' },
   red: { core: '#ef4444', mid: 'rgba(239, 68, 68, 0.35)', edge: 'rgba(153, 27, 27, 0.05)' },
   

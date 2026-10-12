@@ -47,7 +47,7 @@ export const ComparisonSlider = ({ block, accent, index }) => {
           ))}
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto scroll-styled">
           <table className="w-full text-left border-collapse min-w-[600px]">
             <thead>
               <tr>

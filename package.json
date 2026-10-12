@@ -4,10 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && npm run test:compare",
+    "build": "next build && npm run test:compare && npm run test:testimonials",
     "start": "next start",
     "lint": "eslint",
-    "test:compare": "node scripts/test-comparison-content.js"
+    "test:compare": "node scripts/test-comparison-content.js",
+    "test:testimonials": "node scripts/test-testimonials-content.js"
   },
   "dependencies": {
     "@react-spring/web": "^10.1.2",

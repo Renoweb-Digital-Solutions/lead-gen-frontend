@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 import { SectionRenderer } from './tool-template/SectionRenderer';
 import { GridBackground } from './tool-template/primitives';
 import dynamic from 'next/dynamic';
-import { StaticGlow } from './tool-template/AmbientGlow';
+import { StaticGlow, TONE_MAP } from './tool-template/AmbientGlow';
 
 const AmbientGlow = dynamic(() => import('./tool-template/AmbientGlow'), { 
   ssr: false, 
@@ -23,10 +23,15 @@ export default function ToolTemplate({ data }) {
 
   React.useEffect(() => {
     document.documentElement.setAttribute('data-theme', 'dark');
+    const tone = data.tone || data.accent || 'default';
+    const accent = TONE_MAP[tone]?.core || '#023dbb';
+    document.documentElement.style.setProperty('--scroll-accent', accent);
+
     return () => {
       document.documentElement.setAttribute('data-theme', 'light');
+      document.documentElement.style.removeProperty('--scroll-accent');
     };
-  }, []);
+  }, [data]);
 
   return (
     <div className="min-h-screen bg-[#050507] text-white selection:bg-brand-blue/30 font-sans relative overflow-x-hidden">
