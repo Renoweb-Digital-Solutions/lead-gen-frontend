@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { fetchAdminUsersAndRuns, fetchAnalyticsSummary, apiSuspendUser, apiUnsuspendUser } from "../lib/api";
 import { LogOut, Users, Activity, CheckCircle, XCircle, AlertCircle, Calendar, ChevronDown, ChevronUp, MessageSquare, RefreshCw, BarChart3, Ban, Unlock } from "lucide-react";
@@ -8,6 +8,13 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recha
 
 function UserRow({ user, onSuspendClick, onUnsuspendClick }) {
   const [expanded, setExpanded] = useState(false);
+  const [runsPage, setRunsPage] = useState(1);
+  const runs = user.runs || [];
+  const pageSize = 10;
+  const totalPages = Math.max(1, Math.ceil(runs.length / pageSize));
+  const currentPage = Math.min(runsPage, totalPages);
+  const startIndex = (currentPage - 1) * pageSize;
+  const visibleRuns = runs.slice(startIndex, startIndex + pageSize);
 
   return (
     <>
@@ -15,6 +22,7 @@ function UserRow({ user, onSuspendClick, onUnsuspendClick }) {
         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
           {user.username}
           {user.is_admin && <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">Admin</span>}
+          {user.email && user.email !== user.username && <div className="mt-1 text-xs font-normal text-gray-500">{user.email}</div>}
         </td>
         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
           {user.runs ? user.runs.length : 0} runs
@@ -44,7 +52,11 @@ function UserRow({ user, onSuspendClick, onUnsuspendClick }) {
             </button>
           )}
           <button 
-            onClick={() => setExpanded(!expanded)}
+            onClick={() => {
+              if (!expanded) setRunsPage(1);
+              setExpanded(!expanded);
+            }}
+            aria-expanded={expanded}
             className="text-[#308fef] hover:text-[#023dbb] flex items-center ml-2 px-2 py-1.5"
           >
             {expanded ? "Hide Details" : "View Runs"}
@@ -68,15 +80,16 @@ function UserRow({ user, onSuspendClick, onUnsuspendClick }) {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {user.runs.map((run, idx) => (
+                    {visibleRuns.map((run, idx) => (
                       <tr key={run._id || idx}>
                         <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900 font-medium capitalize">
-                          {run.type || "gmaps"}
+                          {(run.type || "unknown").replaceAll("_", " ")}
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap">
                           {run.status === "success" && <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800"><CheckCircle className="w-3 h-3 mr-1" /> Success</span>}
                           {run.status === "empty" && <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800"><AlertCircle className="w-3 h-3 mr-1" /> Empty</span>}
                           {run.status === "failed" && <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800"><XCircle className="w-3 h-3 mr-1" /> Failed</span>}
+                          {!["success", "empty", "failed"].includes(run.status) && <span title={run.status === "submitted" ? "Legacy record: submission was recorded; the final outcome was not tracked." : undefined} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 capitalize">{run.status === "submitted" ? "Submitted (legacy)" : run.status || "Unknown"}</span>}
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500 flex items-center">
                           <Calendar className="w-3 h-3 mr-1 text-gray-400" />
@@ -86,6 +99,32 @@ function UserRow({ user, onSuspendClick, onUnsuspendClick }) {
                     ))}
                   </tbody>
                 </table>
+                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-gray-200 bg-white px-4 py-3 text-sm text-gray-500">
+                  <span aria-live="polite">
+                    Showing {startIndex + 1}–{Math.min(startIndex + pageSize, runs.length)} of {runs.length} runs
+                  </span>
+                  {totalPages > 1 && (
+                    <nav aria-label={`Run history pages for ${user.username}`} className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setRunsPage(currentPage - 1)}
+                        disabled={currentPage === 1}
+                        className="rounded-lg border border-gray-200 px-3 py-1.5 text-[#023dbb] transition-colors hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-white"
+                      >
+                        Previous
+                      </button>
+                      <span>Page {currentPage} of {totalPages}</span>
+                      <button
+                        type="button"
+                        onClick={() => setRunsPage(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                        className="rounded-lg border border-gray-200 px-3 py-1.5 text-[#023dbb] transition-colors hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-white"
+                      >
+                        Next
+                      </button>
+                    </nav>
+                  )}
+                </div>
               </div>
             )}
           </td>
@@ -109,7 +148,7 @@ export default function AdminDashboard() {
   const [isSuspending, setIsSuspending] = useState(false);
   const router = useRouter();
 
-  const loadData = async (isRefresh = false) => {
+  const loadData = useCallback(async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
     else setLoading(true);
     
@@ -139,6 +178,7 @@ export default function AdminDashboard() {
       ]);
       
       setUsers(usersData.users || []);
+      setError("");
       setTickets(ticketsData.tickets || []);
       setAnalytics(analyticsData || { total_visitors: 0, top_events: [] });
     } catch (err) {
@@ -151,11 +191,21 @@ export default function AdminDashboard() {
       if (isRefresh) setRefreshing(false);
       else setLoading(false);
     }
-  };
+  }, [router]);
 
   useEffect(() => {
-    loadData();
-  }, [router]);
+    const initialLoad = window.setTimeout(() => loadData(), 0);
+    const refresh = () => {
+      if (document.visibilityState === "visible") loadData(true);
+    };
+    const interval = window.setInterval(refresh, 30000);
+    window.addEventListener("focus", refresh);
+    return () => {
+      window.clearTimeout(initialLoad);
+      window.clearInterval(interval);
+      window.removeEventListener("focus", refresh);
+    };
+  }, [loadData]);
 
   const handleLogout = () => {
     localStorage.removeItem("renoweb_jwt");

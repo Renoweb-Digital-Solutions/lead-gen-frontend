@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { fetchMyTickets, fetchReportRuns, apiForgotPassword, apiVerifyOtp, apiResetPassword } from "../lib/api";
 import { useAuth } from "../lib/AuthContext";
@@ -26,7 +26,13 @@ export default function ProfilePage() {
   const { token, isInitializing } = useAuth();
   const router = useRouter();
   
-  const [username, setUsername] = useState("");
+  const username = useMemo(() => {
+    try {
+      return JSON.parse(atob(token.split('.')[1])).sub || "User";
+    } catch {
+      return "User";
+    }
+  }, [token]);
   const [isDark, setIsDark] = useSessionState("renoweb-theme-dark", false);
 
   useEffect(() => {
@@ -35,51 +41,30 @@ export default function ProfilePage() {
       router.push("/");
       return;
     }
-    try {
-      const payloadBase64 = token.split('.')[1];
-      const decoded = JSON.parse(atob(payloadBase64));
-      setUsername(decoded.sub || "User");
-    } catch (e) {}
-
-    loadData();
+    let cancelled = false;
+    fetchMyTickets().then((data) => {
+      if (!cancelled) setTickets(data.tickets || []);
+    }).catch((err) => {
+      if (!cancelled) setError(err.message || "Failed to load profile data.");
+    }).finally(() => {
+      if (!cancelled) setLoading(false);
+    });
+    return () => { cancelled = true; };
   }, [token, isInitializing, router]);
 
   useEffect(() => {
-    if (token) {
-      loadReports(reportsPage);
-    }
-  }, [reportsPage, token]);
-
-  // removed otp interval effect
-
-  async function loadData() {
-    setLoading(true);
-    try {
-      const [ticketsData, reportsData] = await Promise.all([
-        fetchMyTickets().catch(() => ({ tickets: [] })),
-        fetchReportRuns(1, 10).catch(() => ({ reports: [], total: 0, pages: 0 }))
-      ]);
-      setTickets(ticketsData.tickets || []);
-      setReports(reportsData.reports || []);
-      setReportsTotal(reportsData.total || 0);
-      setReportsPages(reportsData.pages || 0);
-    } catch (err) {
-      setError(err.message || "Failed to load profile data.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function loadReports(page) {
-    try {
-      const reportsData = await fetchReportRuns(page, 10);
-      setReports(reportsData.reports || []);
-      setReportsTotal(reportsData.total || 0);
-      setReportsPages(reportsData.pages || 0);
-    } catch (err) {
-      console.error(err);
-    }
-  }
+    if (!token || isInitializing) return;
+    let cancelled = false;
+    fetchReportRuns(reportsPage, 10).then((data) => {
+      if (cancelled) return;
+      setReports(data.reports || []);
+      setReportsTotal(data.total || 0);
+      setReportsPages(data.pages || 0);
+    }).catch((err) => {
+      if (!cancelled) setError(err.message || "Failed to load pipeline history.");
+    });
+    return () => { cancelled = true; };
+  }, [reportsPage, token, isInitializing]);
 
   // removed inline OTP handlers
 
@@ -162,12 +147,13 @@ export default function ProfilePage() {
                     {reports.map((report) => {
                       const date = new Date(report.created_at);
                       const isSuccess = report.status.toLowerCase() === 'success';
+                      const isFailed = report.status.toLowerCase() === 'failed';
                       return (
                         <tr key={report.id} className="hover:bg-[var(--rw-surface-hover)] transition-colors">
                           <td className="px-6 py-4 font-medium text-[var(--rw-text)]">{report.report_type}</td>
                           <td className="px-6 py-4">
-                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${isSuccess ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                              {isSuccess ? <CheckCircle className="w-3.5 h-3.5" /> : <XCircle className="w-3.5 h-3.5" />}
+                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${isSuccess ? 'bg-green-100 text-green-700' : isFailed ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'}`}>
+                              {isSuccess ? <CheckCircle className="w-3.5 h-3.5" /> : isFailed ? <XCircle className="w-3.5 h-3.5" /> : null}
                               {report.status}
                             </span>
                           </td>
@@ -244,7 +230,7 @@ export default function ProfilePage() {
             </div>
             {tickets.length === 0 ? (
               <div className="p-8 text-center text-[var(--rw-text-muted)] text-sm font-medium">
-                You haven't submitted any support requests.
+                You haven&apos;t submitted any support requests.
               </div>
             ) : (
               <div className="divide-y divide-[var(--rw-border)] max-h-[350px] overflow-y-auto">
