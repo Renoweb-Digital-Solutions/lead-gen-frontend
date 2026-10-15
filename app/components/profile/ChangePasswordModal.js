@@ -1,7 +1,7 @@
 "use client";
 
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Lock, X, Loader2, CheckCircle, AlertCircle, Eye, EyeOff, KeyRound, Mail } from "lucide-react";
 import { apiForgotPassword, apiVerifyOtp, apiResetPassword } from "../../lib/api";
@@ -19,18 +19,32 @@ export default function ChangePasswordModal({ isOpen, onClose, username }) {
   const [error, setError] = useState("");
   const [resendTimer, setResendTimer] = useState(0);
 
+  // # The profile mounts a fresh modal for each visit; keep focus and scrolling inside it.
+  const dialogRef = useRef(null);
   useEffect(() => {
-    if (!isOpen) {
-      setStep("confirm");
-      setOtp("");
-      setNewPassword("");
-      setConfirmPassword("");
-      setError("");
-      setResendTimer(0);
-      setShowNewPwd(false);
-      setShowConfirmPwd(false);
-    }
-  }, [isOpen]);
+    if (!isOpen) return;
+    const previousFocus = document.activeElement;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    dialogRef.current?.querySelector("button")?.focus();
+    const handleKey = (event) => {
+      if (event.key === "Escape") onClose();
+      if (event.key !== "Tab") return;
+      const focusable = [...dialogRef.current.querySelectorAll('button:not(:disabled), input:not(:disabled)')];
+      const first = focusable[0];
+      const last = focusable.at(-1);
+      // # Step transitions can remove the focused button; keep the next Tab inside the modal.
+      if (!dialogRef.current.contains(document.activeElement)) { event.preventDefault(); first?.focus(); return; }
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+      if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+    };
+    document.addEventListener("keydown", handleKey);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", handleKey);
+      if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true });
+    };
+  }, [isOpen, onClose]);
 
   useEffect(() => {
     let interval;
@@ -102,16 +116,17 @@ export default function ChangePasswordModal({ isOpen, onClose, username }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div ref={dialogRef} role="dialog" aria-modal="true" aria-label="Change password with email verification" className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
         transition={{ type: "spring", damping: 25, stiffness: 300 }}
-        className="relative w-full max-w-md bg-surface rounded-3xl shadow-2xl overflow-hidden"
+        className="relative w-full max-w-md max-h-[90dvh] bg-surface rounded-3xl shadow-2xl overflow-y-auto"
       >
         <button
           onClick={onClose}
+          aria-label="Close password verification"
           className="absolute top-5 right-5 p-2 text-[var(--rw-text-muted)] hover:text-[var(--rw-text-secondary)] hover:bg-[var(--rw-border)] rounded-full transition-colors z-10"
         >
           <X className="w-5 h-5" />
@@ -141,7 +156,7 @@ export default function ChangePasswordModal({ isOpen, onClose, username }) {
                 </p>
 
                 {error && (
-                  <div className="mb-6 p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl font-medium flex items-center gap-2">
+                  <div role="alert" className="mb-6 p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl font-medium flex items-center gap-2">
                     <AlertCircle className="w-4 h-4 shrink-0" />
                     {error}
                   </div>
@@ -179,7 +194,7 @@ export default function ChangePasswordModal({ isOpen, onClose, username }) {
                 </p>
 
                 {error && (
-                  <div className="mb-6 p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl font-medium flex items-center gap-2">
+                  <div role="alert" className="mb-6 p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl font-medium flex items-center gap-2">
                     <AlertCircle className="w-4 h-4 shrink-0" />
                     {error}
                   </div>
@@ -187,16 +202,19 @@ export default function ChangePasswordModal({ isOpen, onClose, username }) {
 
                 <form onSubmit={handleVerifyOtp} className="space-y-4">
                   <div>
-                    <label className="text-[13px] font-bold text-[var(--rw-text)] block mb-1.5 uppercase tracking-wide">
+                    <label htmlFor="profile-password-otp" className="text-[13px] font-bold text-[var(--rw-text)] block mb-1.5 uppercase tracking-wide">
                       Verification Code
                     </label>
                     <input
+                      id="profile-password-otp"
                       type="text"
+                      inputMode="numeric"
+                      autoComplete="one-time-code"
                       required
                       value={otp}
                       onChange={(e) => setOtp(e.target.value)}
                       className="w-full px-4 py-3 bg-[var(--rw-surface-hover)] border border-border rounded-xl focus:bg-surface focus:outline-none focus:border-[#4ec8ef] focus:ring-4 focus:ring-[#4ec8ef]/10 transition-all font-medium text-[var(--rw-text)] placeholder:text-[var(--rw-text-muted)]"
-                      placeholder="123456"
+                      placeholder="Verification code"
                       maxLength={6}
                     />
                   </div>
@@ -242,7 +260,7 @@ export default function ChangePasswordModal({ isOpen, onClose, username }) {
                 </p>
 
                 {error && (
-                  <div className="mb-6 p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl font-medium flex items-center gap-2">
+                  <div role="alert" className="mb-6 p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl font-medium flex items-center gap-2">
                     <AlertCircle className="w-4 h-4 shrink-0" />
                     {error}
                   </div>
@@ -250,11 +268,13 @@ export default function ChangePasswordModal({ isOpen, onClose, username }) {
 
                 <form onSubmit={handleResetPassword} className="space-y-4">
                   <div>
-                    <label className="text-[13px] font-bold text-[var(--rw-text)] block mb-1.5 uppercase tracking-wide">
+                    <label htmlFor="profile-new-password" className="text-[13px] font-bold text-[var(--rw-text)] block mb-1.5 uppercase tracking-wide">
                       New Password
                     </label>
                     <div className="relative">
                       <input
+                        id="profile-new-password"
+                        autoComplete="new-password"
                         type={showNewPwd ? "text" : "password"}
                         required
                         value={newPassword}
@@ -265,6 +285,8 @@ export default function ChangePasswordModal({ isOpen, onClose, username }) {
                       <button
                         type="button"
                         onClick={() => setShowNewPwd(!showNewPwd)}
+                        aria-label={showNewPwd ? "Hide new password" : "Show new password"}
+                        aria-pressed={showNewPwd}
                         className="absolute inset-y-0 right-3 flex items-center text-[var(--rw-text-muted)] hover:text-[var(--rw-text-secondary)] transition-colors"
                         tabIndex="-1"
                       >
@@ -274,11 +296,13 @@ export default function ChangePasswordModal({ isOpen, onClose, username }) {
                   </div>
 
                   <div>
-                    <label className="text-[13px] font-bold text-[var(--rw-text)] block mb-1.5 uppercase tracking-wide">
+                    <label htmlFor="profile-confirm-password" className="text-[13px] font-bold text-[var(--rw-text)] block mb-1.5 uppercase tracking-wide">
                       Confirm New Password
                     </label>
                     <div className="relative">
                       <input
+                        id="profile-confirm-password"
+                        autoComplete="new-password"
                         type={showConfirmPwd ? "text" : "password"}
                         required
                         value={confirmPassword}
@@ -289,6 +313,8 @@ export default function ChangePasswordModal({ isOpen, onClose, username }) {
                       <button
                         type="button"
                         onClick={() => setShowConfirmPwd(!showConfirmPwd)}
+                        aria-label={showConfirmPwd ? "Hide password confirmation" : "Show password confirmation"}
+                        aria-pressed={showConfirmPwd}
                         className="absolute inset-y-0 right-3 flex items-center text-[var(--rw-text-muted)] hover:text-[var(--rw-text-secondary)] transition-colors"
                         tabIndex="-1"
                       >

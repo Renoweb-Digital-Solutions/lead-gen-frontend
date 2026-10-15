@@ -1,250 +1,87 @@
-"use client";
+﻿"use client";
 
-import { useState, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Users, Mail, Link as LinkIcon, ChevronLeft, ChevronRight, List, Copy, Check, Video, Eye, MapPin } from "lucide-react";
+import { useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
+import { ArrowUpRight, Check, Copy, Eye, Globe2, Mail, MapPin, Play, Users, CalendarDays } from "lucide-react";
+import { safeWebsite } from "../../lib/youtube";
+
+// # Deterministic visual identities distinguish channels without inventing profile images.
+const PALETTES = [
+  ["#ef4444", "#f97316"], ["#6366f1", "#a855f7"],
+  ["#0891b2", "#14b8a6"], ["#db2777", "#f43f5e"],
+];
+const compactNumber = (value) => new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 }).format(Number(value || 0));
+const fullNumber = (value) => Number(value || 0).toLocaleString();
 
 export default function YoutubeResultsGrid({ data }) {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [sortBy, setSortBy] = useState("subscribers_desc");
-  const [copiedId, setCopiedId] = useState(null);
-
-  const itemsPerPage = 15; // 3 columns x 5 rows
-
-  // New helpers matching the exact JSON structure provided
-  const getSubscribers = (row) => Number(row.subscribers || 0);
-  const getTitle = (row) => row.channel_name || "Unknown Channel";
-  const getEmail = (row) => row.email || "";
-  const getUrl = (row) => row.channel_url || "";
-  const getBio = (row) => row.brief_bio || "";
-  const getNiche = (row) => row.niche || "";
-  const getTotalVideos = (row) => Number(row.total_videos || 0);
-  const getTotalViews = (row) => Number(row.total_views || 0);
-  const getLocation = (row) => row.location || "";
-
-  const sortedData = useMemo(() => {
-    if (!data) return [];
-    return [...data].sort((a, b) => {
-      if (sortBy === "subscribers_desc") return getSubscribers(b) - getSubscribers(a);
-      if (sortBy === "subscribers_asc") return getSubscribers(a) - getSubscribers(b);
-      return 0;
-    });
-  }, [data, sortBy]);
-
-  const totalPages = Math.ceil(sortedData.length / itemsPerPage);
-  const currentData = sortedData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-
-  const formatNumber = (num) => {
-    if (!num && num !== 0) return "N/A";
-    if (num >= 1000000000) return (num / 1000000000).toFixed(1) + "B";
-    if (num >= 1000000) return (num / 1000000).toFixed(1) + "M";
-    if (num >= 1000) return (num / 1000).toFixed(1) + "K";
-    return num.toString();
+  const [copied, setCopied] = useState(null);
+  const [copyError, setCopyError] = useState("");
+  const reduceMotion = useReducedMotion();
+  const copyEmail = async (email) => {
+    try {
+      await navigator.clipboard.writeText(email);
+      setCopied(email);
+      setCopyError("");
+    } catch {
+      setCopyError("Could not copy automatically. Select the email and copy it manually.");
+    }
   };
 
-  const handleCopyEmail = (email) => {
-    if (!email) return;
-    navigator.clipboard.writeText(email);
-    setCopiedId(email);
-    setTimeout(() => setCopiedId(null), 2000);
-  };
+  if (!data?.length) return (
+    <div className="flex flex-col items-center justify-center px-6 py-20 text-center text-gray-500">
+      <div className="mb-5 rounded-3xl border border-red-500/10 bg-red-500/5 p-5"><Users className="h-9 w-9 text-red-400" /></div>
+      <h3 className="text-xl font-semibold text-brand-dark">No matching creators</h3>
+      <p className="mt-2 max-w-sm text-sm">Try lowering the minimum subscribers or removing the country or email filter.</p>
+    </div>
+  );
 
   return (
-    <div className="flex flex-col h-full bg-[var(--rw-surface-hover)]/50 rounded-2xl overflow-hidden">
-      {/* Top Controls */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-surface border-b border-border shrink-0">
-        <div className="text-sm font-semibold text-gray-600">
-          Showing {((currentPage - 1) * itemsPerPage) + (sortedData.length > 0 ? 1 : 0)}-{Math.min(currentPage * itemsPerPage, sortedData.length)} of {sortedData.length} channels
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Sort by:</label>
-          <select 
-            className="text-sm border border-border rounded-lg px-3 py-1.5 bg-surface text-gray-700 focus:outline-none focus:ring-2 focus:ring-brand-sky/20 focus:border-brand-sky transition-colors cursor-pointer outline-none"
-            value={sortBy}
-            onChange={(e) => {
-              setSortBy(e.target.value);
-              setCurrentPage(1); // Reset to page 1 on sort change
-            }}
-          >
-            <option value="subscribers_desc">Subscribers (High to Low)</option>
-            <option value="subscribers_asc">Subscribers (Low to High)</option>
-          </select>
-        </div>
+    <div>
+      {copyError && <p role="alert" className="mb-4 text-sm text-red-600">{copyError}</p>}
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+        {data.map((channel, index) => {
+          const name = channel.channelName || "Unnamed channel";
+          const initials = Array.from(name.trim().split(/\s+/).map((word) => Array.from(word)[0]).slice(0, 2)).join("").toUpperCase();
+          const hash = Array.from(channel.channelUrl).reduce((value, char) => value + char.charCodeAt(0), 0);
+          const [accent, secondary] = PALETTES[hash % PALETTES.length];
+          const website = safeWebsite(channel.website);
+          return (
+            <motion.article
+              key={channel.channelUrl}
+              initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: Math.min(index, 8) * 0.035 }}
+              className="group flex min-w-0 flex-col overflow-hidden rounded-3xl border border-border bg-surface shadow-sm transition-shadow hover:shadow-lg"
+            >
+              {/* # A channel identity strip, audience hero, and contact footer form each creator card. */}
+              <div className="relative overflow-hidden px-5 pt-5 pb-4" style={{ background: `linear-gradient(125deg, ${accent}14, ${secondary}05)` }}>
+                <div aria-hidden="true" className="pointer-events-none absolute -right-7 -top-10 h-36 w-36 rounded-full border-[18px]" style={{ borderColor: `${accent}08` }} />
+                <div className="relative flex items-start justify-between gap-3">
+                  <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-base font-bold text-white shadow-sm" style={{ background: `linear-gradient(135deg, ${accent}, ${secondary})` }}>{initials}</span>
+                  <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-semibold ${channel.email ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-600" : "border-border bg-surface text-gray-400"}`}><span className={`h-1.5 w-1.5 rounded-full ${channel.email ? "bg-emerald-500" : "bg-gray-400"}`} />{channel.email ? "PUBLIC EMAIL" : "NO EMAIL"}</span>
+                </div>
+                <a href={channel.channelUrl} target="_blank" rel="noopener noreferrer" className="relative mt-4 flex items-start justify-between gap-2 text-brand-dark hover:underline">
+                  <h3 className="line-clamp-2 text-lg font-bold leading-snug tracking-tight">{name}</h3><ArrowUpRight className="mt-1 h-4 w-4 shrink-0 text-gray-400 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                </a>
+                <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500"><span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{channel.country || "Country unavailable"}</span><span className="inline-flex items-center gap-1" title={channel.joinedDate ? `Joined ${channel.joinedDate}` : "Join date unavailable"}><CalendarDays className="h-3 w-3" />{channel.channelAgeYears == null ? "Age unavailable" : `${Number(channel.channelAgeYears).toFixed(1)} years`}</span></div>
+              </div>
+              <div className="flex-1 px-5 py-4">
+                <div className="flex items-end justify-between gap-2"><div><p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-gray-400">Subscriber audience</p><p className="mt-1 text-4xl font-bold tracking-tighter text-brand-dark tabular-nums" title={`${fullNumber(channel.subscribers)} subscribers`}>{compactNumber(channel.subscribers)}</p></div><Users className="mb-1 h-7 w-7" style={{ color: `${accent}60` }} /></div>
+                <dl className="mt-5 grid grid-cols-3 gap-2 border-t border-border pt-4">
+                  {[{ icon: Eye, label: "Total views", value: channel.viewCount }, { icon: Play, label: "Videos", value: channel.videoCount }, { icon: Eye, label: "Avg. views ≈", value: channel.averageViewsPerVideo }].map(({ icon: Icon, label, value }) => <div key={label} title={`${fullNumber(value)}${label === "Avg. views ≈" ? " average views per video (approx., includes Shorts)" : ""}`}><dt className="mb-1 flex items-center gap-1 text-[10px] text-gray-400"><Icon className="h-3 w-3" />{label}</dt><dd className="text-sm font-bold text-brand-dark tabular-nums">{compactNumber(value)}</dd></div>)}
+                </dl>
+                {channel.joinedDate && <p className="mt-3 text-[10px] text-gray-400">On YouTube since {new Date(`${channel.joinedDate}T00:00:00Z`).toLocaleDateString("en", { month: "short", year: "numeric", timeZone: "UTC" })}</p>}
+              </div>
+              <div className="border-t border-border p-4">
+                {channel.email ? <div className="flex items-center gap-2 rounded-xl border border-emerald-500/15 bg-emerald-500/5 px-3 py-2.5"><Mail className="h-4 w-4 shrink-0 text-emerald-600" /><span className="min-w-0 flex-1 select-all break-all text-xs font-medium text-brand-dark">{channel.email}</span><button type="button" onClick={() => copyEmail(channel.email)} aria-label={`Copy ${channel.email}`} className="shrink-0 rounded-lg p-2 text-emerald-600 transition-colors hover:bg-emerald-500/10">{copied === channel.email ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}</button></div> : <div className="flex items-center gap-2 rounded-xl border border-dashed border-border px-3 py-4 text-xs text-gray-400"><Mail className="h-4 w-4" />No public business email</div>}
+                <div className="mt-3 flex items-center justify-between gap-3 text-[11px]"><span className="font-mono text-gray-400">#{String(index + 1).padStart(2, "0")}</span>{website ? <a href={website} target="_blank" rel="noopener noreferrer" className="flex min-w-0 items-center gap-1 text-gray-500 hover:text-brand-blue"><Globe2 className="h-3 w-3 shrink-0" /><span className="truncate">{new URL(website).hostname.replace(/^www\./, "")}</span><ArrowUpRight className="h-3 w-3 shrink-0" /></a> : <span className="text-gray-400">No website listed</span>}</div>
+              </div>
+            </motion.article>
+          );
+        })}
       </div>
-
-      {/* Grid */}
-      <div className="flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar bg-var(--rw-bg, #f5f7fb)">
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          <AnimatePresence mode="popLayout">
-            {currentData.map((channel, idx) => (
-              <motion.div
-                key={channel.channel_url || channel.channel_name || idx}
-                layout
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.2 }}
-                className="bg-surface rounded-2xl border border-border shadow-sm hover:shadow-lg hover:border-brand-sky/40 transition-all overflow-hidden flex flex-col"
-              >
-                {/* Card Header (No Logo) */}
-                <div className="p-5 flex flex-col gap-2">
-                  <div className="flex items-start justify-between gap-2">
-                    <h3 className="text-lg font-bold text-gray-900 truncate tracking-tight flex-1" title={getTitle(channel)}>
-                      {getUrl(channel) ? (
-                        <a href={getUrl(channel)} target="_blank" rel="noopener noreferrer" className="hover:text-brand-blue hover:underline transition-colors">
-                          {getTitle(channel)}
-                        </a>
-                      ) : (
-                        getTitle(channel)
-                      )}
-                    </h3>
-                    {getLocation(channel) && (
-                      <div className="flex items-center gap-1 text-[10px] font-semibold text-gray-500 bg-[var(--rw-border)] px-2 py-1 rounded-md shrink-0" title={getLocation(channel)}>
-                        <MapPin className="w-3 h-3" />
-                        <span className="truncate max-w-[80px]">{getLocation(channel)}</span>
-                      </div>
-                    )}
-                  </div>
-                  <p className="text-xs text-gray-500 mt-1 line-clamp-3 leading-relaxed" title={getBio(channel)}>
-                    {getBio(channel) || "No bio available."}
-                  </p>
-                </div>
-
-                {/* Card Stats */}
-                <div className="grid grid-cols-2 gap-px bg-[var(--rw-border)]/50 border-y border-border/50">
-                  <div className="p-3 text-center flex flex-col items-center justify-center gap-1 bg-surface">
-                    <div className="bg-brand-blue/5 p-1.5 rounded-full mb-0.5"><Users className="w-3.5 h-3.5 text-brand-blue" /></div>
-                    <span className="text-[11px] uppercase tracking-wider text-gray-400 font-semibold">Subscribers</span>
-                    <span className="text-sm font-bold text-gray-800">{formatNumber(getSubscribers(channel))}</span>
-                  </div>
-                  <div className="p-3 text-center flex flex-col items-center justify-center gap-1 bg-surface">
-                    <div className="bg-brand-cyan/5 p-1.5 rounded-full mb-0.5"><List className="w-3.5 h-3.5 text-brand-cyan" /></div>
-                    <span className="text-[11px] uppercase tracking-wider text-gray-400 font-semibold">Niche</span>
-                    <span className="text-sm font-bold text-gray-800 capitalize truncate w-full px-2" title={getNiche(channel)}>{getNiche(channel) || "N/A"}</span>
-                  </div>
-                  <div className="p-3 text-center flex flex-col items-center justify-center gap-1 bg-surface">
-                    <div className="bg-emerald-500/5 p-1.5 rounded-full mb-0.5"><Video className="w-3.5 h-3.5 text-emerald-500" /></div>
-                    <span className="text-[11px] uppercase tracking-wider text-gray-400 font-semibold">Videos</span>
-                    <span className="text-sm font-bold text-gray-800">{formatNumber(getTotalVideos(channel))}</span>
-                  </div>
-                  <div className="p-3 text-center flex flex-col items-center justify-center gap-1 bg-surface">
-                    <div className="bg-purple-500/5 p-1.5 rounded-full mb-0.5"><Eye className="w-3.5 h-3.5 text-purple-500" /></div>
-                    <span className="text-[11px] uppercase tracking-wider text-gray-400 font-semibold">Views</span>
-                    <span className="text-sm font-bold text-gray-800">{formatNumber(getTotalViews(channel))}</span>
-                  </div>
-                </div>
-
-                {/* Card Footer (Contact/Links) */}
-                <div className="p-4 bg-surface flex-1 flex flex-col justify-end">
-                  <div className="flex flex-wrap gap-2 items-center justify-between">
-                    {(() => {
-                      const email = getEmail(channel);
-                      if (email) {
-                        const isCopied = copiedId === email;
-                        return (
-                          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-sky/10 text-brand-dark text-xs font-semibold border border-brand-sky/20 truncate max-w-full">
-                            <Mail className="w-3.5 h-3.5 shrink-0 text-brand-blue" />
-                            <span className="truncate">{email}</span>
-                            <button
-                              onClick={() => handleCopyEmail(email)}
-                              className={`ml-1 p-1 rounded-md transition-colors ${isCopied ? 'bg-emerald-100 text-emerald-600' : 'bg-surface text-brand-blue hover:bg-brand-blue/10 hover:text-brand-dark'}`}
-                              title="Copy email"
-                            >
-                              {isCopied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                            </button>
-                          </div>
-                        );
-                      }
-                      return (
-                        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--rw-surface-hover)] text-gray-400 text-xs font-medium border border-border">
-                          <Mail className="w-3.5 h-3.5 shrink-0" />
-                          <span>No Email</span>
-                        </div>
-                      );
-                    })()}
-                    
-                    {getUrl(channel) && (
-                      <a 
-                        href={getUrl(channel)} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-[var(--rw-surface-hover)] border border-border text-brand-blue hover:bg-brand-blue hover:text-white transition-colors cursor-pointer shrink-0" 
-                        title="Open Channel"
-                      >
-                        <LinkIcon className="w-4 h-4" />
-                      </a>
-                    )}
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-          
-          {sortedData.length === 0 && (
-            <div className="col-span-full py-12 flex flex-col items-center justify-center text-gray-400">
-              <Users className="w-12 h-12 mb-4 opacity-20" />
-              <p>No valid channel data to display.</p>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Pagination Controls */}
-      {totalPages > 1 && (
-        <div className="p-4 bg-surface border-t border-border flex items-center justify-between shrink-0">
-          <button
-            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-            disabled={currentPage === 1}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold text-gray-600 hover:bg-[var(--rw-surface-hover)] active:bg-[var(--rw-border)] disabled:opacity-40 disabled:hover:bg-transparent transition-all border border-transparent hover:border-border"
-          >
-            <ChevronLeft className="w-4 h-4" /> Prev
-          </button>
-          
-          <div className="flex items-center gap-1 hidden sm:flex">
-            {Array.from({ length: totalPages }).map((_, i) => {
-              const pageNum = i + 1;
-              if (
-                pageNum === 1 || 
-                pageNum === totalPages || 
-                (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
-              ) {
-                return (
-                  <button
-                    key={pageNum}
-                    onClick={() => setCurrentPage(pageNum)}
-                    className={`w-9 h-9 rounded-xl text-sm font-bold flex items-center justify-center transition-all ${
-                      currentPage === pageNum 
-                        ? 'bg-gradient-to-br from-brand-blue to-brand-cyan text-white shadow-md shadow-brand-blue/20' 
-                        : 'text-gray-500 hover:bg-[var(--rw-border)] hover:text-brand-dark'
-                    }`}
-                  >
-                    {pageNum}
-                  </button>
-                );
-              } else if (
-                pageNum === currentPage - 2 || 
-                pageNum === currentPage + 2
-              ) {
-                return <span key={pageNum} className="text-gray-300 px-2 font-bold">...</span>;
-              }
-              return null;
-            })}
-          </div>
-          
-          <div className="sm:hidden text-sm font-bold text-gray-600">
-            Page {currentPage} of {totalPages}
-          </div>
-
-          <button
-            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-            disabled={currentPage === totalPages}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold text-brand-blue hover:bg-brand-blue/5 active:bg-brand-blue/10 disabled:opacity-40 disabled:hover:bg-transparent transition-all border border-transparent hover:border-border"
-          >
-            Next <ChevronRight className="w-4 h-4" />
-          </button>
-        </div>
-      )}
+      <p className="mt-7 text-center text-xs text-gray-400" role="status">{data.length} creators in your current view · Average views include Shorts</p>
+      <span className="sr-only" aria-live="polite">{copied ? `Copied ${copied}` : ""}</span>
     </div>
   );
 }

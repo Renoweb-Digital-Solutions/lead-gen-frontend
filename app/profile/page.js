@@ -1,269 +1,130 @@
-"use client";
+﻿"use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { fetchMyTickets, fetchReportRuns, apiForgotPassword, apiVerifyOtp, apiResetPassword } from "../lib/api";
+import { MotionConfig } from "framer-motion";
+import { ArrowUpRight, BookOpen } from "lucide-react";
+import { fetchAccountIdentity, fetchMyTickets, fetchReportRuns } from "../lib/api";
+import { filterReports, sortReports } from "../lib/profileLogbook";
 import { useAuth } from "../lib/AuthContext";
 import { useSessionState } from "../hooks/useSessionState";
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
 import ChangePasswordModal from "../components/profile/ChangePasswordModal";
-import { User, MessageSquare, Calendar, CheckCircle, AlertCircle, XCircle, FileText, Lock, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { ActivityMap, EmailSignature, ErrorNote, LoadingNote, PasswordVault, PipelinePassport, ReportTimeline, SupportThread } from "../components/profile/ProfileLogbook";
+import styles from "../components/profile/ProfileLogbook.module.css";
+
+// # Profile counters start unknown; a failed request is never presented as zero activity.
+const initialHistory = { reports: [], total: null, loading: true, complete: false, error: "" };
 
 export default function ProfilePage() {
-  const [tickets, setTickets] = useState([]);
-  const [reports, setReports] = useState([]);
-  const [reportsPage, setReportsPage] = useState(1);
-  const [reportsTotal, setReportsTotal] = useState(0);
-  const [reportsPages, setReportsPages] = useState(0);
-  
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  
-  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
   const { token, isInitializing } = useAuth();
   const router = useRouter();
-  
-  const username = useMemo(() => {
-    try {
-      return JSON.parse(atob(token.split('.')[1])).sub || "User";
-    } catch {
-      return "User";
-    }
-  }, [token]);
+  const [identity, setIdentity] = useState({ account: null, loading: true, error: "" });
+  const [history, setHistory] = useState(initialHistory);
+  const [support, setSupport] = useState({ tickets: [], loading: true, error: "" });
+  const [reload, setReload] = useState(0);
+  const [filters, setFilters] = useState({ pipeline: "", status: "", day: "" });
+  const [visibleDays, setVisibleDays] = useState(3);
+  const [passwordOpen, setPasswordOpen] = useState(false);
+  const closePassword = useCallback(() => setPasswordOpen(false), []);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isDark, setIsDark] = useSessionState("renoweb-theme-dark", false);
 
   useEffect(() => {
     if (isInitializing) return;
-    if (!token) {
-      router.push("/");
-      return;
-    }
+    if (!token) { router.replace("/"); return; }
     let cancelled = false;
-    fetchMyTickets().then((data) => {
-      if (!cancelled) setTickets(data.tickets || []);
-    }).catch((err) => {
-      if (!cancelled) setError(err.message || "Failed to load profile data.");
-    }).finally(() => {
-      if (!cancelled) setLoading(false);
-    });
+    const loadIdentity = async () => {
+      try {
+        const account = await fetchAccountIdentity();
+        if (!cancelled) setIdentity({ account, loading: false, error: "" });
+      } catch {
+        if (!cancelled) setIdentity({ account: null, loading: false, error: "Your account identity could not be loaded." });
+      }
+    };
+    const loadTickets = async () => {
+      try {
+        const data = await fetchMyTickets();
+        if (!Array.isArray(data.tickets)) throw new Error("Invalid tickets response");
+        if (!cancelled) setSupport({ tickets: data.tickets, loading: false, error: "" });
+      } catch {
+        if (!cancelled) setSupport((current) => ({ ...current, loading: false, error: "Your support notes could not be loaded." }));
+      }
+    };
+    const loadHistory = async () => {
+      try {
+        const first = await fetchReportRuns(1, 100);
+        if (!Array.isArray(first.reports) || !Number.isInteger(first.total) || !Number.isInteger(first.pages)) throw new Error("Invalid history response");
+        if (cancelled) return;
+        const firstComplete = first.pages <= 1 && first.reports.length === first.total;
+        setHistory({ reports: sortReports(first.reports), total: first.total, complete: firstComplete, loading: first.pages > 1,
+          error: first.pages <= 1 && !firstComplete ? "History changed while loading. Refresh to read the complete record." : "" });
+        if (first.pages <= 1) return;
+        // # Fetch every server page before describing aggregates as complete history.
+        const pages = await Promise.allSettled(Array.from({ length: first.pages - 1 }, (_, index) => fetchReportRuns(index + 2, 100)));
+        if (cancelled) return;
+        const records = [...first.reports];
+        let failed = false;
+        for (const page of pages) {
+          if (page.status === "fulfilled" && Array.isArray(page.value.reports)) records.push(...page.value.reports);
+          else failed = true;
+        }
+        const unique = [...new Map(records.map((report, index) => [report.id || `record-${index}`, report])).values()];
+        const complete = !failed && unique.length === first.total;
+        setHistory({ reports: sortReports(unique), total: first.total, loading: false, complete,
+          error: complete ? "" : "Some history is missing or changed while loading. The activity map and passport use only the loaded reports. Refresh to try again." });
+      } catch {
+        if (!cancelled) setHistory((current) => ({ ...current, loading: false, complete: false, error: "Your report history could not be loaded. Any entries already shown are still available." }));
+      }
+    };
+    // # Identity, support, and history fail independently so one error cannot hide another feature.
+    Promise.allSettled([loadIdentity(), loadTickets(), loadHistory()]);
     return () => { cancelled = true; };
-  }, [token, isInitializing, router]);
+  }, [token, isInitializing, router, reload]);
 
-  useEffect(() => {
-    if (!token || isInitializing) return;
-    let cancelled = false;
-    fetchReportRuns(reportsPage, 10).then((data) => {
-      if (cancelled) return;
-      setReports(data.reports || []);
-      setReportsTotal(data.total || 0);
-      setReportsPages(data.pages || 0);
-    }).catch((err) => {
-      if (!cancelled) setError(err.message || "Failed to load pipeline history.");
-    });
-    return () => { cancelled = true; };
-  }, [reportsPage, token, isInitializing]);
+  const retry = () => {
+    setIdentity((current) => ({ ...current, loading: true, error: "" }));
+    setSupport((current) => ({ ...current, loading: true, error: "" }));
+    setHistory((current) => ({ ...current, loading: true, complete: false, error: "" }));
+    setReload((value) => value + 1);
+  };
+  const onFilter = (changes) => {
+    setFilters((current) => ({ ...current, ...changes }));
+    setVisibleDays(3);
+  };
+  const filteredReports = useMemo(() => filterReports(history.reports, filters), [history.reports, filters]);
+  const email = identity.account?.email;
 
-  // removed inline OTP handlers
-
-  if (loading || isInitializing) {
-    return (
-      <div className="min-h-screen bg-[var(--rw-bg)] flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-[#023dbb] border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    );
-  }
+  if (isInitializing || !token) return <div className={styles.authLoading}><LoadingNote>Opening your account...</LoadingNote></div>;
 
   return (
-    <div className="min-h-screen bg-[var(--rw-bg)] flex flex-col text-[var(--rw-text)]" data-theme={isDark ? "dark" : "light"}>
-      <Header isDark={isDark} onToggleTheme={() => setIsDark(!isDark)} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-      <div className="lg:hidden">
-        <Sidebar 
-          isOpen={isSidebarOpen} 
-          onClose={() => setIsSidebarOpen(false)} 
-          isMobileOnly={true} 
-          onModuleChange={(mod) => {
-            sessionStorage.setItem("renoweb-active-module", JSON.stringify(mod));
-            window.dispatchEvent(new Event("local-session-storage"));
-            router.push('/dashboard');
-          }}
-        />
+    <MotionConfig reducedMotion="user">
+      <div className={styles.page} data-theme={isDark ? "dark" : "light"}>
+        <Header isDark={isDark} onToggleTheme={() => setIsDark(!isDark)} onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
+        <div className="lg:hidden"><Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} isMobileOnly onModuleChange={(module) => { sessionStorage.setItem("renoweb-active-module", JSON.stringify(module)); window.dispatchEvent(new Event("local-session-storage")); router.push("/dashboard"); }} /></div>
+        <main className={styles.paper} id="account-logbook">
+          <div className={styles.masthead}><span><BookOpen size={15} />Simpleads / Account overview</span><a href="/dashboard">Back to the workspace<ArrowUpRight size={14} /></a></div>
+          {/* # The account email generates the identity mark; no avatar or membership metadata is invented. */}
+          <header className={styles.identity}>
+            <div className={styles.identityAnchor}>{email && <EmailSignature email={email} />}<div>{identity.loading ? <LoadingNote>Reading your account identity...</LoadingNote> : identity.error ? <ErrorNote onRetry={retry}>{identity.error}</ErrorNote> : <><p className={styles.welcome}>Welcome,</p><p className={styles.email}>{email || identity.account?.username}</p>{!email && <p className={styles.muted}>No email address is available for this account.</p>}<p className={styles.signatureCaption}>{email ? "Your address. Your signature. Your work." : "Your personal work logbook."}</p></>}</div></div>
+            <span className={styles.edition}>Personal logbook</span>
+          </header>
+          <div className={styles.introduction}><div><p className={styles.eyebrow}>A record, not a dashboard</p><h1>Your work,<br /><em>on the record.</em></h1><p className={styles.introDescription}>Follow the days, revisit the runs, and see the shape of your work.</p></div>{history.total != null && <div className={styles.total}><strong>{history.total.toLocaleString()}</strong><span>reports recorded</span><span className={styles.totalRule} /></div>}</div>
+          <ActivityMap reports={history.reports} complete={history.complete} selectedDay={filters.day} onSelectDay={(day) => onFilter({ day })} loading={history.loading} />
+          <div className={styles.body}>
+            <ReportTimeline reports={filteredReports} allReports={history.reports} total={history.total} complete={history.complete} loading={history.loading} error={history.error} onRetry={retry} filters={filters} onFilter={onFilter} visibleDays={visibleDays} onLoadEarlier={() => setVisibleDays((value) => value + 3)} />
+            <aside className={styles.marginNotes} aria-label="Pipeline collection, support, and security">
+              <PipelinePassport reports={history.reports} complete={history.complete} selected={filters.pipeline} onSelect={(pipeline) => onFilter({ pipeline })} />
+              <SupportThread {...support} onRetry={retry} />
+              <PasswordVault disabled={!identity.account?.username} onOpen={() => setPasswordOpen(true)} />
+            </aside>
+          </div>
+          <footer className={styles.colophon}><BookOpen size={13} /><span>{history.complete ? "Your logbook is up to date with the history loaded for this visit." : "This logbook reflects the records available for this visit."}</span></footer>
+        </main>
+        {/* # Mount the existing OTP flow fresh for every vault opening. */}
+        {passwordOpen && <ChangePasswordModal isOpen onClose={closePassword} username={identity.account.username} />}
       </div>
-      
-      <main className="flex-1 max-w-5xl w-full mx-auto py-8 sm:py-12 px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-8 overflow-hidden">
-        
-        {/* Profile Card */}
-        <div className="bg-[var(--rw-surface)] rounded-2xl shadow-[var(--rw-shadow-sm)] border border-[var(--rw-border)] p-6 sm:p-8 flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4 sm:gap-6">
-          <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-[#023dbb] to-[#308fef] rounded-full flex items-center justify-center text-white shadow-inner shrink-0">
-            <User className="w-10 h-10 sm:w-12 sm:h-12" />
-          </div>
-          <div className="min-w-0 w-full">
-            <h1 className="text-2xl sm:text-3xl font-bold text-[var(--rw-text)] font-oswald tracking-wide break-words">
-              Welcome, {username}
-            </h1>
-            <p className="text-[var(--rw-text-muted)] font-medium mt-1">
-              Account Overview
-            </p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-          
-          {/* Reports Section */}
-          <div className="bg-[var(--rw-surface)] rounded-2xl shadow-[var(--rw-shadow-sm)] border border-[var(--rw-border)] overflow-hidden md:col-span-2">
-            <div className="px-5 sm:px-6 py-5 border-b border-[var(--rw-border)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 bg-[var(--rw-surface-hover)]">
-              <h2 className="text-xl font-bold text-[var(--rw-text)] font-oswald tracking-wide flex items-center">
-                <FileText className="w-5 h-5 mr-2 text-[#023dbb] shrink-0" />
-                Lead Reports History
-              </h2>
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-[#f0f7ff] text-[#023dbb] shrink-0">
-                {reportsTotal} Total Generated
-              </span>
-            </div>
-
-            {reports.length === 0 ? (
-              <div className="p-12 text-center flex flex-col items-center">
-                <div className="w-16 h-16 bg-[var(--rw-surface-raised)] rounded-full flex items-center justify-center mb-4 text-[var(--rw-text-muted)]">
-                  <FileText className="w-8 h-8" />
-                </div>
-                <h3 className="text-lg font-bold text-[var(--rw-text)] mb-1">No Reports Yet</h3>
-                <p className="text-[var(--rw-text-muted)] font-medium max-w-sm">
-                  Run a lead generation pipeline from the dashboard to see your history here.
-                </p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-[var(--rw-bg)] text-[var(--rw-text-muted)] text-xs uppercase tracking-wider">
-                      <th className="px-6 py-4 font-semibold">Report Type</th>
-                      <th className="px-6 py-4 font-semibold">Status</th>
-                      <th className="px-6 py-4 font-semibold">Generated On</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[var(--rw-border)]">
-                    {reports.map((report) => {
-                      const date = new Date(report.created_at);
-                      const isSuccess = report.status.toLowerCase() === 'success';
-                      const isFailed = report.status.toLowerCase() === 'failed';
-                      return (
-                        <tr key={report.id} className="hover:bg-[var(--rw-surface-hover)] transition-colors">
-                          <td className="px-6 py-4 font-medium text-[var(--rw-text)]">{report.report_type}</td>
-                          <td className="px-6 py-4">
-                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${isSuccess ? 'bg-green-100 text-green-700' : isFailed ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'}`}>
-                              {isSuccess ? <CheckCircle className="w-3.5 h-3.5" /> : isFailed ? <XCircle className="w-3.5 h-3.5" /> : null}
-                              {report.status}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 text-sm text-[var(--rw-text-muted)] font-medium">
-                            {date.toLocaleDateString()} at {date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-                
-                {/* Pagination */}
-                {reportsPages > 1 && (
-                  <div className="px-6 py-4 border-t border-[var(--rw-border)] flex items-center justify-between">
-                    <span className="text-sm text-[var(--rw-text-muted)] font-medium">
-                      Page {reportsPage} of {reportsPages}
-                    </span>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => setReportsPage(p => Math.max(1, p - 1))}
-                        disabled={reportsPage === 1}
-                        className="p-2 rounded-lg border border-[var(--rw-border)] text-[var(--rw-text-muted)] hover:bg-[var(--rw-bg)] disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <ChevronLeft className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => setReportsPage(p => Math.min(reportsPages, p + 1))}
-                        disabled={reportsPage === reportsPages}
-                        className="p-2 rounded-lg border border-[var(--rw-border)] text-[var(--rw-text-muted)] hover:bg-[var(--rw-bg)] disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <ChevronRight className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Password Reset Section */}
-          <div className="bg-[var(--rw-surface)] rounded-2xl shadow-[var(--rw-shadow-sm)] border border-[var(--rw-border)] overflow-hidden">
-            <div className="px-6 py-5 border-b border-[var(--rw-border)] flex items-center bg-[var(--rw-surface-hover)]">
-              <h2 className="text-xl font-bold text-[var(--rw-text)] font-oswald tracking-wide flex items-center">
-                <Lock className="w-5 h-5 mr-2 text-[#023dbb]" />
-                Change Password
-              </h2>
-            </div>
-            <div className="p-8 text-center flex flex-col items-center">
-              <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4 text-[#023dbb]">
-                <Lock className="w-8 h-8" />
-              </div>
-              <h3 className="text-lg font-bold text-[var(--rw-text)] mb-2">Update Your Credentials</h3>
-              <p className="text-[var(--rw-text-muted)] font-medium max-w-sm mb-6 text-sm">
-                For security reasons, changing your password requires email verification via OTP.
-              </p>
-              <button
-                onClick={() => setIsPasswordModalOpen(true)}
-                className="w-full sm:w-auto bg-[#023dbb] hover:bg-[#308fef] text-white font-bold py-3 px-8 rounded-xl transition-colors duration-200 flex items-center justify-center gap-2"
-              >
-                <Lock className="w-4 h-4" />
-                Change Password
-              </button>
-            </div>
-          </div>
-
-          {/* Tickets Section */}
-          <div className="bg-[var(--rw-surface)] rounded-2xl shadow-[var(--rw-shadow-sm)] border border-[var(--rw-border)] overflow-hidden">
-            <div className="px-6 py-5 border-b border-[var(--rw-border)] flex items-center justify-between bg-[var(--rw-surface-hover)]">
-              <h2 className="text-xl font-bold text-[var(--rw-text)] font-oswald tracking-wide flex items-center">
-                <MessageSquare className="w-5 h-5 mr-2 text-[#023dbb]" />
-                Support Tickets
-              </h2>
-            </div>
-            {tickets.length === 0 ? (
-              <div className="p-8 text-center text-[var(--rw-text-muted)] text-sm font-medium">
-                You haven&apos;t submitted any support requests.
-              </div>
-            ) : (
-              <div className="divide-y divide-[var(--rw-border)] max-h-[350px] overflow-y-auto">
-                {tickets.map(ticket => (
-                  <div key={ticket.id} className="p-5 hover:bg-[var(--rw-surface-hover)] transition-colors">
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="text-sm font-bold text-[var(--rw-text)]">{ticket.title}</h3>
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${ticket.type === 'error' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'}`}>
-                        {ticket.type}
-                      </span>
-                    </div>
-                    <p className="text-[var(--rw-text-secondary)] font-medium text-xs whitespace-pre-wrap line-clamp-2 mb-3">
-                      {ticket.description}
-                    </p>
-                    <div className="flex items-center text-[10px] text-[var(--rw-text-muted)] font-bold uppercase tracking-wider">
-                      <Calendar className="w-3 h-3 mr-1" />
-                      {new Date(ticket.created_at).toLocaleDateString()}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-          
-        </div>
-      </main>
-
-      <ChangePasswordModal 
-        isOpen={isPasswordModalOpen} 
-        onClose={() => setIsPasswordModalOpen(false)} 
-        username={username} 
-      />
-    </div>
+    </MotionConfig>
   );
 }
-

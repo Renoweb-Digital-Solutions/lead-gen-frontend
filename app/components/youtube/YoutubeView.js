@@ -1,401 +1,221 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Search, Loader2, Video, Users, Mail, Link as LinkIcon, Download, X } from "lucide-react";
-import TagInput from "../inputs/TagInput";
-import SignalScannerPanel from "./SignalScannerPanel";
-import ExportProgress from "../ExportProgress";
-import YoutubeResultsBottomSheet from "./YoutubeResultsBottomSheet";
-import RippleArrivalSignal from "../gmaps/RippleArrivalSignal";
-import { fetchYoutubeLeads } from "../../lib/api";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Info, Loader2, Search, Video, X } from "lucide-react";
+import { Country } from "country-state-city";
+import { cancelYoutubeJob, fetchYoutubeJobStatus, fetchYoutubeLeads } from "../../lib/api";
+import { selectYoutubeChannels, youtubeCsv, YOUTUBE_FIELDS } from "../../lib/youtube";
 import { useSessionState } from "../../hooks/useSessionState";
 import { useAuth } from "../../lib/AuthContext";
+import YoutubeResultsBottomSheet from "./YoutubeResultsBottomSheet";
+import ExportProgress from "../ExportProgress";
+import RippleArrivalSignal from "../gmaps/RippleArrivalSignal";
+import SignalScannerPanel from "./SignalScannerPanel";
 
+// # Search and filter state share one result list with CSV and JSON exports.
 export default function YoutubeView() {
   const { isSuspended } = useAuth();
-  // ─── Search Form State ───────────────────────────────────
-  const [keyword, setKeyword] = useSessionState("youtube-keyword", "");
-  const [maxEmails, setMaxEmails] = useSessionState("youtube-max-emails", 20);
-  const [customDomain, setCustomDomain] = useSessionState("youtube-custom-domain", "@gmail.com,@yahoo.com");
-
-  // ─── Search State ────────────────────────────────────────
-  const [isSearching, setIsSearching] = useState(false);
-  const [errorMsg, setErrorMsg] = useState(null);
-  const [successMsg, setSuccessMsg] = useState(null);
-  const [resultData, setResultData] = useSessionState("youtube-results", null);
+  const [query, setQuery] = useSessionState("youtube-keyword", "");
+  const [target, setTarget] = useSessionState("youtube-target-count", 50);
+  const [result, setResult] = useSessionState("youtube-results-v2", null);
+  const [minSubscribers, setMinSubscribers] = useState("");
+  const [country, setCountry] = useState("");
+  const [onlyEmail, setOnlyEmail] = useState(false);
+  const [sort, setSort] = useState("subscribers");
+  const [searching, setSearching] = useState(false);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const wsRef = useRef(null);
+  const openSheet = useCallback(() => setIsSheetOpen(true), []);
+  const closeSheet = useCallback(() => setIsSheetOpen(false), []);
+  const [cancelling, setCancelling] = useState(false);
+  const [canCancel, setCanCancel] = useState(false);
+  const [error, setError] = useState("");
+  const [progress, setProgress] = useState({ message: "", percent: 0 });
+  const jobRef = useRef(null);
+  const timerRef = useRef(null);
+  const mountedRef = useRef(false);
 
   useEffect(() => {
+    mountedRef.current = true;
     return () => {
-      if (wsRef.current) {
-        wsRef.current.close();
-      }
+      mountedRef.current = false;
+      clearTimeout(timerRef.current);
+      // # Leaving the tool stops paid work rather than abandoning an active actor.
+      if (jobRef.current) cancelYoutubeJob(jobRef.current).catch(() => {});
+      jobRef.current = null;
     };
   }, []);
 
-  // ─── Search Handler ──────────────────────────────────────
-  const handleSearch = async () => {
-    if (!keyword.trim()) {
-      setErrorMsg("Please add a target keyword (e.g. 'tech reviews', 'gaming')");
+  const channels = useMemo(() => result?.channels || [], [result]);
+  // # Populate countries before searching, using only the installed package's country list.
+  const countries = useMemo(() => Country.getAllCountries().map(({ name }) => name).sort(), []);
+  const ageAvailable = channels.some((row) => row.joinedDate);
+  const visibleChannels = useMemo(() => selectYoutubeChannels(channels, {
+    minSubscribers, country, onlyEmail, sort: ageAvailable ? sort : "subscribers",
+  }), [channels, minSubscribers, country, onlyEmail, sort, ageAvailable]);
+  const visibleEmailCount = visibleChannels.filter((row) => row.email).length;
+  const inputClass = "w-full px-4 py-3 bg-surface border border-border rounded-xl text-sm text-brand-dark focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500";
+
+  // # Share filter controls between the form and the open results sheet.
+  const renderFilters = () => (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <label className="text-sm font-semibold text-brand-dark">Minimum subscribers
+            <input className={`${inputClass} mt-2`} type="number" min={0} step={1} placeholder="No minimum" value={minSubscribers} onChange={(e) => setMinSubscribers(e.target.value)} />
+          </label>
+          <label className="text-sm font-semibold text-brand-dark">Country
+            <select className={`${inputClass} mt-2`} value={country} onChange={(e) => setCountry(e.target.value)}><option value="">Any</option>{countries.map((name) => <option key={name} value={name}>{name}</option>)}</select>
+          </label>
+          <label className="text-sm font-semibold text-brand-dark">Sort by
+            <select className={`${inputClass} mt-2`} value={ageAvailable ? sort : "subscribers"} onChange={(e) => setSort(e.target.value)}><option value="subscribers">Subscribers (highest first)</option><option value="age" disabled={!ageAvailable}>Channel age (oldest first)</option></select>
+          </label>
+        </div>
+  );
+
+  const handleSearch = async (event) => {
+    event.preventDefault();
+    if (searching || isSuspended) return;
+    if (!query.trim() || !Number.isInteger(Number(target)) || Number(target) < 1 || Number(target) > 500) {
+      setError("Enter a niche and location, and a target between 1 and 500 channels.");
       return;
     }
-
-    setIsSearching(true);
-    setErrorMsg(null);
-    setSuccessMsg(null);
-    setResultData(null);
+    setSearching(true);
     setIsSheetOpen(false);
-
+    setCancelling(false);
+    setCanCancel(false);
+    setError("");
+    setResult(null);
+    setProgress({ message: "Starting YouTube search...", percent: 0 });
     try {
-      const jobData = await fetchYoutubeLeads({
-        keywords: [keyword.trim()],
-        max_emails: Number(maxEmails),
-        custom_domains: customDomain.split(",").map(d => d.trim())
-      });
-
-      const wsAbsoluteUrl = jobData.ws_url.startsWith('ws')
-        ? jobData.ws_url
-        : `${process.env.NEXT_PUBLIC_API_URL.replace('http', 'ws')}${jobData.ws_url}`;
-
-      const ws = new WebSocket(wsAbsoluteUrl);
-      wsRef.current = ws;
-
-      ws.onmessage = async (event) => {
-        try {
-          const msg = JSON.parse(event.data);
-
-          if (msg.status === "completed") {
-            ws.close();
-            try {
-              let result = msg.yt_data || [];
-              let rows = Array.isArray(result) ? result : (result.data || []);
-
-              // Flatten socialLinks for YouTube
-              rows = rows.map(row => {
-                const newRow = { ...row };
-                if (newRow.socialLinks) {
-                  Object.entries(newRow.socialLinks).forEach(([key, value]) => {
-                    newRow[`${key}`] = value;
-                  });
-                  delete newRow.socialLinks;
-                }
-                return newRow;
-              });
-
-              setResultData(rows);
-              setSuccessMsg(`Found ${rows.length} YouTube leads!`);
-            } catch (err) {
-              setErrorMsg(err.message || "Failed to process final YouTube leads.");
-            } finally {
-              setIsSearching(false);
-            }
-          } else if (msg.status === "failed") {
-            ws.close();
-            setErrorMsg(msg.message || msg.error || "YouTube search failed.");
-            setIsSearching(false);
-          } else if (msg.status === "cancelled") {
-            ws.close();
-            setErrorMsg("YouTube search was cancelled.");
-            setIsSearching(false);
-          }
-        } catch (e) {
-          console.error("Failed to parse WS message", e);
-        }
-      };
-
-      ws.onerror = () => {
-        ws.close();
-        setErrorMsg("WebSocket connection error occurred.");
-        setIsSearching(false);
-      };
-
-    } catch (err) {
-      if (err.message === "Failed to fetch") {
-        setErrorMsg("We couldn't reach the search service right now. Please check your internet connection and try again in a moment.");
-      } else {
-        setErrorMsg(err.message || "Failed to start YouTube scraper. Please try again.");
+      const job = await fetchYoutubeLeads({ query: query.trim(), target_count: Number(target) });
+      if (!mountedRef.current) {
+        await cancelYoutubeJob(job.job_id);
+        return;
       }
-      setIsSearching(false);
-    }
-  };
-
-  const handleAbort = () => {
-    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify({ type: "abort" }));
-      setErrorMsg("Cancelling search... Please wait.");
-    }
-  };
-
-  const handleExportCsv = () => {
-    if (!resultData || resultData.length === 0) return;
-    try {
-      const headers = Object.keys(resultData[0]);
-      const csvContent = [
-        headers.join(","),
-        ...resultData.map((row) =>
-          headers
-            .map((h) => {
-              let val = row[h];
-              if (val === null || val === undefined) val = "";
-              if (typeof val === "object") val = JSON.stringify(val);
-              return `"${val.toString().replace(/"/g, '""')}"`;
-            })
-            .join(",")
-        ),
-      ].join("\n");
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "youtube_leads.csv";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      jobRef.current = job.job_id;
+      setCanCancel(true);
+      // # Poll authenticated snapshots so progress and cancellation survive socket failures.
+      const poll = async () => {
+        if (!mountedRef.current || jobRef.current !== job.job_id) return;
+        try {
+          const snapshot = await fetchYoutubeJobStatus(job.job_id);
+          if (!mountedRef.current || jobRef.current !== job.job_id) return;
+          setError("");
+          setProgress({ message: snapshot.message, percent: snapshot.percent || 0 });
+          setResult({ ...snapshot.result, channels: snapshot.result?.channels || snapshot.yt_data || [], costUsd: snapshot.cost_usd, message: snapshot.message, keywords: snapshot.keywords || [] });
+          if (["completed", "failed", "cancelled"].includes(snapshot.status)) {
+            jobRef.current = null;
+            setSearching(false);
+            setCancelling(false);
+            setCanCancel(false);
+            if (snapshot.status === "failed") setError(snapshot.message || "YouTube search failed. Any partial results are available below.");
+            return;
+          }
+        } catch (err) {
+          if (!mountedRef.current || jobRef.current !== job.job_id) return;
+          setError(`${err.message} Reconnecting automatically; you can still cancel the search.`);
+        }
+        timerRef.current = setTimeout(poll, 2000);
+      };
+      await poll();
     } catch (err) {
-      setErrorMsg("CSV Export failed: " + err.message);
+      if (!mountedRef.current) return;
+      setError(typeof err.message === "string" ? err.message : "Could not start YouTube search. Please try again.");
+      setSearching(false);
     }
   };
 
-  const formatNumber = (num) => {
-    if (num === null || num === undefined) return "N/A";
-    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  const handleCancel = async () => {
+    if (!jobRef.current) return;
+    setCancelling(true);
+    try {
+      await cancelYoutubeJob(jobRef.current);
+      if (mountedRef.current) setProgress((current) => ({ ...current, message: "Cancelling search..." }));
+    } catch (err) {
+      if (mountedRef.current) {
+        setError(err.message);
+        setCancelling(false);
+      }
+    }
+  };
+
+  const exportResults = (format) => {
+    // # Both formats export exactly the current filtered order using the documented fields.
+    const rows = visibleChannels.map((row) => Object.fromEntries(YOUTUBE_FIELDS.map((field) => [field, row[field] ?? null])));
+    const content = format === "csv" ? youtubeCsv(rows) : JSON.stringify({ query: result.query, totalFound: rows.length, withEmail: visibleEmailCount, channels: rows }, null, 2);
+    const url = URL.createObjectURL(new Blob([content], { type: format === "csv" ? "text/csv;charset=utf-8" : "application/json;charset=utf-8" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `youtube_leads.${format}`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 
   return (
-    <div className="rw-main-content w-full relative min-h-screen pb-20">
-      {/* Page header */}
-      <div className="mb-8 animate-[rw-fadeInUp_0.3s_ease-out]">
-        <div className="flex items-center gap-3 mb-1">
-          <div className="w-10 h-10 bg-gradient-to-br from-red-500/10 to-orange-500/10 rounded-xl flex items-center justify-center border border-red-500/20 shadow-sm text-red-600">
-            <Video className="w-5 h-5" />
-          </div>
-          <h1 className="text-2xl font-bold text-brand-dark m-0 tracking-tight font-display">
-            YouTube Lead Scraper
-          </h1>
-        </div>
-        <p className="text-sm text-gray-500 m-0 ml-14">
-          Extract high-quality leads, emails, and social links from YouTube channels
-        </p>
+    <div className="rw-main-content w-full min-h-screen pb-20">
+      {/* # One search screen keeps filters and results accessible together. */}
+      <div className="mb-8 flex items-center gap-3">
+        <Video className="w-9 h-9 text-red-500" />
+        <div><h1 className="text-2xl font-bold text-brand-dark font-display">YouTube Leads</h1><p className="text-sm text-gray-500">Discover channels in your niche and their public business emails.</p></div>
       </div>
-
-      {/* Elegant Alerts (replaces toasts) */}
-      <AnimatePresence>
-        {errorMsg && (
-          <motion.div
-            key="error-alert"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="mb-6 p-4 bg-red-50/80 backdrop-blur border border-red-200 rounded-xl shadow-sm flex items-start gap-3 relative"
-          >
-            <div className="mt-0.5 bg-red-100 text-red-600 p-1 rounded-full shrink-0">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
-            </div>
-            <div className="pr-6">
-              <h4 className="text-sm font-bold text-red-800 m-0">Error</h4>
-              <p className="text-sm text-red-700 mt-1 mb-0">{errorMsg}</p>
-            </div>
-            <button
-              onClick={() => setErrorMsg(null)}
-              className="absolute top-4 right-4 text-red-400 hover:text-red-700 transition-colors"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </motion.div>
-        )}
-
-        {successMsg && !isSearching && (
-          <motion.div
-            key="success-alert"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="mb-6 p-4 bg-emerald-50/80 backdrop-blur border border-emerald-200 rounded-xl shadow-sm flex items-start gap-3 relative"
-          >
-            <div className="mt-0.5 bg-emerald-100 text-emerald-600 p-1 rounded-full shrink-0">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
-            </div>
-            <div className="pr-6">
-              <h4 className="text-sm font-bold text-emerald-800 m-0">Success</h4>
-              <p className="text-sm text-emerald-700 mt-1 mb-0">{successMsg}</p>
-            </div>
-            <button
-              onClick={() => setSuccessMsg(null)}
-              className="absolute top-4 right-4 text-emerald-400 hover:text-emerald-700 transition-colors"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* ── ZONE 1: Search Form & Signal Scanner ───────────────────────────── */}
-      <div className="mb-8 grid grid-cols-1 lg:grid-cols-[55%_45%] gap-6 items-stretch">
-        <div className="flex flex-col">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-surface rounded-2xl p-6 lg:p-7 border border-red-600/10 shadow-md h-full"
-          >
-            <div className="flex items-center gap-2.5 mb-6 pb-3 border-b border-red-600/5">
-              <div className="w-1 h-3.5 bg-gradient-to-b from-red-600 to-red-500 rounded-full" />
-              <h2 className="text-[12px] font-bold uppercase tracking-[0.05em] text-red-600 m-0 leading-none">
-                Search Parameters
-              </h2>
-            </div>
-
-            <div className="flex flex-col lg:flex-row gap-6 mb-6">
-              <div className="flex-[1.5] relative group">
-                <label className="text-[13px] font-semibold text-brand-dark block mb-1.5 uppercase tracking-wide">
-                  Target Keyword
-                </label>
-                <div className="relative flex items-center">
-                  <div className="absolute left-4 text-gray-400 group-focus-within:text-red-500 transition-colors pointer-events-none">
-                    <Search className="w-4 h-4" />
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="e.g. vloggers"
-                    value={keyword}
-                    onChange={(e) => setKeyword(e.target.value)}
-                    className="w-full pl-11 pr-4 py-3 text-[14px] bg-surface border border-border rounded-xl focus:outline-none focus:border-red-500 focus:ring-4 focus:ring-red-500/10 transition-all hover:border-red-500/40 text-brand-dark font-medium shadow-sm"
-                  />
-                </div>
-              </div>
-
-              <div className="flex-[1.5] relative group">
-                <label className="text-[13px] font-semibold text-brand-dark block mb-1.5 uppercase tracking-wide">
-                  Custom Domain
-                </label>
-                <div className="relative flex items-center">
-                  <div className="absolute left-4 text-gray-400 group-focus-within:text-red-500 transition-colors pointer-events-none">
-                    <Mail className="w-4 h-4" />
-                  </div>
-                  <select
-                    value={customDomain}
-                    onChange={(e) => setCustomDomain(e.target.value)}
-                    className="w-full pl-11 pr-10 py-3 text-[14px] bg-surface border border-border rounded-xl focus:outline-none focus:border-red-500 focus:ring-4 focus:ring-red-500/10 transition-all hover:border-red-500/40 text-brand-dark font-medium shadow-sm appearance-none cursor-pointer"
-                  >
-                    <option value="@gmail.com,@yahoo.com">Both (@gmail & @yahoo)</option>
-                    <option value="@gmail.com">Only @gmail.com</option>
-                    <option value="@yahoo.com">Only @yahoo.com</option>
-                  </select>
-                  <div className="absolute right-4 pointer-events-none text-gray-400">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex-1 relative group">
-                <label className="text-[13px] font-semibold text-brand-dark block mb-1.5 uppercase tracking-wide">
-                  Max Emails
-                </label>
-                <input
-                  type="number"
-                  className="w-full px-4 py-3 text-[14px] bg-surface border border-border rounded-xl focus:outline-none focus:border-red-500 focus:ring-4 focus:ring-red-500/10 transition-all hover:border-red-500/40 text-brand-dark font-medium shadow-sm"
-                  value={maxEmails}
-                  onChange={(e) => setMaxEmails(e.target.value)}
-                  min={1}
-                />
-              </div>
-            </div>
-
-            <div className="flex justify-end pt-4 border-t border-border gap-3">
-              {isSearching && (
-                <motion.button
-                  type="button"
-                  onClick={handleAbort}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="px-6 py-3.5 rounded-xl text-white font-bold text-[15px] tracking-wide flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 shadow-md transition-all duration-300"
-                >
-                  <X className="w-5 h-5" />
-                  <span>Abort</span>
-                </motion.button>
-              )}
-              <motion.button
-                type="button"
-                onClick={handleSearch}
-                disabled={isSearching || isSuspended}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className={`
-              relative px-8 py-3.5 rounded-xl text-white font-bold text-[15px] tracking-wide flex items-center justify-center gap-2 overflow-hidden transition-all duration-300 min-w-[220px]
-              ${(isSearching || isSuspended)
-                    ? "bg-red-500 shadow-inner pointer-events-none"
-                    : "bg-gradient-to-r from-red-600 to-red-500 shadow-md hover:shadow-lg"
-                  }
-            `}
-                title={isSuspended ? "Account suspended" : ""}
-              >
-                {isSearching ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    <span>Extracting... (Up to 10 min)</span>
-                  </>
-                ) : (
-                  <>
-                    <Video className="w-5 h-5" />
-                    <span>{isSuspended ? "Account Suspended" : "Extract YouTube Leads"}</span>
-                  </>
-                )}
-              </motion.button>
-            </div>
-          </motion.div>
-          <div className="mt-4">
-            <ExportProgress isActive={isSearching} logType="youtube" />
+      {error && <div role="alert" className="mb-5 p-4 rounded-xl border border-red-200 bg-red-50 text-red-700 text-sm">{error}</div>}
+      {/* # Restore the original animated scanner beside the updated search controls. */}
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] gap-6 items-stretch mb-6">
+      <div className="min-w-0">
+      <form onSubmit={handleSearch} className="min-w-0 bg-surface border border-border rounded-2xl p-6 space-y-5">
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_180px] gap-4">
+          <label className="text-sm font-semibold text-brand-dark">Niche and location
+            <input className={`${inputClass} mt-2`} value={query} onChange={(e) => setQuery(e.target.value)} placeholder="e.g. vloggers in mumbai" maxLength={500} required disabled={searching} />
+          </label>
+          <label className="text-sm font-semibold text-brand-dark">Target channels
+            <input className={`${inputClass} mt-2`} type="number" min={1} max={500} step={1} value={target} onChange={(e) => setTarget(e.target.value)} required disabled={searching} />
+          </label>
+        </div>
+        {renderFilters()}
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <label className="flex items-center gap-2 text-sm text-brand-dark"><input type="checkbox" checked={onlyEmail} onChange={(e) => setOnlyEmail(e.target.checked)} className="accent-red-500" />Only channels with email</label>
+          <div className="flex items-center gap-3">
+            {searching && <button type="button" onClick={handleCancel} disabled={cancelling || !canCancel} className="flex items-center gap-2 px-5 py-3 rounded-xl border border-border text-sm disabled:opacity-50"><X className="w-4 h-4" />{cancelling ? "Cancelling..." : "Cancel"}</button>}
+            <button type="submit" disabled={searching || isSuspended} className="flex items-center gap-2 px-6 py-3 rounded-xl bg-red-600 text-white font-semibold text-sm disabled:opacity-50">{searching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}{isSuspended ? "Account suspended" : searching ? "Searching..." : "Search"}</button>
           </div>
         </div>
-        <div className="flex flex-col min-h-[500px] gap-6">
-          <SignalScannerPanel
-            status={isSearching ? "scanning" : (resultData?.length > 0 ? "complete" : "idle")}
-            channelCount={resultData?.length || 0}
-          />
-
-          {/* {(!resultData || resultData.length === 0) && !isSearching && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="bg-surface rounded-2xl p-6 border border-border shadow-md flex flex-col"
-            >
-
-            </motion.div>
-          )} */}
-        </div>
+        {!!result?.keywords?.length && <p className="text-xs text-gray-500">Search angles: {result.keywords.join(" · ")}</p>}
+        {result && !searching && !ageAvailable && <p className="text-xs text-gray-500">Channel age is unavailable for this data source in these results.</p>}
+        <details className="text-xs text-gray-500"><summary className="cursor-pointer inline-flex items-center gap-1"><Info className="w-3.5 h-3.5" />About these results</summary><ul className="mt-2 space-y-1 list-disc pl-5"><li>Country comes from the channel’s own profile and may be blank.</li><li>Email means a publicly listed business email; some channels have none.</li><li>Use minimum subscribers to filter very small channels. Inactive channels may appear.</li><li>Average views per video is approximate and includes Shorts.</li></ul></details>
+      </form>
+      {/* # Reuse the shared elapsed timer, running log, and progress styling. */}
+      <ExportProgress isActive={searching} logType="youtube" totalResults={Number(target)} progressState={progress} />
       </div>
+      <div className="min-w-0">
+        <SignalScannerPanel
+          status={searching ? "scanning" : channels.length > 0 ? "complete" : "idle"}
+          channelCount={channels.length}
+        />
+      </div>
+      </div>
+      {/* # Results arrive through the same spring sheet and ripple signal as other tools. */}
+      {result && !searching && <>
+        <RippleArrivalSignal isActive={true} />
+        <YoutubeResultsBottomSheet
+          isOpen={isSheetOpen}
+          onOpen={openSheet}
+          onClose={closeSheet}
+          onExport={() => exportResults("csv")}
+          onExportJson={() => exportResults("json")}
+          data={visibleChannels}
+          totalFound={result.totalFound ?? channels.length}
+          withEmail={result.withEmail ?? channels.filter((row) => row.email).length}
+          costUsd={result.costUsd}
+          query={result.query}
+          message={result.message}
+          filters={<>
+            {renderFilters()}
+            <label className="mt-3 flex items-center gap-2 text-xs text-brand-dark"><input type="checkbox" checked={onlyEmail} onChange={(e) => setOnlyEmail(e.target.checked)} className="accent-red-500" />Only channels with email</label>
+            {!ageAvailable && <p className="mt-2 text-xs text-gray-500">Channel age is unavailable for this data source in these results.</p>}
+          </>}
+        />
+      </>}
 
-      {!isSearching && resultData && resultData.length === 0 && (
-        <motion.div
-          initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-          className="bg-surface rounded-2xl p-12 border border-border flex flex-col items-center justify-center text-center"
-        >
-          <div className="w-24 h-24 bg-[var(--rw-surface-hover)] rounded-full flex items-center justify-center mb-6">
-            <Video className="w-12 h-12 text-gray-300" />
-          </div>
-          <h3 className="text-xl font-bold text-gray-700 mb-2">No channels found</h3>
-          <p className="text-gray-500 max-w-md">
-            No leads were found for these parameters. Try broadening your keywords or modifying custom domains.
-          </p>
-        </motion.div>
-      )}
-
-      {/* ── Results Delivery System ───────────────────────────────────── */}
-      {resultData && resultData.length > 0 && !isSearching && (
-        <>
-          <RippleArrivalSignal isActive={true} />
-          <YoutubeResultsBottomSheet
-            isOpen={isSheetOpen}
-            onOpen={() => setIsSheetOpen(true)}
-            onClose={() => setIsSheetOpen(false)}
-            onExport={handleExportCsv}
-            data={resultData}
-          />
-        </>
-      )}
     </div>
   );
 }

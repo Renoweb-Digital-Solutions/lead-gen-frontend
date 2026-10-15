@@ -486,6 +486,19 @@ export async function gmapsExportCsv(runId) {
 // NEW SCRAPERS API FUNCTIONS (YouTube & B2B)
 // ═══════════════════════════════════════════════════════════
 
+// # HTTP status and cancellation remain available if the live socket disconnects.
+export async function fetchYoutubeJobStatus(jobId) {
+  const res = await fetchWithAuth(`/jobs/${encodeURIComponent(jobId)}/status`);
+  if (!res.ok) throw new Error("Could not retrieve YouTube search progress. Please try again.");
+  return res.json();
+}
+
+export async function cancelYoutubeJob(jobId) {
+  const res = await fetchWithAuth(`/jobs/${encodeURIComponent(jobId)}/cancel`, { method: "POST" });
+  if (!res.ok) throw new Error("Could not cancel the YouTube search. Please try Cancel again.");
+  return res.json();
+}
+
 export async function fetchYoutubeLeads(params, signal) {
   const res = await fetchWithAuth(`/yt_leads`, {
     method: "POST",
@@ -813,6 +826,13 @@ export async function logReportRun(report_type, status) {
   } catch (err) {
     console.error("Failed to log report run:", err);
   }
+}
+
+// # Read the stored email instead of assuming the token's username is an email address.
+export async function fetchAccountIdentity() {
+  const res = await fetchWithAuth("/auth/me");
+  if (!res.ok) throw new Error("Could not load your account identity.");
+  return res.json();
 }
 
 export async function fetchReportRuns(page = 1, limit = 10) {
