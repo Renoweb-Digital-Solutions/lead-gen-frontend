@@ -32,6 +32,22 @@ async function fetchWithAuth(endpoint, options = {}) {
   return res;
 }
 
+export async function adminEmailApi(path = "/studio", data, method = "POST") {
+  const res = await fetchWithAuth(`/admin/email${path}`, data === undefined ? {} : {
+    method,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const payload = await res.json().catch(() => ({}));
+    const detail = typeof payload.detail === "string" ? payload.detail : "Please check the email fields and try again.";
+    const error = new Error(detail);
+    error.status = res.status;
+    throw error;
+  }
+  return res.json();
+}
+
 export async function apiLogin(email, password) {
   const res = await fetch(`${BASE_URL}/auth/token`, {
     method: "POST",

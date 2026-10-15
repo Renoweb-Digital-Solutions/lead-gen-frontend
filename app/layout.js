@@ -18,6 +18,10 @@ export const metadata = {
   title: "Simpleads",
   description:
     "Generate, score, and export qualified leads with Renoweb's intelligent lead generation pipeline.",
+  // Publish Search Console verification in the head of every frontend page.
+  verification: {
+    google: "PqX_zOuAiuxkbAdanm6NYTgQGt0xe-JXQsojayJ2lds",
+  },
 };
 
 import ClientProviders from "./ClientProviders";

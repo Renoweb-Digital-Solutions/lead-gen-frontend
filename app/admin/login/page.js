@@ -4,8 +4,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Lock, User, ArrowRight, Loader2, ShieldCheck } from "lucide-react";
 import { apiAdminLogin } from "../../lib/api";
+import { useSessionState } from "../../hooks/useSessionState";
+import ThemeToggle from "../../components/ThemeToggle";
 
 export default function AdminLogin() {
+  const [isDark, setIsDark] = useSessionState("renoweb-theme-dark", false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -31,10 +34,13 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div data-theme={isDark ? "dark" : "light"} style={{ colorScheme: isDark ? "dark" : "light" }} className="relative min-h-screen bg-[var(--rw-bg)] text-[var(--rw-text)] flex flex-col justify-center py-12 sm:px-6 lg:px-8 transition-colors">
+      <div className="absolute right-6 top-6">
+        <ThemeToggle isDark={isDark} onToggleTheme={() => setIsDark(!isDark)} />
+      </div>
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center mb-6">
-          <ShieldCheck className="w-16 h-16 text-[#023dbb]" />
+          <ShieldCheck className="w-16 h-16 text-[var(--rw-deep-blue)]" />
         </div>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 font-oswald tracking-wide">
           Admin Portal
@@ -45,7 +51,7 @@ export default function AdminLogin() {
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-gray-100">
+        <div className="bg-[var(--rw-surface)] py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-gray-100">
           {error && (
             <div className="mb-6 p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl font-medium">
               {error}
@@ -54,7 +60,7 @@ export default function AdminLogin() {
 
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
-              <label className="text-[13px] font-bold text-[#191919] block mb-1.5 uppercase tracking-wide">
+              <label className="text-[13px] font-bold text-[var(--rw-text)] block mb-1.5 uppercase tracking-wide">
                 Admin Username or Email
               </label>
               <div className="relative mt-1">
@@ -64,7 +70,7 @@ export default function AdminLogin() {
                 <input
                   type="text"
                   required
-                  className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:border-[#4ec8ef] focus:ring-4 focus:ring-[#4ec8ef]/10 transition-all font-medium text-[#191919]"
+                  className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-[var(--rw-surface)] focus:outline-none focus:border-[#4ec8ef] focus:ring-4 focus:ring-[#4ec8ef]/10 transition-all font-medium text-[var(--rw-text)]"
                   placeholder="admin@renoweb.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -73,7 +79,7 @@ export default function AdminLogin() {
             </div>
 
             <div>
-              <label className="text-[13px] font-bold text-[#191919] block mb-1.5 uppercase tracking-wide">
+              <label className="text-[13px] font-bold text-[var(--rw-text)] block mb-1.5 uppercase tracking-wide">
                 Password
               </label>
               <div className="relative mt-1">
@@ -83,7 +89,7 @@ export default function AdminLogin() {
                 <input
                   type="password"
                   required
-                  className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:border-[#4ec8ef] focus:ring-4 focus:ring-[#4ec8ef]/10 transition-all font-medium text-[#191919]"
+                  className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-[var(--rw-surface)] focus:outline-none focus:border-[#4ec8ef] focus:ring-4 focus:ring-[#4ec8ef]/10 transition-all font-medium text-[var(--rw-text)]"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}

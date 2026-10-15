@@ -2,11 +2,14 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSessionState } from "../hooks/useSessionState";
+import ThemeToggle from "../components/ThemeToggle";
+import EmailStudio from "./EmailStudio";
 import { fetchAdminUsersAndRuns, fetchAnalyticsSummary, apiSuspendUser, apiUnsuspendUser } from "../lib/api";
-import { LogOut, Users, Activity, CheckCircle, XCircle, AlertCircle, Calendar, ChevronDown, ChevronUp, MessageSquare, RefreshCw, BarChart3, Ban, Unlock } from "lucide-react";
+import { LogOut, Users, Activity, CheckCircle, XCircle, AlertCircle, Calendar, ChevronDown, ChevronUp, MessageSquare, RefreshCw, BarChart3, Ban, Unlock, Mail } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
-function UserRow({ user, onSuspendClick, onUnsuspendClick }) {
+function UserRow({ user, onSuspendClick, onUnsuspendClick, onEmailClick }) {
   const [expanded, setExpanded] = useState(false);
   const [runsPage, setRunsPage] = useState(1);
   const runs = user.runs || [];
@@ -21,13 +24,14 @@ function UserRow({ user, onSuspendClick, onUnsuspendClick }) {
       <tr className="hover:bg-gray-50 transition-colors border-b border-gray-100">
         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
           {user.username}
-          {user.is_admin && <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">Admin</span>}
+          {user.is_admin && <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-[var(--rw-deep-blue)]">Admin</span>}
           {user.email && user.email !== user.username && <div className="mt-1 text-xs font-normal text-gray-500">{user.email}</div>}
         </td>
         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
           {user.runs ? user.runs.length : 0} runs
         </td>
         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex items-center justify-end gap-3">
+          <button onClick={() => onEmailClick(user)} disabled={!user.email} title={user.email ? `Email ${user.username}` : "No email address on this account"} className="flex items-center gap-1.5 rounded-lg border border-blue-200 px-3 py-1.5 text-[#308fef] hover:bg-blue-50 disabled:opacity-40 disabled:cursor-not-allowed"><Mail className="w-4 h-4" />Email</button>
           {user.is_suspended ? (
             <button
               onClick={() => onUnsuspendClick(user)}
@@ -57,7 +61,7 @@ function UserRow({ user, onSuspendClick, onUnsuspendClick }) {
               setExpanded(!expanded);
             }}
             aria-expanded={expanded}
-            className="text-[#308fef] hover:text-[#023dbb] flex items-center ml-2 px-2 py-1.5"
+            className="text-[#308fef] hover:text-[var(--rw-deep-blue)] flex items-center ml-2 px-2 py-1.5"
           >
             {expanded ? "Hide Details" : "View Runs"}
             {expanded ? <ChevronUp className="w-4 h-4 ml-1" /> : <ChevronDown className="w-4 h-4 ml-1" />}
@@ -79,7 +83,7 @@ function UserRow({ user, onSuspendClick, onUnsuspendClick }) {
                       <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-[var(--rw-surface)] divide-y divide-gray-200">
                     {visibleRuns.map((run, idx) => (
                       <tr key={run._id || idx}>
                         <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900 font-medium capitalize">
@@ -89,7 +93,7 @@ function UserRow({ user, onSuspendClick, onUnsuspendClick }) {
                           {run.status === "success" && <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800"><CheckCircle className="w-3 h-3 mr-1" /> Success</span>}
                           {run.status === "empty" && <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800"><AlertCircle className="w-3 h-3 mr-1" /> Empty</span>}
                           {run.status === "failed" && <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800"><XCircle className="w-3 h-3 mr-1" /> Failed</span>}
-                          {!["success", "empty", "failed"].includes(run.status) && <span title={run.status === "submitted" ? "Legacy record: submission was recorded; the final outcome was not tracked." : undefined} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 capitalize">{run.status === "submitted" ? "Submitted (legacy)" : run.status || "Unknown"}</span>}
+                          {!["success", "empty", "failed"].includes(run.status) && <span title={run.status === "submitted" ? "Legacy record: submission was recorded; the final outcome was not tracked." : undefined} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-[var(--rw-deep-blue)] capitalize">{run.status === "submitted" ? "Submitted (legacy)" : run.status || "Unknown"}</span>}
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500 flex items-center">
                           <Calendar className="w-3 h-3 mr-1 text-gray-400" />
@@ -99,7 +103,7 @@ function UserRow({ user, onSuspendClick, onUnsuspendClick }) {
                     ))}
                   </tbody>
                 </table>
-                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-gray-200 bg-white px-4 py-3 text-sm text-gray-500">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-gray-200 bg-[var(--rw-surface)] px-4 py-3 text-sm text-gray-500">
                   <span aria-live="polite">
                     Showing {startIndex + 1}–{Math.min(startIndex + pageSize, runs.length)} of {runs.length} runs
                   </span>
@@ -109,7 +113,7 @@ function UserRow({ user, onSuspendClick, onUnsuspendClick }) {
                         type="button"
                         onClick={() => setRunsPage(currentPage - 1)}
                         disabled={currentPage === 1}
-                        className="rounded-lg border border-gray-200 px-3 py-1.5 text-[#023dbb] transition-colors hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-white"
+                        className="rounded-lg border border-gray-200 px-3 py-1.5 text-[var(--rw-deep-blue)] transition-colors hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-[var(--rw-surface)]"
                       >
                         Previous
                       </button>
@@ -118,7 +122,7 @@ function UserRow({ user, onSuspendClick, onUnsuspendClick }) {
                         type="button"
                         onClick={() => setRunsPage(currentPage + 1)}
                         disabled={currentPage === totalPages}
-                        className="rounded-lg border border-gray-200 px-3 py-1.5 text-[#023dbb] transition-colors hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-white"
+                        className="rounded-lg border border-gray-200 px-3 py-1.5 text-[var(--rw-deep-blue)] transition-colors hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-[var(--rw-surface)]"
                       >
                         Next
                       </button>
@@ -135,6 +139,7 @@ function UserRow({ user, onSuspendClick, onUnsuspendClick }) {
 }
 
 export default function AdminDashboard() {
+  const [isDark, setIsDark] = useSessionState("renoweb-theme-dark", false);
   const [activeTab, setActiveTab] = useState("users"); // "users", "tickets", "analytics"
   const [users, setUsers] = useState([]);
   const [tickets, setTickets] = useState([]);
@@ -146,6 +151,7 @@ export default function AdminDashboard() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [suspendReason, setSuspendReason] = useState("");
   const [isSuspending, setIsSuspending] = useState(false);
+  const [emailStudio, setEmailStudio] = useState(null);
   const router = useRouter();
 
   const loadData = useCallback(async (isRefresh = false) => {
@@ -244,7 +250,7 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div data-theme={isDark ? "dark" : "light"} style={{ colorScheme: isDark ? "dark" : "light" }} className="min-h-screen bg-[var(--rw-bg)] text-[var(--rw-text)] flex items-center justify-center">
         <div className="flex flex-col items-center">
           <div className="w-8 h-8 border-4 border-[#023dbb] border-t-transparent rounded-full animate-spin"></div>
           <p className="mt-4 text-gray-600 font-medium">Loading secure portal...</p>
@@ -254,15 +260,15 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
+    <div data-theme={isDark ? "dark" : "light"} style={{ colorScheme: isDark ? "dark" : "light" }} className="min-h-screen bg-[var(--rw-bg)] text-[var(--rw-text)] flex flex-col md:flex-row transition-colors">
       {/* Sidebar */}
-      <aside className="w-full md:w-64 bg-[#1a56db] text-white flex flex-col shadow-xl flex-shrink-0">
+      <aside style={{ background: isDark ? "var(--rw-sidebar-bg)" : undefined }} className="w-full md:w-64 bg-[#1a56db] text-white flex flex-col shadow-xl flex-shrink-0">
         <div className="p-6 border-b border-white/10 flex items-center justify-between md:block">
           <div className="flex items-center">
             <span className="text-white font-black text-2xl tracking-tighter">SIMPLE</span>
             <span className="text-[#308fef] font-black text-2xl tracking-tighter">ADS</span>
           </div>
-          <span className="mt-1 md:inline-block hidden px-2 py-0.5 bg-white/20 rounded text-xs font-bold uppercase tracking-widest text-blue-100">
+          <span className="mt-1 md:inline-block hidden px-2 py-0.5 bg-white/20 rounded text-xs font-bold uppercase tracking-widest text-[#dbeafe]">
             Admin Panel
           </span>
         </div>
@@ -271,7 +277,7 @@ export default function AdminDashboard() {
           <button
             onClick={() => setActiveTab("users")}
             className={`w-full flex items-center px-4 py-3 rounded-xl transition-all font-medium ${
-              activeTab === "users" ? "bg-white text-[#023dbb] shadow-md" : "text-blue-100 hover:bg-white/10"
+              activeTab === "users" ? "bg-[var(--rw-surface)] text-[var(--rw-deep-blue)] shadow-md" : "text-[#dbeafe] hover:bg-white/10"
             }`}
           >
             <Users className="w-5 h-5 mr-3" />
@@ -281,7 +287,7 @@ export default function AdminDashboard() {
           <button
             onClick={() => setActiveTab("tickets")}
             className={`w-full flex items-center px-4 py-3 rounded-xl transition-all font-medium ${
-              activeTab === "tickets" ? "bg-white text-[#023dbb] shadow-md" : "text-blue-100 hover:bg-white/10"
+              activeTab === "tickets" ? "bg-[var(--rw-surface)] text-[var(--rw-deep-blue)] shadow-md" : "text-[#dbeafe] hover:bg-white/10"
             }`}
           >
             <MessageSquare className="w-5 h-5 mr-3" />
@@ -296,7 +302,7 @@ export default function AdminDashboard() {
           <button
             onClick={() => setActiveTab("analytics")}
             className={`w-full flex items-center px-4 py-3 rounded-xl transition-all font-medium ${
-              activeTab === "analytics" ? "bg-white text-[#023dbb] shadow-md" : "text-blue-100 hover:bg-white/10"
+              activeTab === "analytics" ? "bg-[var(--rw-surface)] text-[var(--rw-deep-blue)] shadow-md" : "text-[#dbeafe] hover:bg-white/10"
             }`}
           >
             <BarChart3 className="w-5 h-5 mr-3" />
@@ -338,14 +344,18 @@ export default function AdminDashboard() {
             </p>
           </div>
           
-          <button
-            onClick={() => loadData(true)}
-            disabled={refreshing}
-            className="inline-flex items-center justify-center px-4 py-2 bg-white border border-gray-200 rounded-lg shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-[#023dbb] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#308fef] disabled:opacity-50 transition-colors"
-          >
-            <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? "animate-spin" : ""}`} />
-            Refresh Data
-          </button>
+          <div className="flex items-center gap-3">
+            <button onClick={() => setEmailStudio({})} className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-[#023dbb] to-[#308fef] text-white rounded-lg shadow-sm text-sm font-medium hover:brightness-110 transition-all"><Mail className="w-4 h-4" />Email studio</button>
+            <ThemeToggle isDark={isDark} onToggleTheme={() => setIsDark(!isDark)} />
+            <button
+              onClick={() => loadData(true)}
+              disabled={refreshing}
+              className="inline-flex items-center justify-center px-4 py-2 bg-[var(--rw-surface)] border border-gray-200 rounded-lg shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-[var(--rw-deep-blue)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#308fef] disabled:opacity-50 transition-colors"
+            >
+              <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? "animate-spin" : ""}`} />
+              Refresh Data
+            </button>
+          </div>
         </div>
 
         {error ? (
@@ -353,7 +363,7 @@ export default function AdminDashboard() {
             {error}
           </div>
         ) : (
-          <div className="bg-white shadow rounded-xl overflow-hidden border border-gray-100">
+          <div className="bg-[var(--rw-surface)] shadow rounded-xl overflow-hidden border border-gray-100">
             {activeTab === "users" && (
               <>
                 <div className="px-6 py-5 border-b border-gray-200 flex items-center justify-between bg-gray-50">
@@ -361,14 +371,14 @@ export default function AdminDashboard() {
                     <Users className="w-5 h-5 mr-2 text-gray-400" />
                     Registered Users
                   </h3>
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-[#f0f7ff] text-[#023dbb]">
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-[var(--rw-surface-hover)] text-[var(--rw-deep-blue)]">
                     {users.length} Total Users
                   </span>
                 </div>
                 
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-white">
+                    <thead className="bg-[var(--rw-surface)]">
                       <tr>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
                           User / Email
@@ -381,7 +391,7 @@ export default function AdminDashboard() {
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="bg-[var(--rw-surface)] divide-y divide-gray-200">
                       {users.length === 0 ? (
                         <tr>
                           <td colSpan={3} className="px-6 py-10 text-center text-gray-500 font-medium">
@@ -391,6 +401,7 @@ export default function AdminDashboard() {
                       ) : (
                         users.map((user) => (
                           <UserRow 
+                            onEmailClick={(user) => setEmailStudio({ user })}
                             key={user._id} 
                             user={user} 
                             onSuspendClick={handleSuspendClick}
@@ -421,7 +432,8 @@ export default function AdminDashboard() {
                           </p>
                         </div>
                         <div className="flex gap-2">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider ${ticket.type === 'error' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'}`}>
+                          <button onClick={() => setEmailStudio({ type: "feedback", user: users.find((user) => user._id === String(ticket.user_id)) })} disabled={!users.some((user) => user._id === String(ticket.user_id) && user.email)} className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 px-3 py-1.5 text-xs font-semibold text-[#308fef] hover:bg-blue-50 disabled:opacity-40 disabled:cursor-not-allowed"><Mail className="w-3.5 h-3.5" />Ask for feedback</button>
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider ${ticket.type === 'error' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-[var(--rw-deep-blue)]'}`}>
                             {ticket.type}
                           </span>
                         </div>
@@ -448,13 +460,13 @@ export default function AdminDashboard() {
 
             {activeTab === "analytics" && (
               <div className="p-6">
-                <div className="mb-6 bg-[#f0f7ff] rounded-xl p-6 border border-[#308fef]/20">
-                  <h3 className="text-sm font-semibold text-[#023dbb] uppercase tracking-wider mb-2">Total Unique Visitors</h3>
+                <div className="mb-6 bg-[var(--rw-surface-hover)] rounded-xl p-6 border border-[#308fef]/20">
+                  <h3 className="text-sm font-semibold text-[var(--rw-deep-blue)] uppercase tracking-wider mb-2">Total Unique Visitors</h3>
                   <div className="text-4xl font-black text-gray-900">{analytics.total_visitors}</div>
                   <p className="text-sm text-gray-500 mt-1">Based on unique device IDs</p>
                 </div>
 
-                <div className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm">
+                <div className="bg-[var(--rw-surface)] border border-gray-100 rounded-xl p-6 shadow-sm">
                   <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center">
                     <Activity className="w-5 h-5 mr-2 text-[#308fef]" />
                     Top Events
@@ -468,10 +480,11 @@ export default function AdminDashboard() {
                     <div className="h-80 w-full">
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={analytics.top_events} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                          <XAxis type="number" />
-                          <YAxis dataKey="name" type="category" width={150} tick={{fontSize: 12}} />
+                          <XAxis type="number" stroke="var(--rw-text-secondary)" />
+                          <YAxis dataKey="name" type="category" width={150} tick={{fontSize: 12, fill: "var(--rw-text-secondary)"}} stroke="var(--rw-text-secondary)" />
                           <Tooltip 
-                            contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                            contentStyle={{ background: 'var(--rw-surface)', color: 'var(--rw-text)', borderRadius: '8px', border: '1px solid var(--rw-border)', boxShadow: 'var(--rw-shadow-md)' }}
+                            itemStyle={{ color: 'var(--rw-bright-blue)' }}
                             cursor={{ fill: 'rgba(48, 143, 239, 0.1)' }}
                           />
                           <Bar dataKey="count" fill="#308fef" radius={[0, 4, 4, 0]} barSize={24} />
@@ -487,9 +500,10 @@ export default function AdminDashboard() {
       </main>
 
       {/* Suspend Modal */}
+      {emailStudio && <EmailStudio users={users} initialUser={emailStudio.user} initialType={emailStudio.type || "feedback"} onClose={() => setEmailStudio(null)} onDelivered={() => loadData(true)} />}
       {suspendModalOpen && selectedUser && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-[var(--rw-surface)] rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
             <div className="p-6 border-b border-gray-100 flex items-center justify-between">
               <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
                 <Ban className="w-5 h-5 text-red-500" />
@@ -511,7 +525,7 @@ export default function AdminDashboard() {
                 value={suspendReason}
                 onChange={(e) => setSuspendReason(e.target.value)}
                 placeholder="e.g. Violation of terms of service..."
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-red-500 focus:ring-4 focus:ring-red-500/10 transition-all outline-none resize-none h-32 text-sm text-gray-900"
+                className="w-full px-4 py-3 rounded-xl bg-[var(--rw-surface)] border border-gray-200 focus:border-red-500 focus:ring-4 focus:ring-red-500/10 transition-all outline-none resize-none h-32 text-sm text-gray-900"
                 disabled={isSuspending}
               />
             </div>
