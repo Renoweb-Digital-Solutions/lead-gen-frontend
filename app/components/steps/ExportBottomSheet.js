@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSpring, animated } from "@react-spring/web";
 import { useDrag } from "@use-gesture/react";
 import { X, Download, ChevronUp, Database } from "lucide-react";
 import ResultsTable from "../ResultsTable";
 import { EXPORT_FORMATS } from "../../lib/constants";
+// # Header controls must wrap along with the available outreach pane width.
+import layout from "./ExportStep.module.css";
 
 export default function ExportBottomSheet({ 
   isOpen, 
@@ -14,13 +16,23 @@ export default function ExportBottomSheet({
   data, 
   exportResultFile, 
   formState, 
-  onDownload 
+  onDownload,
+  isTestData = false,
 }) {
   const SHEET_HEIGHT_VH = 85; 
   const [sheetHeightPx, setSheetHeightPx] = useState(800);
+  const sheetRef = useRef(null);
 
   useEffect(() => {
-    setSheetHeightPx((window.innerHeight * SHEET_HEIGHT_VH) / 100);
+    // # Observe the actual constrained sheet, not a one-time browser height.
+    // # The outreach pane can clip 85vh below navigation or change on resize;
+    // # gesture thresholds must follow that rendered height without render loops.
+    const observer = new ResizeObserver(([entry]) => {
+      const height = entry.borderBoxSize?.[0]?.blockSize || entry.target.getBoundingClientRect().height;
+      if (height > 0) setSheetHeightPx(height);
+    });
+    observer.observe(sheetRef.current);
+    return () => observer.disconnect();
   }, []);
 
   const closedY = sheetHeightPx * 0.90; // 10% visible
@@ -82,6 +94,7 @@ export default function ExportBottomSheet({
 
       {/* Sheet */}
       <animated.div
+        ref={sheetRef}
         style={{ y, height: `${SHEET_HEIGHT_VH}vh` }}
         className="fixed bottom-0 left-0 right-0 z-[110] bg-[var(--rw-surface)] rounded-t-[32px] border-t border-[var(--rw-border)] shadow-[0_-15px_40px_rgba(48,143,239,0.15)] flex flex-col will-change-transform"
       >
@@ -108,14 +121,14 @@ export default function ExportBottomSheet({
         </div>
 
         {/* Header */}
-        <div className="px-8 pb-4 border-b border-brand-blue/5 flex items-center justify-between shrink-0">
+        <div className={`${layout.sheetHeader} px-6 pb-4 border-b border-brand-blue/5 flex items-center justify-between shrink-0`}>
           <div>
             <h2 className="text-2xl font-bold font-display text-brand-dark leading-tight">
-              {formState.exportFormat === "bundle" ? "Bundle Export Ready" : `Preview: ${formatLabel}`}
+              {isTestData ? "Preview: Outreach test leads" : formState.exportFormat === "bundle" ? "Bundle Export Ready" : `Preview: ${formatLabel}`}
             </h2>
           </div>
           
-          <div className="flex items-center gap-4">
+          <div className={`${layout.sheetActions} flex items-center gap-3`}>
             {exportResultFile && (
               <button
                 type="button"
@@ -137,7 +150,9 @@ export default function ExportBottomSheet({
 
         {/* Body / Table */}
         <div className="flex-1 overflow-auto p-6 bg-[var(--rw-surface-hover)]">
-          {formState.exportFormat === "bundle" ? (
+          {/* # Test fixtures always expose selectable leads, even for Bundle. */}
+          {isTestData && <p role="status" className="mb-4 rounded-xl border border-brand-sky/30 bg-brand-sky/10 px-4 py-3 text-sm text-brand-dark">Test data: supplied email addresses with synthetic lead details. Outreach sending uses your connected mailbox.</p>}
+          {formState.exportFormat === "bundle" && !isTestData ? (
             <div className="p-10 text-center bg-surface rounded-xl border border-dashed border-brand-blue/20 flex flex-col items-center h-full justify-center shadow-sm">
               <Database className="w-12 h-12 text-brand-sky mb-4" />
               <div className="font-semibold text-brand-dark mb-1">Bundle processing complete</div>

@@ -25,7 +25,9 @@ export default function RadioCards({
           {hint && <span className="text-[12px] font-normal text-gray-400 ml-2 normal-case">{hint}</span>}
         </label>
       )}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {/* # Auto-fit uses this control's width, so a wide browser with a narrow
+          # split pane does not squeeze two icon/text cards into unusable columns. */}
+      <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 220px), 1fr))" }}>
         {options.map((opt) => {
           const isSelected = value === opt.id;
           const Icon = ICON_MAP[opt.iconName] || Package;
@@ -38,7 +40,7 @@ export default function RadioCards({
               whileTap={{ scale: 0.99 }}
               onClick={() => onChange(opt.id)}
               className={`
-                relative flex items-start gap-4 p-4 text-left border rounded-2xl transition-all duration-300
+                relative flex min-w-0 items-start gap-4 p-4 text-left border rounded-2xl transition-all duration-300
                 ${isSelected 
                   ? "border-brand-sky bg-brand-sky/5 shadow-md ring-1 ring-brand-sky/30" 
                   : "border-border bg-surface hover:border-brand-sky/40 hover:bg-[var(--rw-surface-hover)]/50"
@@ -66,7 +68,7 @@ export default function RadioCards({
               </div>
 
               {/* Text Content */}
-              <div className="flex flex-col pt-1">
+              <div className="flex min-w-0 flex-col break-words pt-1">
                 <span className={`text-[15px] font-bold ${isSelected ? "text-brand-dark" : "text-gray-600"}`}>
                   {opt.label}
                 </span>

@@ -1,0 +1,22 @@
+/* # The export page can live inside a resized outreach pane. Container queries
+   # measure its actual content width; browser-width breakpoints cannot do this. */
+.page { container-name: export-content; container-type: inline-size; min-width: 0; }
+.layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; }
+.fields, .summaryColumn { min-width: 0; }
+.outputFields { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; }
+.outputFields > * { min-width: 0; }
+.summary { position: static; min-width: 0; }
+.sheetHeader { flex-wrap: wrap; gap: 12px; }
+.sheetHeader > div:first-child { min-width: 0; flex: 1 1 160px; }
+.sheetHeader h2 { overflow-wrap: anywhere; }
+.sheetActions { min-width: 0; max-width: 100%; flex-wrap: wrap; }
+.sheetActions > button:first-child { min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
+.loadingLayout { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; min-width: 0; }
+@container export-content (min-width: 600px) {
+  .outputFields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .loadingLayout { flex-direction: row; }
+}
+@container export-content (min-width: 900px) {
+  .layout { grid-template-columns: minmax(0, 1fr) 340px; gap: 28px; }
+  .summary { position: sticky; top: 24px; }
+}

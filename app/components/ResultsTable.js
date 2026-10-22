@@ -1,9 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import { AgGridReact } from "ag-grid-react";
 import { AllCommunityModule, ModuleRegistry, themeQuartz } from "ag-grid-community";
 import { X } from "lucide-react";
+// # Outreach owns its UI and provider API separately from table cell rendering.
+import { useOutreachWorkspace } from "./outreach/OutreachWorkspace";
+import { recipientsFromRows } from "./outreach/recipients";
+import outreachStyles from "./outreach/Outreach.module.css";
 
 // Register AG Grid Community modules
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -234,12 +238,26 @@ function LongTextCellRenderer(params) {
 }
 
 export default function ResultsTable({ data, hideEmptyColumns = false, excludeColumns = [] }) {
-  const [colDefs, setColDefs] = useState([]);
   const [textModal, setTextModal] = useState(null);
+  // # Grid selection is capped at ten rows. Only real email fields are mapped
+  // # into recipients; missing and duplicate addresses are disclosed in toolbar.
+  const [selectedRows, setSelectedRows] = useState([]);
+  // # Publish selection to the dashboard-level studio; the sheet only contains
+  // # the table. A source ID prevents hidden module tables changing this draft.
+  const tableId = useId();
+  const { source, excluded, openStudio, updateRecipients, restoreRecipients } = useOutreachWorkspace();
+  const selected = useMemo(() => recipientsFromRows(selectedRows.filter((row) => data?.includes(row))), [data, selectedRows]);
+  const removedEmails = source === tableId ? excluded : [];
+  const recipients = selected.recipients.filter((item) => !removedEmails.includes(item.email));
+  useEffect(() => {
+    updateRecipients(tableId, selected.recipients);
+  }, [tableId, selected.recipients, updateRecipients]);
 
   // Generate column definitions dynamically based on the first row of data.
   // Detects email/phone/linkedin/website columns and assigns clickable cell renderers.
-  useMemo(() => {
+  // # Derive columns directly instead of setting state during rendering; this
+  // # keeps selection/studio renders safe under React's concurrent rendering.
+  const colDefs = useMemo(() => {
     if (data && data.length > 0) {
       const TARGET_COLUMNS = [
         "channelName", "channelHandle", "firstName", "lastName", "first_name", "last_name", "name", "email", "emails", "company", "companyName", "role", "seniority",
@@ -341,9 +359,10 @@ export default function ResultsTable({ data, hideEmptyColumns = false, excludeCo
 
           return colDef;
         });
-      setColDefs(cols);
+      return cols;
     }
-  }, [data]);
+    return [];
+  }, [data, hideEmptyColumns, excludeColumns]);
 
   const defaultColDef = useMemo(() => {
     return {
@@ -364,9 +383,18 @@ export default function ResultsTable({ data, hideEmptyColumns = false, excludeCo
   }
 
   return (
+    <section className={outreachStyles.workspace}>
+      <div className={outreachStyles.toolbar}>
+        <button type="button" disabled={!recipients.length} onClick={(event) => openStudio(tableId, selected.recipients, event.currentTarget)}>✉ Email {recipients.length ? `(${recipients.length}/10)` : "selected leads"}</button>
+        <small>{selectedRows.length} selected · Up to 10 leads per send</small>
+        {selected.missing > 0 && <small>{selected.missing} without a usable email</small>}
+        {selected.duplicates > 0 && <small>{selected.duplicates} duplicate addresses excluded</small>}
+        {removedEmails.length > 0 && <button type="button" onClick={restoreRecipients}>Restore recipients</button>}
+      </div>
     <div
       style={{
         height: 500,
+        minWidth: 0,
         width: "100%",
         marginTop: 20,
         borderRadius: 12,
@@ -415,7 +443,15 @@ export default function ResultsTable({ data, hideEmptyColumns = false, excludeCo
         pagination={true}
         paginationPageSize={10}
         paginationPageSizeSelector={[10, 25, 50, 100]}
-        rowSelection={{ mode: 'multiRow' }}
+        rowSelection={{ mode: 'multiRow', headerCheckbox: false }}
+        onSelectionChanged={(event) => {
+          // # Disable select-all and trim excess row selection in the grid itself.
+          const nodes = event.api.getSelectedNodes();
+          if (nodes.length > 10) {
+            nodes.slice(10).forEach((node) => node.setSelected(false));
+          }
+          setSelectedRows(event.api.getSelectedRows().slice(0, 10));
+        }}
         context={{ openTextModal: (text, title) => setTextModal({ text, title }) }}
       />
       
@@ -441,5 +477,6 @@ export default function ResultsTable({ data, hideEmptyColumns = false, excludeCo
         </div>
       )}
     </div>
+    </section>
   );
 }
