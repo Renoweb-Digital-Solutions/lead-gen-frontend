@@ -1,0 +1,578 @@
+/* # Navigation stays above both floating canvases. The left pane establishes
+   # the containing block for fixed sheets, while overflow clips all descendants
+   # to the same rounded surface. A 16px gap is structural and never animated. */
+.screenWorkspace { width: 100%; min-width: 0; }
+.appPane, .appCanvas, .paneGrid { min-width: 0; }
+.studioPane[hidden] { display: none; }
+.navigation { position: relative; z-index: 3; flex-shrink: 0; }
+.screenWorkspace :global(.rw-app-container) { min-height: calc(100dvh - 57px); }
+.screenSplit {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+  height: 100dvh;
+  overflow: hidden;
+  background: radial-gradient(ellipse at 60% 0%, rgba(48,143,239,.12), transparent 65%), var(--rw-bg);
+}
+.screenSplit .paneGrid {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, calc(var(--outreach-split, 50%) - 8px)) 16px minmax(0, 1fr);
+  gap: 0;
+  margin: 14px;
+  flex: 1;
+  min-height: 0;
+  isolation: isolate;
+}
+.screenSplit .appPane, .screenSplit .studioPane {
+  position: relative;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+  border: 1px solid var(--rw-border);
+  border-radius: 26px;
+  background: var(--rw-surface);
+  overflow: hidden;
+  box-shadow: 0 3px 8px rgba(18,48,100,.035), 0 16px 42px rgba(18,48,100,.075), inset 0 1px 0 rgba(255,255,255,.4);
+}
+.screenSplit .appPane {
+  /* # A stable transform confines fixed sheets without scaling their contents. */
+  transform: translateZ(0);
+  isolation: isolate;
+  container-name: lead-workspace;
+  container-type: inline-size;
+}
+/* # A split pane is not a smaller browser viewport. Adapt its dashboard shell
+   # by pane width and give the canvas one scroll area instead of nested scrolls. */
+@container lead-workspace (max-width: 1100px) {
+  .appCanvas :global(.rw-main-layout) { min-width: 0; }
+  .appCanvas :global(.rw-main-content) { min-width: 0; padding: 22px; max-height: none; overflow: visible; }
+}
+@media (min-width: 1024px) {
+  @container lead-workspace (max-width: 1100px) {
+    .appCanvas :global(.rw-sidebar) { width: 190px; }
+    .appCanvas :global(.rw-sidebar-steps) { padding-left: 16px; padding-right: 16px; }
+    .appCanvas :global(.rw-sidebar-steps button) { gap: 10px; }
+  }
+  @container lead-workspace (max-width: 700px) {
+    .appCanvas :global(.rw-sidebar) { width: 76px; }
+    .appCanvas :global(.rw-sidebar-steps) { padding-left: 12px; padding-right: 12px; }
+    .appCanvas :global(.rw-step-label), .appCanvas :global(.rw-sidebar-footer) { display: none; }
+    .appCanvas :global(.rw-main-content) { padding: 16px; }
+  }
+}
+/* # Field grids in the earlier pipeline steps also lose the viewport's md
+   # assumptions inside a narrow pane; real form controls remain fully visible. */
+@container lead-workspace (max-width: 900px) {
+  .appCanvas :global(.rw-main-content [class~="md:grid-cols-2"]),
+  .appCanvas :global(.rw-main-content [class~="md:grid-cols-3"]) { grid-template-columns: minmax(0, 1fr); }
+}
+.screenSplit .appCanvas {
+  height: 100%;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  animation: canvasSettle 900ms cubic-bezier(.16,1,.3,1) both;
+}
+.screenSplit .appPane :global(.fixed.bottom-0) { max-height: 100%; }
+.screenSplit .studioPane { animation: studioArrive 900ms cubic-bezier(.16,1,.3,1) both; }
+.screenSplit .studioPane > .studio { border-radius: inherit; }
+/* # The separator owns the existing gap, so dragging never adds/removes space.
+   # Pointer capture keeps a drag reliable outside the bar; keyboard users get the
+   # same operation through the focusable separator and arrow/Home keys. */
+.resizeHandle { display: flex; align-items: center; justify-content: center; cursor: col-resize; touch-action: none; outline: none; }
+.resizeHandle[hidden] { display: none; }
+.resizeHandle > span { width: 3px; height: 64px; border-radius: 10px; background: linear-gradient(transparent, rgba(48,143,239,.5), transparent); box-shadow: 0 0 9px rgba(48,143,239,.15); }
+.resizeHandle:hover > span, .resizeHandle:focus-visible > span { width: 4px; background: #308fef; box-shadow: 0 0 12px rgba(48,143,239,.35); }
+.paneGrid[data-resizing] { cursor: col-resize; user-select: none; }
+/* # Only the empty backing surface shrinks. Neither live text nor the table
+   # raster is scaled, and layout is committed once rather than every frame. */
+.surfaceReveal {
+  position: absolute;
+  z-index: -1;
+  inset: 0 auto 0 0;
+  width: calc(var(--outreach-split, 50%) - 8px);
+  border-radius: 26px;
+  background: var(--rw-surface);
+  transform-origin: left center;
+  pointer-events: none;
+  animation: surfaceSettle 980ms cubic-bezier(.16,1,.3,1) both;
+}
+/* # The wave uses only compositor transforms/opacity. Curved radial lobes make
+   # a feathered cyan crest; no image, large blur, pointer capture or infinite
+   # animation is involved. React removes the overlay when its sweep completes. */
+.energyWave {
+  position: absolute;
+  z-index: 180;
+  inset: -12% auto -12% 0;
+  width: 70%;
+  border-radius: 42% 65% 58% 38% / 48% 54% 46% 52%;
+  background:
+    radial-gradient(ellipse at 78% 45%, rgba(92,214,255,.22) 0%, rgba(48,143,239,.12) 24%, transparent 58%),
+    radial-gradient(ellipse at 64% 68%, rgba(21,94,239,.14), transparent 62%),
+    linear-gradient(90deg, transparent, rgba(2,61,187,.035) 25%, rgba(48,143,239,.08) 60%, transparent);
+  pointer-events: none;
+  animation: energySweep 980ms cubic-bezier(.16,1,.3,1) both;
+}
+.energyWave::after {
+  content: "";
+  position: absolute;
+  inset: 5% 8% 4% 24%;
+  border-radius: 50% 75% 64% 44%;
+  background: radial-gradient(ellipse at 74% 46%, rgba(126,231,255,.18), transparent 65%);
+  pointer-events: none;
+}
+.screenSplit .studioPane > .studio > .studioHeader > div,
+.screenSplit .studioPane > .studio > .studioBody > :not(dialog) {
+  animation: studioContent 440ms cubic-bezier(.16,1,.3,1) both;
+  animation-delay: 220ms;
+}
+.screenSplit .studioPane > .studio > .studioBody > .mailboxButton { animation-delay: 280ms; }
+.screenSplit .studioPane > .studio > .studioBody > .connectionBar { animation-delay: 330ms; }
+.screenSplit .studioPane > .studio > .studioBody > .chips { animation-delay: 370ms; }
+.screenSplit .studioPane > .studio > .studioBody > .composer { animation-delay: 420ms; }
+.screenSplit .studioPane > .studio > .studioBody > .composer > label { animation: studioContent 400ms 460ms both; }
+.screenSplit .studioPane > .studio > .studioBody > .composer > label:nth-child(2) { animation-delay: 510ms; }
+.screenSplit .studioPane > .studio > .studioBody > .composer > .primary { animation: studioContent 400ms 560ms both; }
+.workspaceClosing .studioPane { animation: studioLeave 240ms ease-out both; }
+.workspaceClosing .appCanvas { animation: canvasFade 240ms ease-out both; }
+@keyframes surfaceSettle { from { transform: scaleX(2.04); opacity: .9; } to { transform: scaleX(1); opacity: 0; } }
+@keyframes canvasSettle { from { opacity: .9; } to { opacity: 1; } }
+@keyframes studioArrive { from { transform: translateX(65px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes studioContent { from { transform: translateY(9px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes energySweep {
+  0% { transform: translateX(-110%) rotate(-8deg); opacity: 0; }
+  16% { opacity: 1; }
+  70% { opacity: .75; }
+  100% { transform: translateX(160%) rotate(7deg); opacity: 0; }
+}
+@keyframes studioLeave { to { transform: translateX(12px); opacity: 0; } }
+@keyframes canvasFade { to { opacity: .9; } }
+.workspace {
+  min-width: 0;
+  width: 100%;
+}
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  flex-wrap: wrap;
+  border: 1px solid var(--rw-border);
+  border-radius: 12px;
+  background: var(--rw-surface);
+  color: var(--rw-text);
+}
+.toolbar button,
+.primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 9px;
+  padding: 10px 16px;
+  background: #155eef;
+  color: white;
+  cursor: pointer;
+  font-weight: 600;
+}
+.toolbar small {
+  color: var(--rw-text-muted);
+}
+.studio {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--rw-surface);
+  color: var(--rw-text);
+  min-width: 0;
+  overflow: hidden;
+}
+.studio[hidden] {
+  display: none;
+}
+.studioHeader {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px;
+  border-bottom: 1px solid var(--rw-border);
+  background: linear-gradient(120deg, rgba(21, 94, 239, 0.1), transparent);
+}
+.eyebrow {
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  color: #308fef;
+  font-weight: 700;
+}
+.studioHeader h2 {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 20px;
+  font-weight: 700;
+  margin: 6px 0 0;
+}
+.studio button {
+  cursor: pointer;
+}
+.studio button:disabled,
+.toolbar button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.studioHeader button,
+.connectionBar button,
+.senderRow button,
+.chips button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  padding: 5px;
+}
+.studioBody {
+  padding: 20px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.muted {
+  color: var(--rw-text-muted);
+  font-size: 12px;
+  margin-bottom: 14px;
+}
+.connectionBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  margin: 12px 0 8px;
+  font-weight: 600;
+}
+.connectionBar button {
+  color: #308fef;
+}
+.senderRow {
+  display: flex;
+  gap: 8px;
+}
+/* # Only the compact sender button occupies the writing canvas. The native
+   # dialog uses the top layer, independent of either pane's overflow/stacking. */
+.mailboxButton {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 14px;
+  margin-bottom: 20px;
+  border: 1px solid var(--rw-border);
+  border-radius: 10px;
+  background: var(--rw-bg);
+  color: var(--rw-text);
+  text-align: left;
+}
+.mailboxButton > span { flex: 1; min-width: 0; overflow-wrap: anywhere; font-size: 13px; font-weight: 600; }
+.mailboxButton > small { flex-shrink: 0; }
+.mailboxModal {
+  width: min(640px, calc(100vw - 32px));
+  max-height: calc(100dvh - 48px);
+  height: auto;
+  padding: 0;
+  margin: auto;
+  border: 1px solid var(--rw-border);
+  border-radius: 18px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, .25);
+}
+.mailboxModal::backdrop { background: rgba(9, 18, 38, .5); backdrop-filter: blur(4px); }
+.mailboxSummary { cursor: pointer; font-size: 13px; font-weight: 600; padding-bottom: 14px; }
+.modalFooter { display: flex; justify-content: flex-end; padding: 14px 20px; border-top: 1px solid var(--rw-border); flex-shrink: 0; }
+.studio input,
+.studio select,
+.studio textarea {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--rw-border);
+  background: var(--rw-bg);
+  color: var(--rw-text);
+  border-radius: 8px;
+  padding: 10px;
+  font: inherit;
+  font-size: 12px;
+}
+.studio input:focus,
+.studio select:focus,
+.studio textarea:focus {
+  outline: 2px solid #308fef;
+  outline-offset: 2px;
+}
+.studio textarea {
+  resize: vertical;
+  line-height: 1.7;
+}
+.setup {
+  background: var(--rw-bg);
+  border: 1px solid var(--rw-border);
+  border-radius: 12px;
+  padding: 14px;
+  margin-top: 12px;
+}
+.setupForm,
+.composer {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+.studio label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.google {
+  border: 1px solid var(--rw-border);
+  background: var(--rw-surface);
+  color: var(--rw-text);
+  border-radius: 8px;
+  padding: 12px;
+  width: 100%;
+  margin-bottom: 14px;
+}
+.studio small {
+  font-size: 11px;
+  color: var(--rw-text-muted);
+  font-weight: 400;
+}
+.chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.chips > span {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  border-radius: 6px;
+  padding: 3px 6px;
+  background: rgba(48, 143, 239, 0.12);
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+.previewButton {
+  background: transparent;
+  border: 1px dashed var(--rw-border);
+  color: #308fef;
+  border-radius: 7px;
+  padding: 8px;
+  font-size: 12px;
+}
+.preview {
+  padding: 12px;
+  background: var(--rw-bg);
+  border: 1px solid var(--rw-border);
+  border-radius: 8px;
+  font-size: 12px;
+}
+.preview strong {
+  display: block;
+  margin-top: 12px;
+}
+.preview p {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  margin-top: 8px;
+}
+.security {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--rw-text-muted);
+}
+.notice,
+.error {
+  padding: 11px;
+  border-radius: 8px;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+  margin-bottom: 12px;
+}
+.notice {
+  background: rgba(16, 185, 129, 0.12);
+  color: #07875e;
+}
+.error {
+  background: rgba(239, 68, 68, 0.12);
+  color: #dc4545;
+}
+.history {
+  margin-top: 24px;
+  border-top: 1px solid var(--rw-border);
+}
+.history details {
+  border-bottom: 1px solid var(--rw-border);
+  padding: 12px 0;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.history summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.history time {
+  display: block;
+  color: var(--rw-text-muted);
+  font-size: 10px;
+  margin: 8px 0;
+}
+.result {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding: 7px 0;
+  font-size: 11px;
+}
+.result small {
+  width: 100%;
+}
+.result b[data-status="accepted"] {
+  color: #07875e;
+}
+.result b[data-status="failed"],
+.result b[data-status="uncertain"] {
+  color: #dc4545;
+}
+/* # On narrow viewports keep the preview full width and float the studio as a
+   # rounded bottom sheet below the navigation, never an offscreen second column. */
+@media (max-width: 1050px) {
+  .screenSplit { padding: 0; gap: 0; }
+  .screenSplit .paneGrid { display: block; margin: 10px; }
+  .resizeHandle { display: none; }
+  .screenSplit .appPane { width: 100%; border-radius: 22px; }
+  .screenSplit .studioPane {
+    position: absolute;
+    z-index: 190;
+    inset: auto 6px 6px;
+    height: min(74dvh, calc(100% - 12px));
+    border-radius: 24px;
+    animation-name: studioRise;
+    box-shadow: 0 -8px 48px rgba(18,48,100,.16), 0 12px 30px rgba(18,48,100,.12);
+  }
+  .screenSplit .paneGrid::after { display: none; }
+  .surfaceReveal { width: 100%; animation-name: canvasFade; }
+  .energyWave { width: 55%; }
+  .workspaceClosing .studioPane { animation-name: studioDrop; }
+  .studioHeader { padding: 18px 20px; }
+  .studioBody { padding: 18px; }
+}
+@keyframes studioRise { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes studioDrop { to { transform: translateY(16px); opacity: 0; } }
+/* # Reduced motion removes all travel and the wave, retaining a brief crossfade.
+   # The rule also applies when the preference changes with a workspace open. */
+@media (prefers-reduced-motion: reduce) {
+  .energyWave, .surfaceReveal { display: none; }
+  .screenSplit .appCanvas,
+  .screenSplit .studioPane,
+  .screenSplit .studioPane > .studio > .studioHeader > div,
+  .screenSplit .studioPane > .studio > .studioBody > :not(dialog),
+  .screenSplit .studioPane > .studio > .studioBody > .composer > label,
+  .screenSplit .studioPane > .studio > .studioBody > .composer > .primary {
+    animation: reducedFade 120ms ease-out both;
+  }
+  .workspaceClosing .studioPane { animation: reducedExit 120ms ease-out both; }
+}
+@keyframes reducedFade { from { opacity: .6; } to { opacity: 1; } }
+@keyframes reducedExit { to { opacity: 0; } }
+
+/* # User-facing composing tools follow the admin studio's editorial layout:
+   # a clear draft heading, compact library controls and a bordered writing page. */
+.writingHeading { display:flex; align-items:center; justify-content:space-between; gap:16px; margin:4px 0 18px; }
+/* # Real lead values are shown as protected details, not template syntax.
+   # Their underlying field identity survives typing, formatting and lead changes. */
+.personalizedDetail { display:inline; padding:1px 4px; border-radius:4px; background:#308fef12; color:inherit; box-decoration-break:clone; }
+.personalizedDetail[data-missing="true"] { background:#f59e0b14; color:#a15c00; }
+.personalizedSubject { min-height:40px; width:100%; padding:10px; border:1px solid var(--rw-border); border-radius:8px; background:var(--rw-bg); color:var(--rw-text); font-size:12px; font-weight:400; overflow-wrap:anywhere; }
+.personalizedSubject:focus { outline:2px solid #308fef; outline-offset:2px; }
+.personalizedSubject:empty::before { content:attr(data-placeholder); color:var(--rw-text-muted); pointer-events:none; }
+.subjectField { display:flex; flex-direction:column; gap:7px; font-size:12px; font-weight:600; }
+.recipientSwitcher { padding:12px; border-radius:10px; border:1px solid var(--rw-border); background:var(--rw-bg); }
+.writingHeading h3 { font-family:var(--font-oswald),sans-serif; font-size:25px; font-weight:600; letter-spacing:-.02em; margin:5px 0 0; }
+.draftBadge { border:1px solid var(--rw-border); border-radius:7px; padding:5px 9px; font-size:9px; letter-spacing:.12em; color:var(--rw-text-muted); }
+.composerActions { display:flex; gap:8px; flex-wrap:wrap; padding-bottom:18px; margin-bottom:18px; border-bottom:1px solid var(--rw-border); }
+.composerActions button, .saveTemplateRow button, .linkControls button { border:1px solid var(--rw-border); background:var(--rw-surface); color:var(--rw-text); border-radius:8px; padding:8px 11px; font-size:12px; font-weight:600; }
+.composerActions button[aria-expanded="true"], .composerActions button[aria-pressed="true"] { color:#155eef; border-color:#308fef80; background:#308fef0d; }
+.composerActions small { margin-left:6px; }
+.templateLibrary { border:1px solid var(--rw-border); padding:14px; border-radius:12px; margin-bottom:18px; background:var(--rw-bg); }
+.templateLibrary > button { display:grid; grid-template-columns:minmax(0,1fr) auto; text-align:left; gap:5px 12px; width:100%; padding:13px; margin-top:8px; border:1px solid var(--rw-border); background:var(--rw-surface); color:var(--rw-text); border-radius:9px; }
+.templateLibrary strong { font-size:13px; }
+.templateLibrary small { grid-row:2; overflow-wrap:anywhere; }
+.templateLibrary > button > span { grid-column:2; grid-row:1 / 3; align-self:center; color:#308fef; font-size:11px; }
+.messageHeading { display:flex; justify-content:space-between; align-items:center; gap:10px; font-size:12px; font-weight:600; }
+.richWrap { border:1px solid var(--rw-border); border-radius:12px; overflow:hidden; background:var(--rw-surface); }
+.formatBar { display:flex; flex-wrap:wrap; align-items:center; gap:3px; padding:8px; border-bottom:1px solid var(--rw-border); background:var(--rw-bg); }
+.formatBar button { display:inline-flex; align-items:center; justify-content:center; gap:4px; min-width:29px; min-height:29px; border:0; background:transparent; color:var(--rw-text-secondary,var(--rw-text)); border-radius:5px; }
+.formatBar button:hover { background:#308fef14; color:#155eef; }
+.formatBar .variableButton { padding:5px 6px; font-size:10px; color:#308fef; }
+.formatDivider { height:18px; width:1px; background:var(--rw-border); margin:0 5px; }
+.richEditor { min-height:260px; max-height:480px; overflow-y:auto; padding:20px; line-height:1.8; font-size:14px; outline:none; overflow-wrap:anywhere; }
+.richEditor:empty::before { content:attr(data-placeholder); color:var(--rw-text-muted); pointer-events:none; }
+.richEditor:focus { box-shadow:inset 0 0 0 2px #308fef55; }
+.richEditor p, .richEditor div { margin:0 0 12px; }
+.richEditor h2 { font:normal 25px/1.4 Georgia,serif; margin:10px 0 18px; }
+.richEditor h3 { font-size:18px; font-weight:600; margin:10px 0 14px; }
+.richEditor ul { list-style:disc; padding-left:24px; }
+.richEditor ol { list-style:decimal; padding-left:24px; }
+.richEditor a { color:#155eef; text-decoration:underline; }
+.richEditor blockquote { border-left:3px solid #308fef; margin:12px 0; padding-left:14px; }
+.linkControls { display:flex; gap:8px; padding:10px; border-bottom:1px solid var(--rw-border); }
+.linkControls button { white-space:nowrap; }
+.saveTemplateRow { display:flex; gap:8px; }
+.saveTemplateRow button { white-space:nowrap; }
+.signatureField { padding:12px; border:1px dashed var(--rw-border); border-radius:10px; background:var(--rw-bg); }
+.previewFrame { width:100%; min-height:300px; border:0; background:white; border-radius:10px; margin-top:12px; }
+.previewFrame { display: block; min-width: 0; max-width: 100%; box-sizing: border-box; }
+.designedPreview { height:860px; background:#eef3fb; }
+.composer > .primary { min-height:46px; box-shadow:0 5px 16px #155eef22; }
+/* # Provider choice precedes the credentials form. Disabled Outlook is labelled
+   # honestly; the custom card describes SMTP rather than promising inbox sync. */
+.mailboxModal { width:min(820px,calc(100vw - 32px)); }
+.mailboxIntro h3 { font-size:27px; font-weight:700; letter-spacing:-.03em; margin-bottom:9px; }
+.providerLabel { font-size:13px; font-weight:600; margin:20px 0 12px; }
+.providerGrid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin-bottom:12px; }
+.providerCard { position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; min-height:165px; padding:20px 12px; background:var(--rw-surface); color:var(--rw-text); border:1px solid var(--rw-border); border-radius:12px; transition:background .18s,border-color .18s; }
+.providerCard:not(:disabled):hover, .providerCard:focus-visible { border-color:#308fef; background:#308fef08; outline:2px solid #308fef30; outline-offset:2px; }
+.providerCard strong { font-size:14px; margin-top:5px; }
+.providerCard small { text-align:center; }
+.providerLock { position:absolute; top:12px; right:12px; }
+.outlookMark { display:grid; place-items:center; width:36px; height:36px; border-radius:7px; font-size:24px; font-weight:700; color:white; background:linear-gradient(135deg,#0078d4,#28b8e8); }
+.providerSteps { padding-top:20px; }
+.backButton { display:inline-flex; align-items:center; gap:6px; color:#308fef; font-size:12px; border:0; background:transparent; padding:5px 0; }
+.setupSteps { display:flex; gap:10px; margin:20px 0; font-size:11px; }
+.setupSteps > span { flex:1; padding:10px; background:var(--rw-bg); color:var(--rw-text-muted); border-radius:7px; }
+.setupSteps .activeSetupStep { background:#308fef14; color:#155eef; font-weight:600; }
+.googleInstructions { padding:22px; border:1px solid var(--rw-border); border-radius:12px; background:var(--rw-bg); }
+.googleInstructions h3 { font-size:18px; font-weight:600; }
+.googleInstructions ol { list-style:decimal; padding-left:20px; font-size:13px; line-height:2.2; margin:14px 0; }
+.googleInstructions p { font-size:12px; color:var(--rw-text-muted); margin:12px 0 20px; }
+.connectionSuccess { display:flex; flex-direction:column; align-items:center; gap:12px; padding:34px 20px; text-align:center; color:#07875e; background:#10b9810a; border-radius:12px; }
+.connectionSuccess h3 { font-size:21px; font-weight:600; }
+.connectionSuccess p { font-size:13px; color:var(--rw-text-muted); }
+@media(max-width:600px) {
+  .providerGrid { grid-template-columns:1fr; }
+  .providerCard { min-height:110px; }
+  .writingHeading h3 { font-size:21px; }
+  .saveTemplateRow { flex-wrap:wrap; }
+}

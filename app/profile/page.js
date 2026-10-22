@@ -11,6 +11,8 @@ import { useSessionState } from "../hooks/useSessionState";
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
 import ChangePasswordModal from "../components/profile/ChangePasswordModal";
+// # Outreach inbox management is independent of account sign-in/password settings.
+import InboxSettings from "../components/profile/InboxSettings";
 import { ActivityMap, EmailSignature, ErrorNote, LoadingNote, PasswordVault, PipelinePassport, ReportTimeline, SupportThread } from "../components/profile/ProfileLogbook";
 import styles from "../components/profile/ProfileLogbook.module.css";
 
@@ -112,6 +114,7 @@ export default function ProfilePage() {
           </header>
           <div className={styles.introduction}><div><p className={styles.eyebrow}>A record, not a dashboard</p><h1>Your work,<br /><em>on the record.</em></h1><p className={styles.introDescription}>Follow the days, revisit the runs, and see the shape of your work.</p></div>{history.total != null && <div className={styles.total}><strong>{history.total.toLocaleString()}</strong><span>reports recorded</span><span className={styles.totalRule} /></div>}</div>
           <ActivityMap reports={history.reports} complete={history.complete} selectedDay={filters.day} onSelectDay={(day) => onFilter({ day })} loading={history.loading} />
+          <InboxSettings key={token} />
           <div className={styles.body}>
             <ReportTimeline reports={filteredReports} allReports={history.reports} total={history.total} complete={history.complete} loading={history.loading} error={history.error} onRetry={retry} filters={filters} onFilter={onFilter} visibleDays={visibleDays} onLoadEarlier={() => setVisibleDays((value) => value + 3)} />
             <aside className={styles.marginNotes} aria-label="Pipeline collection, support, and security">

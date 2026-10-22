@@ -1,0 +1,53 @@
+/* # Scoped account settings keep the existing logbook layout and password flow
+   # intact. Surfaces inherit the profile's light/dark theme rather than assuming
+   # a white background; responsive cards expose only real mailbox metadata. */
+.settings { margin:32px 0 0; padding:26px; border:1px solid var(--rw-border); border-radius:22px; background:linear-gradient(125deg,#308fef08,transparent 60%),var(--rw-surface); box-shadow:0 4px 18px #15345b04; }
+.heading { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:24px; }
+.headingMain { display:flex; gap:15px; align-items:center; min-width:0; }
+.brandMark { width:48px; height:48px; flex-shrink:0; display:grid; place-items:center; color:var(--log-blue,#155eef); background:#308fef12; border:1px solid #308fef20; border-radius:15px; }
+.eyebrow { color:var(--log-blue,#155eef); font-size:9px; letter-spacing:.16em; font-weight:700; margin-bottom:5px!important; }
+.heading h2 { font-size:23px; letter-spacing:-.6px; }
+.description { color:var(--log-muted,var(--rw-text-muted)); font-size:12px; margin-top:7px!important; line-height:1.6; }
+.refresh { display:flex; align-items:center; gap:7px; padding:8px 11px; border:1px solid var(--rw-border); border-radius:9px; background:var(--rw-surface); color:var(--log-muted,var(--rw-text-muted)); font-size:11px; }
+.inboxGrid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+.inboxCard { min-width:0; padding:20px; border:1px solid var(--rw-border); border-radius:15px; background:var(--rw-surface); }
+.cardTop { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:17px; }
+.providerMark { display:grid; place-items:center; width:37px; height:37px; border-radius:11px; border:1px solid var(--rw-border); background:var(--rw-bg); color:var(--log-blue,#155eef); }
+.providerMark[data-provider="google"] { font-size:22px; font-weight:750; color:#4285f4; }
+.linked { display:flex; align-items:center; gap:6px; color:var(--log-teal,#08766b); font-size:10px; }
+.linked > span { width:5px; height:5px; border-radius:50%; background:currentColor; }
+.inboxCard h3 { font-size:14px; line-height:1.6; font-weight:650; overflow-wrap:anywhere; }
+.metadata { font-size:11px; color:var(--log-muted,var(--rw-text-muted)); line-height:1.7; margin-top:5px!important; overflow-wrap:anywhere; }
+.cardBottom { display:flex; align-items:center; justify-content:space-between; gap:12px; padding-top:18px; margin-top:17px; border-top:1px solid var(--rw-border); }
+.cardBottom > span { color:var(--log-muted,var(--rw-text-muted)); font-size:10px; }
+.cardBottom button { display:flex; align-items:center; gap:6px; font-size:11px; color:var(--log-red,#b93b40); background:transparent; border:1px solid var(--rw-border); border-radius:8px; padding:7px 9px; transition:background .15s,border-color .15s; }
+.cardBottom button:hover { background:#ef44440a; border-color:#ef444440; }
+.empty { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; text-align:center; min-height:150px; padding:24px; color:var(--log-muted,var(--rw-text-muted)); border:1px dashed var(--rw-border); border-radius:14px; }
+.emptyMark { color:var(--log-blue,#155eef); margin-bottom:4px; }
+.empty h3 { color:var(--rw-text); font-size:15px; font-weight:600; }
+.empty p { font-size:12px; max-width:330px; line-height:1.7; }
+.footnote { display:flex; align-items:flex-start; gap:8px; margin-top:18px; color:var(--log-muted,var(--rw-text-muted)); }
+.footnote svg { flex-shrink:0; margin-top:1px; }
+.footnote p { font-size:11px; line-height:1.6; }
+.notice,.error { display:flex; align-items:flex-start; gap:8px; padding:12px; border-radius:9px; font-size:12px; line-height:1.6; margin-bottom:16px!important; overflow-wrap:anywhere; }
+.notice { color:var(--log-teal,#08766b); background:#10b9810c; border:1px solid #10b98122; }
+.notice svg { flex-shrink:0; margin-top:1px; }
+.error { color:var(--log-red,#b93b40); background:#ef44440a; border:1px solid #ef444422; }
+/* # Native dialog keeps confirmation above page overlays, traps keyboard focus
+   # and restores it to the original Disconnect action when cancelled. */
+.dialog { width:min(460px,calc(100vw - 32px)); max-height:calc(100dvh - 40px); overflow-y:auto; padding:25px; margin:auto; border:1px solid var(--rw-border); border-radius:20px; color:var(--rw-text); background:var(--rw-surface); box-shadow:0 24px 90px #07182f40; }
+.dialog::backdrop { background:#07182f70; backdrop-filter:blur(4px); }
+.dialogTop { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:19px; }
+.disconnectIcon { width:48px; height:48px; display:grid; place-items:center; border-radius:14px; background:#ef444410; color:var(--log-red,#b93b40); }
+.dialogTop button { padding:5px; border:0; background:transparent; color:var(--log-muted,var(--rw-text-muted)); }
+.dialog h3 { font-size:22px; font-weight:650; letter-spacing:-.5px; }
+.dialogEmail { font-size:13px; font-weight:600; overflow-wrap:anywhere; margin-top:10px!important; }
+.dialog > p:not(.dialogEmail) { color:var(--log-muted,var(--rw-text-muted)); font-size:12px; line-height:1.8; margin-top:12px; }
+.dialogActions { display:flex; flex-wrap:wrap; gap:10px; justify-content:flex-end; margin-top:24px; }
+.dialogActions button { display:flex; align-items:center; justify-content:center; gap:7px; padding:10px 13px; border-radius:9px; font-size:12px; font-weight:600; border:1px solid var(--rw-border); background:var(--rw-surface); color:var(--rw-text); }
+.dialogActions .danger { color:white; background:#c33440; border-color:#c33440; }
+.spin { animation:rotate .9s linear infinite; }
+@keyframes rotate { to { transform:rotate(360deg); } }
+@media(max-width:850px) { .inboxGrid { grid-template-columns:1fr; } }
+@media(max-width:560px) { .settings { padding:18px; border-radius:16px; } .brandMark { display:none; } .refresh span { display:none; } .heading h2 { font-size:21px; } .cardBottom { flex-wrap:wrap; } }
+@media(prefers-reduced-motion:reduce) { .spin { animation:none; } .cardBottom button { transition:none; } }
