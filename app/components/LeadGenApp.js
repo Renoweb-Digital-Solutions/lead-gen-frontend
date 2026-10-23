@@ -3,9 +3,6 @@
 import { useState, useRef, useEffect } from "react";
 import Papa from "papaparse";
 import Header from "./Header";
-// # Own the full dashboard/studio split above all pipeline views and sheets.
-import OutreachWorkspace from "./outreach/OutreachWorkspace";
-import { TEST_LEADS_ENABLED, createTestLeads } from "./outreach/testLeads";
 import Sidebar from "./Sidebar";
 import GmapsView from "./gmaps/GmapsView";
 import YoutubeView from "./youtube/YoutubeView";
@@ -151,19 +148,6 @@ export default function LeadGenApp() {
   };
 
   const handleExport = async () => {
-    // # Temporary frontend-only generation path. Return before the pipeline API,
-    // # WebSocket and export-download calls, while keeping real outreach intact.
-    if (TEST_LEADS_ENABLED) {
-      const data = createTestLeads();
-      const blob = new Blob([Papa.unparse(data)], { type: "text/csv;charset=utf-8;" });
-      setExportResults((previous) => ({ ...previous, [formState.exportFormat]: {
-        data, file: { blob, filename: "outreach-test-leads.csv" }, isTestData: true,
-        error: null, success: "Loaded 4 test leads instantly. Company, role and location details are synthetic.",
-        progress: { percent: 100, message: "Test leads ready", status: "completed" },
-      } }));
-      setIsExporting(false);
-      return;
-    }
     setIsExporting(true);
     const format = formState.exportFormat;
     
@@ -171,7 +155,6 @@ export default function LeadGenApp() {
       ...prev,
       [format]: {
         ...prev[format],
-        isTestData: false,
         error: null,
         success: null,
         data: null,
@@ -343,7 +326,6 @@ export default function LeadGenApp() {
             isExporting={isExporting}
             exportData={currentExportState.data || null}
             exportResultFile={currentExportState.file || null}
-            isTestData={Boolean(currentExportState.isTestData)}
             progressState={currentExportState.progress}
             onCancel={handleCancelExport}
             onDownload={() => {
@@ -359,7 +341,7 @@ export default function LeadGenApp() {
   };
 
   return (
-    <OutreachWorkspace theme={isDark ? "dark" : "light"} navigation={
+    <div className="rw-app-container" data-theme={isDark ? "dark" : "light"} style={{ background: "var(--rw-bg)", color: "var(--rw-text)" }}>
       <Header
         onClearAll={() => setShowClearModal(true)}
         activeModule={activeModule}
@@ -368,9 +350,6 @@ export default function LeadGenApp() {
         isDark={isDark}
         onToggleTheme={() => setIsDark(!isDark)}
       />
-    }>
-    <div className="rw-app-container" data-theme={isDark ? "dark" : "light"} style={{ background: "var(--rw-bg)", color: "var(--rw-text)" }}>
-
 
       {/* ── Google Maps Module ─────────────────────────── */}
       <div className="rw-main-layout" style={{ display: activeModule === "gmaps" ? "flex" : "none" }}>
@@ -656,6 +635,5 @@ export default function LeadGenApp() {
         }
       />
     </div>
-    </OutreachWorkspace>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../../lib/AuthContext";
 import RadioCards from "../inputs/RadioCards";
@@ -8,10 +8,6 @@ import ExportBottomSheet from "./ExportBottomSheet";
 import ExportProgress from "../ExportProgress";
 import Toggle from "../inputs/Toggle";
 import { EXPORT_FORMATS } from "../../lib/constants";
-// # Surface the temporary generation override clearly; mailbox APIs remain real.
-import { TEST_LEADS_ENABLED } from "../outreach/testLeads";
-// # Export cards respond to their container, including a resized outreach pane.
-import layout from "./ExportStep.module.css";
 import { ChevronDown, Download, Rocket, FileText, Database, ArrowRight } from "lucide-react";
 
 const sectionVariants = {
@@ -47,7 +43,7 @@ const ShimmerTable = () => (
     {/* Table Header */}
     <div className="flex bg-[var(--rw-surface-hover)]/80 px-4 py-3 border-b border-border gap-4">
       {[1, 2, 3, 4].map(i => (
-        <div key={i} className="h-4 bg-gray-200 rounded animate-pulse" style={{ width: `${14 + (i * 7) % 17}%` }} />
+        <div key={i} className="h-4 bg-gray-200 rounded animate-pulse" style={{ width: `${Math.random() * 20 + 10}%` }} />
       ))}
     </div>
     {/* Table Rows */}
@@ -57,7 +53,7 @@ const ShimmerTable = () => (
           <div 
             key={col} 
             className="h-3.5 bg-gradient-to-r from-gray-100 via-gray-50 to-gray-100 rounded bg-[length:200%_100%] animate-[rw-shimmer_2s_infinite_linear]" 
-            style={{ width: `${12 + (row * 3 + col * 5) % 12}%`, animationDelay: `${(row+col)*0.1}s` }}
+            style={{ width: `${Math.random() * 40 + 20}%`, animationDelay: `${(row+col)*0.1}s` }} 
           />
         ))}
       </div>
@@ -108,23 +104,21 @@ export default function ExportStep({
   progressState,
   onDownload,
   onCancel,
-  isTestData = false,
 }) {
   const { isSuspended } = useAuth();
   const [showPipelineOptions, setShowPipelineOptions] = useState(false);
-  // # New result objects open the sheet immediately; manual close/open belongs
-  // # to that exact result. Deriving this avoids a cascading effect render while
-  // # resizing, and preserves automatic opening on the next generated result.
-  const [sheetState, setSheetState] = useState({ data: null, file: null, open: false });
-  const freshResult = Boolean(exportData || exportResultFile) && (sheetState.data !== exportData || sheetState.file !== exportResultFile);
-  const isSheetOpen = freshResult || sheetState.open;
-  const setIsSheetOpen = (open) => setSheetState({ data: exportData, file: exportResultFile, open });
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+
+  useEffect(() => {
+    if (exportData || exportResultFile) {
+      setIsSheetOpen(true);
+    }
+  }, [exportData, exportResultFile]);
 
   return (
     <motion.div
       initial="hidden"
       animate="visible"
-      className={layout.page}
       variants={{
         hidden: { opacity: 0 },
         visible: {
@@ -133,10 +127,8 @@ export default function ExportStep({
         }
       }}
     >
-      {/* # Make the temporary data source visible before Run, not only in results. */}
-      {TEST_LEADS_ENABLED && <p role="status" className="mb-5 rounded-xl border border-brand-sky/30 bg-brand-sky/10 px-4 py-3 text-sm text-brand-dark">Test leads mode: Run instantly loads four sample leads. Mailbox connections and email sending use the backend.</p>}
-      <div className={layout.layout}>
-        <div className={`${layout.fields} flex flex-col`}>
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-8">
+        <div className="flex flex-col">
           {/* ── Export Format ───────────────────────────────────── */}
           <Card title="Export Format">
             <RadioCards
@@ -151,7 +143,7 @@ export default function ExportStep({
 
           {/* ── Output Settings ─────────────────────────────────── */}
           <Card title="Output Settings">
-            <div className={layout.outputFields}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {formState.exportFormat !== "bundle" && (
                 <div className="rw-field">
                   <label className="text-[13px] font-semibold text-brand-dark block mb-1.5 uppercase tracking-wide">Filename</label>
@@ -253,7 +245,7 @@ export default function ExportStep({
                 exit={{ opacity: 0 }}
                 className="bg-surface rounded-2xl p-6 lg:p-7 border border-border shadow-md mt-4"
               >
-                <div className={layout.loadingLayout}>
+                <div className="flex flex-col md:flex-row gap-8 items-center justify-center">
                   <AnimatedDocumentStack />
                   <div className="flex-1 w-full max-w-lg">
                     <ShimmerTable />
@@ -269,7 +261,6 @@ export default function ExportStep({
             onClose={() => setIsSheetOpen(false)}
             data={exportData}
             exportResultFile={exportResultFile}
-            isTestData={isTestData}
             formState={formState}
             onDownload={onDownload}
           />
@@ -277,8 +268,8 @@ export default function ExportStep({
         </div>
 
         {/* ── Summary & Generate Panel (Sidebar for this step) ── */}
-        <div className={layout.summaryColumn}>
-          <div className={`${layout.summary} bg-surface rounded-2xl p-6 border border-border shadow-md flex flex-col gap-6`}>
+        <div className="w-full">
+          <div className="sticky top-24 bg-surface rounded-2xl p-6 border border-border shadow-md flex flex-col gap-6">
             <div className="flex items-center gap-2">
               <FileText className="w-4 h-4 text-brand-sky" />
               <h3 className="text-xs uppercase tracking-widest text-brand-blue font-semibold">Export Summary</h3>

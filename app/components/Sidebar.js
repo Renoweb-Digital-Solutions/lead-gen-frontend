@@ -143,10 +143,6 @@ export default function Sidebar({
               <button
                 type="button"
                 onClick={() => onStepChange(index)}
-                // # Preserve accessible names/tooltips when pane container rules
-                // # collapse the step labels into an icon-only navigation rail.
-                aria-label={step.label}
-                title={step.label}
                 className={`group relative flex items-start gap-4 py-3 w-full text-left transition-all duration-300 ${isActive ? "scale-105 origin-left" : ""}`}
               >
                 {/* Step Icon/Indicator */}
@@ -171,7 +167,7 @@ export default function Sidebar({
                 </div>
 
                 {/* Step Text */}
-                <div className="rw-step-label flex min-w-0 flex-col pt-1.5">
+                <div className="flex flex-col pt-1.5">
                   <span 
                     className={`text-[15px] font-bold tracking-wide transition-colors duration-200 ${
                       isActive ? (isDark ? "text-[#60A5FA]" : "text-brand-blue") : isCompleted ? (isDark ? "text-[#FFFFFF]" : "text-brand-dark") : (isDark ? "text-[#E2E8F0]" : "text-gray-400 group-hover:text-gray-600")
