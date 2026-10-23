@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Lock, User, ArrowRight, Loader2, ShieldCheck } from "lucide-react";
-import { apiAdminLogin } from "../../lib/api";
+import { apiAdminLogin, apiRequestLoginOtp, apiResendChallenge } from "../../lib/api";
+import { useAuth } from "../../lib/AuthContext";
 import { useSessionState } from "../../hooks/useSessionState";
 import ThemeToggle from "../../components/ThemeToggle";
 
@@ -13,6 +14,10 @@ export default function AdminLogin() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  // # Admin authentication shares the OTP gate; passwords alone never issue JWTs.
+  const [challenge, setChallenge] = useState(null);
+  const [otp, setOtp] = useState("");
+  const { acceptVerifiedSession } = useAuth();
   const router = useRouter();
 
   const handleSubmit = async (e) => {
@@ -21,9 +26,13 @@ export default function AdminLogin() {
     setError("");
 
     try {
-      const data = await apiAdminLogin(email, password);
-      // Store the admin token
-      localStorage.setItem("renoweb_jwt", data.access_token);
+      if (!challenge) {
+        setChallenge(await apiRequestLoginOtp(email, password));
+        setPassword("");
+        return;
+      }
+      const data = await apiAdminLogin(challenge, otp);
+      acceptVerifiedSession(data);
       router.push("/admin");
     } catch (err) {
       setError(err.message || "Failed to authenticate.");
@@ -59,6 +68,20 @@ export default function AdminLogin() {
           )}
 
           <form className="space-y-6" onSubmit={handleSubmit}>
+            {challenge ? (
+              <div>
+                <p className="text-sm mb-4">Enter the code sent to {challenge.email}.</p>
+                <label htmlFor="admin-otp" className="text-sm font-semibold">Verification code</label>
+                <input id="admin-otp" autoFocus autoComplete="one-time-code" inputMode="numeric" pattern="[0-9]{6}" maxLength={6} required value={otp} onChange={(event) => setOtp(event.target.value.replace(/\D/g, "").slice(0, 6))} className="mt-2 w-full p-3 border border-gray-200 rounded-xl" />
+                <button type="button" disabled={loading} className="text-sm text-blue-600 mt-3" onClick={async () => {
+                  setLoading(true); setError("");
+                  try { await apiResendChallenge(challenge); setOtp(""); }
+                  catch (err) { setError(err.message); }
+                  finally { setLoading(false); }
+                }}>Resend code</button>
+                <button type="button" disabled={loading} className="text-sm ml-4 text-gray-500" onClick={() => { setChallenge(null); setOtp(""); setError(""); }}>Use another account</button>
+              </div>
+            ) : <>
             <div>
               <label className="text-[13px] font-bold text-[var(--rw-text)] block mb-1.5 uppercase tracking-wide">
                 Admin Username or Email
@@ -97,6 +120,7 @@ export default function AdminLogin() {
               </div>
             </div>
 
+            </>}
             <button
               type="submit"
               disabled={loading}
@@ -106,7 +130,7 @@ export default function AdminLogin() {
                 <Loader2 className="w-5 h-5 animate-spin" />
               ) : (
                 <>
-                  Secure Login
+                  {challenge ? "Verify & Sign In" : "Send Verification Code"}
                   <ArrowRight className="w-5 h-5" />
                 </>
               )}

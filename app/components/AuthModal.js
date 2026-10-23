@@ -1,13 +1,22 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { createPortal } from "react-dom";
+import { motion } from "framer-motion";
 import { Mail, Lock, User, ArrowRight, Loader2, Target, Briefcase, Zap, X, KeyRound, CheckCircle, Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../lib/AuthContext";
-import { apiForgotPassword, apiVerifyOtp, apiResetPassword } from "../lib/api";
+import { apiForgotPassword, apiVerifyOtp, apiResetPassword, apiResendChallenge } from "../lib/api";
 
+import GoogleAuthButton from "./GoogleAuthButton";
+
+// # Unmounting the form clears OTPs, password inputs and popup state on every close.
 export default function AuthModal({ isOpen, onClose }) {
+  // # Escape page/header stacking contexts so navigation cannot paint over the dialog.
+  return isOpen && typeof document !== "undefined" ? createPortal(<AuthModalContent onClose={onClose} />, document.body) : null;
+}
+
+function AuthModalContent({ onClose }) {
   const [viewMode, setViewMode] = useState("login"); // 'login', 'signup', 'forgot-password', 'verify-otp', 'reset-password'
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -23,23 +32,27 @@ export default function AuthModal({ isOpen, onClose }) {
   const [successMsg, setSuccessMsg] = useState("");
   const router = useRouter();
 
-  const { login, signup, requestLoginOtp, verifyLoginOtp } = useAuth();
-
-  useEffect(() => {
-    if (!isOpen) {
-      setError("");
-      setSuccessMsg("");
-      setUsername("");
-      setEmail("");
-      setPassword("");
-      setOtp("");
-      setNewPassword("");
-      setViewMode("login");
-      setResendTimer(0);
-      setShowPassword(false);
-      setShowNewPassword(false);
-    }
-  }, [isOpen]);
+  // # Challenges are memory-only and cannot create a session before OTP succeeds.
+  const [challenge, setChallenge] = useState(null);
+  const [googleBusy, setGoogleBusy] = useState(false);
+  const { signup, requestLoginOtp, verifyLoginOtp } = useAuth();
+  const beginVerification = (result) => {
+    setChallenge(result);
+    setUsername(result.suggested_username || username);
+    setPassword("");
+    setOtp("");
+    setError("");
+    setSuccessMsg(`Verification code sent to ${result.email}.`);
+    setViewMode("verify-login-otp");
+    setResendTimer(result.resend_after || 60);
+  };
+  const handleGoogleError = (err) => {
+    setError(err.message);
+    setSuccessMsg("");
+    if (err.email) setEmail(err.email);
+    if (err.code === "ACCOUNT_EXISTS") setViewMode("login");
+    if (err.code === "ACCOUNT_NOT_FOUND") setViewMode("signup");
+  };
 
   useEffect(() => {
     let interval;
@@ -51,8 +64,6 @@ export default function AuthModal({ isOpen, onClose }) {
     return () => clearInterval(interval);
   }, [viewMode, resendTimer]);
 
-  if (!isOpen) return null;
-
   const handleResendOtp = async () => {
     if (resendTimer > 0) return;
     setLoading(true);
@@ -60,7 +71,7 @@ export default function AuthModal({ isOpen, onClose }) {
     setSuccessMsg("");
     try {
       if (viewMode === "verify-login-otp") {
-        const res = await requestLoginOtp(email, password);
+        const res = await apiResendChallenge(challenge);
         setSuccessMsg(res.message || "OTP resent to your email.");
       } else {
         const res = await apiForgotPassword(email);
@@ -83,19 +94,14 @@ export default function AuthModal({ isOpen, onClose }) {
     try {
       if (viewMode === "login") {
         const res = await requestLoginOtp(email, password);
-        setSuccessMsg(res.message || "OTP sent to your email.");
-        setViewMode("verify-login-otp");
-        setResendTimer(60);
+        beginVerification(res);
       } else if (viewMode === "verify-login-otp") {
-        await verifyLoginOtp(email, password, otp);
+        await verifyLoginOtp(challenge, otp, challenge.needs_username ? username : undefined);
         onClose();
         router.push("/dashboard");
       } else if (viewMode === "signup") {
-        await signup(username, email, password);
-        // After signup, we log them in or just show success? The original code logged them in or pushed to dashboard.
-        // wait, the original code did: await signup(); onClose(); router.push("/dashboard");
-        onClose();
-        router.push("/dashboard");
+        const result = await signup(username, email, password);
+        beginVerification(result);
       } else if (viewMode === "forgot-password") {
         const res = await apiForgotPassword(email);
         setSuccessMsg(res.message || "OTP sent to your email.");
@@ -128,7 +134,7 @@ export default function AuthModal({ isOpen, onClose }) {
       case "signup": return "Create Account";
       case "forgot-password": return "Reset Password";
       case "verify-otp": return "Enter OTP";
-      case "verify-login-otp": return "2FA Verification";
+      case "verify-login-otp": return challenge?.needs_username ? "Make It Yours" : "Check Your Email";
       case "reset-password": return "New Password";
       default: return "Welcome";
     }
@@ -140,26 +146,27 @@ export default function AuthModal({ isOpen, onClose }) {
       case "signup": return "Sign up to start generating premium leads.";
       case "forgot-password": return "Enter your email to receive a recovery OTP.";
       case "verify-otp": return "Check your email for the 6-digit OTP.";
-      case "verify-login-otp": return "Check your email for the login verification OTP.";
+      case "verify-login-otp": return challenge?.needs_username ? "Choose your username and enter the verification code to finish signing up." : challenge?.intent === "signup" ? "Verify your email to finish creating your account." : "Enter the six-digit code to securely finish signing in.";
       case "reset-password": return "Create a strong new password.";
       default: return "";
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div role="dialog" aria-modal="true" aria-label="Account authentication" className="fixed inset-0 z-[10000] isolate flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
         transition={{ type: "spring", damping: 25, stiffness: 300 }}
-        className="relative w-full max-w-4xl bg-surface rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-[550px]"
+        className="relative w-full max-w-4xl bg-surface rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-[550px] max-h-[92dvh]"
       >
         {/* Left Side: Form */}
-        <div className="w-full md:w-1/2 p-10 lg:p-12 flex flex-col justify-center relative">
+        <div className="w-full md:w-1/2 p-7 sm:p-10 lg:p-12 flex flex-col relative overflow-y-auto">
           
           <button
             onClick={onClose}
+            aria-label="Close authentication"
             className="absolute top-6 right-6 p-2 text-gray-400 hover:text-gray-600 hover:bg-[var(--rw-border)] rounded-full transition-colors"
           >
             <X className="w-5 h-5" />
@@ -181,20 +188,25 @@ export default function AuthModal({ isOpen, onClose }) {
             </p>
 
             {error && (
-              <div className="mb-6 p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl font-medium">
+              <div role="alert" className="mb-6 p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl font-medium">
                 {error}
               </div>
             )}
             {successMsg && (
-              <div className="mb-6 p-3 bg-green-50 border border-green-200 text-green-600 text-sm rounded-xl font-medium flex items-center gap-2">
+              <div role="status" className="mb-6 p-3 bg-green-50 border border-green-200 text-green-600 text-sm rounded-xl font-medium flex items-center gap-2">
                 <CheckCircle className="w-4 h-4" />
                 {successMsg}
               </div>
             )}
 
+            {(viewMode === "login" || viewMode === "signup") && (
+              <GoogleAuthButton intent={viewMode === "signup" ? "signup" : "signin"} disabled={loading || googleBusy}
+                onVerified={beginVerification} onError={handleGoogleError} onBusyChange={setGoogleBusy} />
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-5">
               
-              {viewMode === "signup" && (
+              {(viewMode === "signup" || (viewMode === "verify-login-otp" && challenge?.needs_username)) && (
                 <div>
                   <label className="text-[13px] font-bold text-[#191919] block mb-1.5 uppercase tracking-wide">
                     Username
@@ -207,6 +219,10 @@ export default function AuthModal({ isOpen, onClose }) {
                       type="text"
                       required
                       className="w-full pl-10 pr-4 py-3 bg-[var(--rw-surface-hover)] border border-border rounded-xl focus:bg-surface focus:outline-none focus:border-[#4ec8ef] focus:ring-4 focus:ring-[#4ec8ef]/10 transition-all font-medium text-[#191919]"
+                      minLength={3}
+                      maxLength={40}
+                      pattern="[A-Za-z0-9_.-]+"
+                      autoComplete="username"
                       placeholder="johndoe"
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
@@ -266,6 +282,7 @@ export default function AuthModal({ isOpen, onClose }) {
                     {viewMode === "login" && (
                       <button
                         type="button"
+                        disabled={loading || googleBusy}
                         onClick={() => {
                           setViewMode("forgot-password");
                           setError("");
@@ -324,9 +341,14 @@ export default function AuthModal({ isOpen, onClose }) {
                       type="text"
                       required
                       className="w-full pl-10 pr-4 py-3 bg-[var(--rw-surface-hover)] border border-border rounded-xl focus:bg-surface focus:outline-none focus:border-[#4ec8ef] focus:ring-4 focus:ring-[#4ec8ef]/10 transition-all font-medium text-[#191919]"
+                      inputMode="numeric"
+                      autoComplete="one-time-code"
+                      maxLength={6}
+                      pattern="[0-9]{6}"
+                      autoFocus
                       placeholder="123456"
                       value={otp}
-                      onChange={(e) => setOtp(e.target.value)}
+                      onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
                     />
                   </div>
                 </div>
@@ -363,7 +385,7 @@ export default function AuthModal({ isOpen, onClose }) {
 
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || googleBusy}
                 className="w-full mt-2 py-3.5 px-6 bg-gradient-to-r from-[#023dbb] to-[#4460ef] hover:from-[#4460ef] hover:to-[#308fef] text-white rounded-xl font-bold text-[15px] tracking-wide flex items-center justify-center gap-2 shadow-[0_4px_14px_rgba(2,61,187,0.3)] hover:shadow-[0_6px_20px_rgba(48,143,239,0.4)] hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-70 disabled:pointer-events-none"
               >
                 {loading ? (
@@ -374,7 +396,7 @@ export default function AuthModal({ isOpen, onClose }) {
                     {viewMode === "signup" && "Create Account"}
                     {viewMode === "forgot-password" && "Send OTP"}
                     {viewMode === "verify-otp" && "Verify OTP"}
-                    {viewMode === "verify-login-otp" && "Verify & Login"}
+                    {viewMode === "verify-login-otp" && (challenge?.intent === "signup" ? "Verify & Create Account" : "Verify & Continue")}
                     {viewMode === "reset-password" && "Reset Password"}
                     <ArrowRight className="w-5 h-5" />
                   </>
@@ -387,6 +409,8 @@ export default function AuthModal({ isOpen, onClose }) {
                 <button
                   type="button"
                   onClick={() => {
+                    setChallenge(null);
+                    setOtp("");
                     setViewMode(viewMode === "login" ? "signup" : "login");
                     setError("");
                     setSuccessMsg("");
@@ -398,6 +422,7 @@ export default function AuthModal({ isOpen, onClose }) {
               ) : (
                 <button
                   type="button"
+                  disabled={loading || googleBusy}
                   onClick={() => {
                     setViewMode("login");
                     setError("");

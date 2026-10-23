@@ -48,88 +48,39 @@ export async function adminEmailApi(path = "/studio", data, method = "POST") {
   return res.json();
 }
 
-export async function apiLogin(email, password) {
-  const res = await fetch(`${BASE_URL}/auth/token`, {
+// # Identity requests deliberately omit outreach authorization and stored JWTs.
+// # Errors retain machine-readable account-switch hints while displaying plain text.
+export async function identityApi(path, body, form = false, signal) {
+  const res = await fetch(`${BASE_URL}/auth${path}`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    // FastAPI OAuth2PasswordRequestForm requires form data
-    body: new URLSearchParams({
-      username: email,
-      password: password,
-    }),
+    headers: { "Content-Type": form ? "application/x-www-form-urlencoded" : "application/json" },
+    body: form ? new URLSearchParams(body) : JSON.stringify(body),
+    cache: "no-store",
+    // # Popup cancellation aborts pending status/exchange calls as well as UI timers.
+    signal,
   });
+  const payload = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const text = await res.text();
-    let errorDetail = text;
-    try {
-      const errData = JSON.parse(text);
-      errorDetail = errData.detail || text;
-    } catch (e) {}
-    throw new Error(errorDetail);
+    const detail = payload.detail;
+    const error = new Error(typeof detail === "string" ? detail : detail?.message || "We could not complete authentication. Please try again.");
+    error.code = detail?.code;
+    error.email = detail?.email;
+    error.status = res.status;
+    throw error;
   }
-  return res.json();
+  return payload;
 }
 
-export async function apiRequestLoginOtp(email, password) {
-  const res = await fetch(`${BASE_URL}/auth/request-login-otp`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: new URLSearchParams({
-      username: email,
-      password: password,
-    }),
-  });
-  if (!res.ok) {
-    const text = await res.text();
-    let errorDetail = text;
-    try {
-      const errData = JSON.parse(text);
-      errorDetail = errData.detail || text;
-    } catch (e) {}
-    throw new Error(errorDetail);
-  }
-  return res.json();
-}
-
-export async function apiVerifyLoginOtp(email, password, otp) {
-  const res = await fetch(`${BASE_URL}/auth/verify-login-otp`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username: email, password, otp }),
-  });
-  if (!res.ok) {
-    const text = await res.text();
-    let errorDetail = text;
-    try {
-      const errData = JSON.parse(text);
-      errorDetail = errData.detail || text;
-    } catch (e) {}
-    throw new Error(errorDetail);
-  }
-  return res.json();
-}
-
-export async function apiSignup(username, email, password) {
-  const res = await fetch(`${BASE_URL}/auth/create-user`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, email, password }),
-  });
-  if (!res.ok) {
-    const text = await res.text();
-    let errorDetail = text;
-    try {
-      const errData = JSON.parse(text);
-      errorDetail = errData.detail || text;
-    } catch (e) {}
-    throw new Error(errorDetail);
-  }
-  return res.json();
-}
+// # Starting login returns an OTP challenge, never a session token.
+export const apiRequestLoginOtp = (username, password) => identityApi("/request-login-otp", { username, password }, true);
+export const apiLogin = apiRequestLoginOtp;
+export const apiSignup = (username, email, password) => identityApi("/create-user", { username, email, password });
+export const apiVerifyLoginOtp = (challenge, otp, username) => identityApi("/verify-challenge", {
+  challenge_id: challenge.challenge_id, browser_secret: challenge.browser_secret, otp, username,
+});
+export const apiResendChallenge = (challenge) => identityApi("/resend-challenge", {
+  challenge_id: challenge.challenge_id, browser_secret: challenge.browser_secret,
+});
 
 export async function apiForgotPassword(email) {
   const res = await fetch(`${BASE_URL}/auth/forgot-password`, {
@@ -601,28 +552,12 @@ export async function fetchB2BLeads(params, signal) {
 // ADMIN DASHBOARD API FUNCTIONS
 // ═══════════════════════════════════════════════════════════
 
-export async function apiAdminLogin(email, password) {
-  // Uses the same login endpoint but we will check the is_admin flag
-  const data = await apiLogin(email, password);
-  
-  // To check if they are an admin, we can decode the JWT payload
-  // The token structure is header.payload.signature
-  try {
-    const payloadBase64 = data.access_token.split('.')[1];
-    const decodedJson = atob(payloadBase64);
-    const decoded = JSON.parse(decodedJson);
-    
-    if (!decoded.is_admin) {
-      throw new Error("Unauthorized. Only administrators can access this portal.");
-    }
-  } catch (e) {
-    if (e.message.includes("Unauthorized")) {
-      throw e;
-    }
-    // If decoding fails for some reason, we assume it's invalid
-    throw new Error("Invalid token format received.");
-  }
-  
+// # Admin login uses the same OTP gate. Backend admin dependencies remain authoritative.
+export async function apiAdminLogin(challenge, otp) {
+  const data = await apiVerifyLoginOtp(challenge, otp);
+  const encoded = data.access_token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+  const decoded = JSON.parse(atob(encoded));
+  if (!decoded.is_admin) throw new Error("Only administrators can access this portal.");
   return data;
 }
 

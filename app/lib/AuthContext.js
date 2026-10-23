@@ -1,89 +1,63 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect } from "react";
-import { apiLogin, apiSignup } from "./api";
+import { createContext, useContext, useSyncExternalStore } from "react";
+import { apiSignup, apiRequestLoginOtp, apiVerifyLoginOtp } from "./api";
 
 const AuthContext = createContext();
+const SESSION_EVENT = "simpleads:session-changed";
+
+function decode(token) {
+  // # Decode only for UI display; protected backend endpoints verify the signature.
+  try {
+    const base64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+    return JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(base64), (value) => value.charCodeAt(0))));
+  } catch { return null; }
+}
+
+function subscribe(listener) {
+  // # Synchronize this tab and other tabs without effect-driven hydration writes.
+  window.addEventListener("storage", listener);
+  window.addEventListener(SESSION_EVENT, listener);
+  return () => {
+    window.removeEventListener("storage", listener);
+    window.removeEventListener(SESSION_EVENT, listener);
+  };
+}
+
+function readToken() {
+  const token = localStorage.getItem("renoweb_jwt");
+  const payload = token && decode(token);
+  return payload?.exp * 1000 > Date.now() ? token : null;
+}
+
+const serverToken = () => null;
+const hydrated = () => false;
+const serverHydrating = () => true;
 
 export function AuthProvider({ children }) {
-  const [token, setToken] = useState(null);
-  const [isInitializing, setIsInitializing] = useState(true);
-  const [isSuspended, setIsSuspended] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const token = useSyncExternalStore(subscribe, readToken, serverToken);
+  const isInitializing = useSyncExternalStore(subscribe, hydrated, serverHydrating);
+  const payload = token ? decode(token) : null;
 
-  useEffect(() => {
-    const storedToken = localStorage.getItem("renoweb_jwt");
-    if (storedToken && storedToken !== "undefined") {
-      try {
-        const payloadBase64 = storedToken.split('.')[1];
-        const decoded = JSON.parse(atob(payloadBase64));
-        if (decoded.exp && decoded.exp * 1000 < Date.now()) {
-          localStorage.removeItem("renoweb_jwt");
-          setToken(null);
-        } else {
-          setToken(storedToken);
-          setIsSuspended(!!decoded.is_suspended);
-          setIsAdmin(!!decoded.is_admin);
-        }
-      } catch (e) {
-        localStorage.removeItem("renoweb_jwt");
-        setToken(null);
-      }
-    }
-    setIsInitializing(false);
-  }, []);
-
-  const setAuthFromToken = (data) => {
-    setToken(data.access_token);
+  const acceptVerifiedSession = (data) => {
+    // # Only OTP verification supplies a session; starting a challenge cannot log in.
+    if (!data?.access_token || !decode(data.access_token)) throw new Error("Invalid authentication session.");
     localStorage.setItem("renoweb_jwt", data.access_token);
-    try {
-      const payloadBase64 = data.access_token.split('.')[1];
-      const decoded = JSON.parse(atob(payloadBase64));
-      setIsSuspended(!!decoded.is_suspended);
-      setIsAdmin(!!decoded.is_admin);
-    } catch (e) {}
+    window.dispatchEvent(new Event(SESSION_EVENT));
   };
-
-  const login = async (username, password) => {
-    const data = await apiLogin(username, password);
-    setAuthFromToken(data);
+  const verifyLoginOtp = async (challenge, otp, username) => {
+    const data = await apiVerifyLoginOtp(challenge, otp, username);
+    acceptVerifiedSession(data);
+    return data;
   };
-
-  const requestLoginOtp = async (username, password) => {
-    // This is just a pass-through to apiRequestLoginOtp in api.js
-    // Wait, I need to import it at the top of the file!
-    const { apiRequestLoginOtp } = await import('./api');
-    return await apiRequestLoginOtp(username, password);
-  };
-
-  const verifyLoginOtp = async (username, password, otp) => {
-    const { apiVerifyLoginOtp } = await import('./api');
-    const data = await apiVerifyLoginOtp(username, password, otp);
-    setAuthFromToken(data);
-  };
-
-  const signup = async (username, email, password) => {
-    const data = await apiSignup(username, email, password);
-    if (data && data.access_token) {
-      setAuthFromToken(data);
-    } else {
-      // If backend only creates user and doesn't return a token, log them in immediately
-      await login(username, password); // We can login with username now
-    }
-  };
-
   const logout = () => {
-    setToken(null);
-    setIsSuspended(false);
-    setIsAdmin(false);
     localStorage.removeItem("renoweb_jwt");
+    window.dispatchEvent(new Event(SESSION_EVENT));
   };
 
-  return (
-    <AuthContext.Provider value={{ token, isInitializing, isSuspended, isAdmin, login, requestLoginOtp, verifyLoginOtp, signup, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={{ token, isInitializing, isSuspended: !!payload?.is_suspended, isAdmin: !!payload?.is_admin,
+    login: apiRequestLoginOtp, requestLoginOtp: apiRequestLoginOtp, verifyLoginOtp,
+    signup: apiSignup, logout, acceptVerifiedSession }}>{children}</AuthContext.Provider>;
 }
 
 export const useAuth = () => useContext(AuthContext);
