@@ -3,6 +3,7 @@
 import { useCallback } from "react";
 import { useSessionState } from "./useSessionState";
 import { DEFAULT_FORM_STATE } from "../lib/constants";
+import { trackLeadgenChange } from "../lib/interactionAnalytics";
 
 const STORAGE_KEY = "renoweb-leadgen-form";
 
@@ -33,6 +34,8 @@ export function useFormState() {
   /** Update a single field */
   const updateField = useCallback(
     (field, value) => {
+      // # Tracking is fire-and-forget and does not alter the persisted form value.
+      trackLeadgenChange(field, value);
       setFormState((prev) => ({ ...prev, [field]: value }));
     },
     [setFormState]
@@ -41,6 +44,8 @@ export function useFormState() {
   /** Update multiple fields at once */
   const updateFields = useCallback(
     (updates) => {
+      // # Only explicitly approved settings are inspected by the analytics helper.
+      Object.entries(updates).forEach(([field, value]) => trackLeadgenChange(field, value));
       setFormState((prev) => ({ ...prev, ...updates }));
     },
     [setFormState]

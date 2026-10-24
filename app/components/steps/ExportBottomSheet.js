@@ -1,4 +1,5 @@
 "use client";
+// # Header visibility records results exposure without inspecting table contents.
 
 import { useEffect, useState } from "react";
 import { useSpring, animated } from "@react-spring/web";
@@ -110,7 +111,7 @@ export default function ExportBottomSheet({
         {/* Header */}
         <div className="px-8 pb-4 border-b border-brand-blue/5 flex items-center justify-between shrink-0">
           <div>
-            <h2 className="text-2xl font-bold font-display text-brand-dark leading-tight">
+            <h2 data-analytics-section={isOpen ? "results" : undefined} className="text-2xl font-bold font-display text-brand-dark leading-tight">
               {formState.exportFormat === "bundle" ? "Bundle Export Ready" : `Preview: ${formatLabel}`}
             </h2>
           </div>
@@ -120,7 +121,7 @@ export default function ExportBottomSheet({
               <button
                 type="button"
                 className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-brand-blue to-brand-sky text-white rounded-xl font-bold text-[13px] hover:shadow-lg hover:shadow-brand-sky/20 transition-all duration-300"
-                onClick={onDownload}
+                data-analytics-action="export_results" onClick={onDownload}
               >
                 <Download className="w-4 h-4" />
                 Download {exportResultFile.filename}

@@ -1,5 +1,8 @@
 "use client";
 
+// # Analytics metadata is allowlisted; search text and result contents are never captured.
+import { trackInteraction } from "../../lib/interactionAnalytics";
+
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Loader2, Building, MapPin, Download, BookOpen, ExternalLink, Phone, Mail, X, Globe, ChevronDown, Check, CheckCircle2, AlertCircle, Info } from "lucide-react";
@@ -137,6 +140,8 @@ export default function B2BView() {
       return;
     }
 
+    // # Track validated submission without awaiting analytics or changing pipeline inputs.
+    trackInteraction("run_submitted", "b2b", { settings: { directory, result_limit: Number(maxResults), ...(isEuropages ? { countries, enrich_emails: enrichEmails } : {}) } });
     setIsSearching(true);
     setErrorMsg(null);
     setSuccessMsg(null);
@@ -325,7 +330,7 @@ export default function B2BView() {
       </AnimatePresence>
 
       {resultData?.length === 0 && resultCsv !== null && !isSearching && (
-        <button type="button" onClick={handleExportCsv} className="mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-border text-sm text-brand-dark">
+        <button type="button" data-analytics-action="export_csv" onClick={handleExportCsv} className="mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-border text-sm text-brand-dark">
           <Download className="w-4 h-4" /> Download empty CSV
         </button>
       )}
@@ -355,7 +360,7 @@ export default function B2BView() {
               const Icon = dir.icon;
               return (
                 <button
-                  key={dir.id}
+                  data-analytics-control="directory" data-analytics-value={dir.id} key={dir.id}
                   type="button"
                   onClick={() => {
                     setDirectory(dir.id);
@@ -451,7 +456,7 @@ export default function B2BView() {
                         <label key={code} className="flex items-center gap-2 py-2 text-sm text-brand-dark cursor-pointer">
                           <input
                             type="checkbox"
-                            checked={countries.includes(code)}
+                            data-analytics-control="countries" data-analytics-value={code} checked={countries.includes(code)}
                             onChange={e => setCountries(e.target.checked ? [...countries, code] : countries.filter(c => c !== code))}
                           />
                           {name}
@@ -468,7 +473,7 @@ export default function B2BView() {
                   <button
                     key={code}
                     type="button"
-                    onClick={() => setCountries(countries.filter(c => c !== code))}
+                    data-analytics-control="countries" data-analytics-value={`${code}_removed`} onClick={() => setCountries(countries.filter(c => c !== code))}
                     aria-label={`Remove ${EUROPAGES_COUNTRIES[code]}`}
                     className={`${styles.countryChip} inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs transition-colors`}
                   >
@@ -503,7 +508,7 @@ export default function B2BView() {
             <label className="text-[13px] font-semibold text-brand-dark block mb-1.5 uppercase tracking-wide">
               Max Results
             </label>
-            <input
+            <input data-analytics-control="result_limit"
               type="number"
               className="w-full px-4 py-2.5 text-sm bg-surface border border-border rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all hover:border-indigo-500/40 text-brand-dark font-medium"
               value={maxResults}
@@ -517,7 +522,7 @@ export default function B2BView() {
         {!validMaxResults && <p className="mb-3 text-xs text-amber-700">Max Results must be a whole number from 1 to 100.</p>}
         {isEuropages && (
           <label className="flex items-center gap-2 text-sm text-brand-dark mb-6 cursor-pointer">
-            <input type="checkbox" checked={enrichEmails} onChange={e => setEnrichEmails(e.target.checked)} />
+            <input data-analytics-control="enrich_emails" type="checkbox" checked={enrichEmails} onChange={e => setEnrichEmails(e.target.checked)} />
             Find emails (extra cost, slower)
           </label>
         )}
@@ -526,7 +531,7 @@ export default function B2BView() {
           {isSearching && (
             <motion.button
               type="button"
-              onClick={handleAbort}
+              data-analytics-action="cancel_search" onClick={handleAbort}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               className="px-6 py-3.5 rounded-xl text-white font-bold text-[15px] tracking-wide flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 shadow-md transition-all duration-300"
@@ -537,7 +542,7 @@ export default function B2BView() {
           )}
           <motion.button
             type="button"
-            onClick={handleSearch}
+            data-analytics-action="start_search" onClick={handleSearch}
             disabled={isSearching || isSuspended || !canExtract}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}

@@ -12,6 +12,7 @@ export default function SliderInput({
   max = 5000,
   step = 10,
   formatValue,
+  analyticsControl,
 }) {
   const trackRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -79,7 +80,8 @@ export default function SliderInput({
   };
 
   return (
-    <div className="rw-field mb-6">
+    // # Optional passive metadata exposes only this slider's numeric value.
+    <div data-analytics-slider={analyticsControl ? "true" : undefined} data-analytics-control={analyticsControl} data-analytics-value={analyticsControl ? value : undefined} className="rw-field mb-6">
       <div className="flex flex-col md:flex-row md:justify-between md:items-baseline gap-3 md:gap-0 mb-4">
         <label className="text-[13px] font-semibold text-brand-dark block uppercase tracking-wide m-0">
           {label}
@@ -93,7 +95,7 @@ export default function SliderInput({
           >
             -
           </button>
-          <input
+          <input data-analytics-control={analyticsControl}
             type="number"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}

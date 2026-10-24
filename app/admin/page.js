@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation";
 import { useSessionState } from "../hooks/useSessionState";
 import ThemeToggle from "../components/ThemeToggle";
 import EmailStudio from "./EmailStudio";
-import { fetchAdminUsersAndRuns, fetchAnalyticsSummary, apiSuspendUser, apiUnsuspendUser } from "../lib/api";
+import BehaviourDashboard from "./BehaviourDashboard";
+import { fetchAdminUsersAndRuns, apiSuspendUser, apiUnsuspendUser } from "../lib/api";
 import { LogOut, Users, Activity, CheckCircle, XCircle, AlertCircle, Calendar, ChevronDown, ChevronUp, MessageSquare, RefreshCw, BarChart3, Ban, Unlock, Mail } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 function UserRow({ user, onSuspendClick, onUnsuspendClick, onEmailClick }) {
   const [expanded, setExpanded] = useState(false);
@@ -143,7 +143,6 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("users"); // "users", "tickets", "analytics"
   const [users, setUsers] = useState([]);
   const [tickets, setTickets] = useState([]);
-  const [analytics, setAnalytics] = useState({ total_visitors: 0, top_events: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [refreshing, setRefreshing] = useState(false);
@@ -177,16 +176,14 @@ export default function AdminDashboard() {
         return;
       }
 
-      const [usersData, ticketsData, analyticsData] = await Promise.all([
+      const [usersData, ticketsData] = await Promise.all([
         fetchAdminUsersAndRuns(),
-        import("../lib/api").then(api => api.fetchAdminTickets()),
-        fetchAnalyticsSummary().catch(() => ({ total_visitors: 0, top_events: [] }))
+        import("../lib/api").then(api => api.fetchAdminTickets())
       ]);
       
       setUsers(usersData.users || []);
       setError("");
       setTickets(ticketsData.tickets || []);
-      setAnalytics(analyticsData || { total_visitors: 0, top_events: [] });
     } catch (err) {
       setError(err.message || "Failed to load dashboard data");
       if (err.message.toLowerCase().includes("unauthorized") || err.message.toLowerCase().includes("forbidden")) {
@@ -329,7 +326,7 @@ export default function AdminDashboard() {
               {activeTab === "users" ? (
                 <><Activity className="w-7 h-7 mr-3 text-[#308fef]" /> Platform Activity</>
               ) : activeTab === "analytics" ? (
-                <><BarChart3 className="w-7 h-7 mr-3 text-[#308fef]" /> Analytics Dashboard</>
+                <><BarChart3 className="w-7 h-7 mr-3 text-[#308fef]" /> User Behaviour</>
               ) : (
                 <><MessageSquare className="w-7 h-7 mr-3 text-[#308fef]" /> Support Tickets</>
               )}
@@ -338,7 +335,7 @@ export default function AdminDashboard() {
               {activeTab === "users" 
                 ? "Monitor user accounts and their lead generation runs across all tools."
                 : activeTab === "analytics"
-                ? "View platform usage, top events, and unique visitor counts."
+                ? "Understand which modules customers use and the choices they make."
                 : "Review and manage user feedback and error reports."
               }
             </p>
@@ -458,43 +455,9 @@ export default function AdminDashboard() {
               </div>
             )}
 
-            {activeTab === "analytics" && (
-              <div className="p-6">
-                <div className="mb-6 bg-[var(--rw-surface-hover)] rounded-xl p-6 border border-[#308fef]/20">
-                  <h3 className="text-sm font-semibold text-[var(--rw-deep-blue)] uppercase tracking-wider mb-2">Total Unique Visitors</h3>
-                  <div className="text-4xl font-black text-gray-900">{analytics.total_visitors}</div>
-                  <p className="text-sm text-gray-500 mt-1">Based on unique device IDs</p>
-                </div>
+            {/* # Behaviour reports own their loading/errors and cannot block user administration. */}
+            {activeTab === "analytics" && <BehaviourDashboard refreshKey={refreshing} />}
 
-                <div className="bg-[var(--rw-surface)] border border-gray-100 rounded-xl p-6 shadow-sm">
-                  <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center">
-                    <Activity className="w-5 h-5 mr-2 text-[#308fef]" />
-                    Top Events
-                  </h3>
-                  
-                  {analytics.top_events.length === 0 ? (
-                    <div className="text-center py-10 text-gray-500 font-medium">
-                      No analytics data collected yet.
-                    </div>
-                  ) : (
-                    <div className="h-80 w-full">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={analytics.top_events} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                          <XAxis type="number" stroke="var(--rw-text-secondary)" />
-                          <YAxis dataKey="name" type="category" width={150} tick={{fontSize: 12, fill: "var(--rw-text-secondary)"}} stroke="var(--rw-text-secondary)" />
-                          <Tooltip 
-                            contentStyle={{ background: 'var(--rw-surface)', color: 'var(--rw-text)', borderRadius: '8px', border: '1px solid var(--rw-border)', boxShadow: 'var(--rw-shadow-md)' }}
-                            itemStyle={{ color: 'var(--rw-bright-blue)' }}
-                            cursor={{ fill: 'rgba(48, 143, 239, 0.1)' }}
-                          />
-                          <Bar dataKey="count" fill="#308fef" radius={[0, 4, 4, 0]} barSize={24} />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
           </div>
         )}
       </main>

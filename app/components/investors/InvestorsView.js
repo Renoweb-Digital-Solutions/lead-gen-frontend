@@ -1,5 +1,8 @@
 "use client";
 
+// # Analytics metadata is allowlisted; search text and result contents are never captured.
+import { trackInteraction } from "../../lib/interactionAnalytics";
+
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Loader2, Building2, MapPin, Globe, Database, TrendingUp, AlertCircle, Briefcase, Zap, CheckCircle2, X } from "lucide-react";
@@ -32,6 +35,8 @@ export default function InvestorsView() {
       return;
     }
 
+    // # Track validated submission without awaiting analytics or changing pipeline inputs.
+    trackInteraction("run_submitted", "investors", { settings: { industry, investment_stage: investmentStage, country, result_limit: Number(investorLimit) } });
     setIsSearching(true);
     setErrorMsg("");
     setSuccessMsg("");
@@ -195,7 +200,7 @@ export default function InvestorsView() {
                   <label className="text-[13px] font-semibold text-brand-dark uppercase tracking-wide">
                     Industry
                   </label>
-                  <select
+                  <select data-analytics-control="industry"
                     required
                     value={industry}
                     onChange={(e) => setIndustry(e.target.value)}
@@ -235,7 +240,7 @@ export default function InvestorsView() {
                   <label className="text-[13px] font-semibold text-brand-dark uppercase tracking-wide">
                     Investment Stage
                   </label>
-                  <select
+                  <select data-analytics-control="investment_stage"
                     required
                     value={investmentStage}
                     onChange={(e) => setInvestmentStage(e.target.value)}
@@ -257,7 +262,7 @@ export default function InvestorsView() {
                     <span>Country</span>
                     <span className="text-[10px] text-gray-400 font-normal normal-case">Optional</span>
                   </label>
-                  <select
+                  <select data-analytics-control="country"
                     value={country}
                     onChange={(e) => setCountry(e.target.value)}
                     className="w-full px-4 py-3 text-sm bg-surface border border-border rounded-xl focus:outline-none focus:border-[#4ec8ef] focus:ring-4 focus:ring-[#4ec8ef]/10 transition-all hover:border-[#4ec8ef]/40 text-brand-dark font-medium"
@@ -275,7 +280,7 @@ export default function InvestorsView() {
               </div>
 
               <div className="mb-2">
-                <SliderInput
+                <SliderInput analyticsControl="result_limit"
                   label="Max Investors to Fetch"
                   hint="Maximum number of candidates to merge and score"
                   value={investorLimit}
@@ -290,7 +295,7 @@ export default function InvestorsView() {
                 {isSearching && (
                   <motion.button
                     type="button"
-                    onClick={handleAbort}
+                    data-analytics-action="cancel_search" onClick={handleAbort}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     className="px-6 py-3.5 rounded-xl text-white font-bold text-[15px] tracking-wide flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 shadow-md transition-all duration-300"
@@ -300,7 +305,7 @@ export default function InvestorsView() {
                   </motion.button>
                 )}
                 <motion.button
-                  type="submit"
+                  data-analytics-action="start_search" type="submit"
                   disabled={isSearching || !companyDescription || isSuspended}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}

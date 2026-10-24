@@ -1,5 +1,8 @@
 "use client";
 
+// # Analytics metadata is allowlisted; search text and result contents are never captured.
+import { trackInteraction } from "../../lib/interactionAnalytics";
+
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, Camera, Link as LinkIcon, Hash, X } from "lucide-react";
@@ -41,6 +44,8 @@ export default function InstagramView() {
       return;
     }
 
+    // # Track validated submission without awaiting analytics or changing pipeline inputs.
+    trackInteraction("run_submitted", "instagram", { settings: { source_type: sourceType, result_limit: Number(maxItems) } });
     setIsSearching(true);
     setErrorMsg(null);
     setSuccessMsg(null);
@@ -250,7 +255,7 @@ export default function InstagramView() {
                 <label className="text-[13px] font-semibold text-brand-dark uppercase tracking-wide">
                   Source Type
                 </label>
-                <select
+                <select data-analytics-control="source_type"
                   value={sourceType}
                   onChange={(e) => setSourceType(e.target.value)}
                   className="w-full px-4 py-3 text-sm bg-surface border border-border rounded-xl focus:outline-none focus:border-brand-sky focus:ring-4 focus:ring-brand-sky/10 transition-all hover:border-brand-sky/40 text-brand-dark font-medium"
@@ -287,7 +292,7 @@ export default function InstagramView() {
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <Hash className="h-4 w-4 text-gray-400" />
                   </div>
-                  <input
+                  <input data-analytics-control="result_limit"
                     type="number"
                     value={maxItems}
                     onChange={(e) => setMaxItems(e.target.value)}
@@ -310,7 +315,7 @@ export default function InstagramView() {
               {isSearching && (
                 <motion.button
                   type="button"
-                  onClick={handleAbort}
+                  data-analytics-action="cancel_search" onClick={handleAbort}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   className="px-6 py-3.5 rounded-xl text-white font-bold text-[15px] tracking-wide flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 shadow-md transition-all duration-300"
@@ -321,7 +326,7 @@ export default function InstagramView() {
               )}
               <motion.button
                 type="button"
-                onClick={handleSearch}
+                data-analytics-action="start_search" onClick={handleSearch}
                 disabled={isSearching || isSuspended}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}

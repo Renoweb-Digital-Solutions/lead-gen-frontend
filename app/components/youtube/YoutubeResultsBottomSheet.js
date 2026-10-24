@@ -1,4 +1,5 @@
 ﻿"use client";
+// # Header visibility records results exposure without inspecting table contents.
 
 import { useEffect, useRef, useSyncExternalStore } from "react";
 import { animated, useSpring } from "@react-spring/web";
@@ -74,13 +75,13 @@ export default function YoutubeResultsBottomSheet({ isOpen, onOpen, onClose, onE
           <header className="flex shrink-0 flex-wrap items-start justify-between gap-4 border-b border-border px-5 py-5 sm:px-8">
             <div className="min-w-0">
               <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.22em] text-red-500">YouTube discovery / Creator collection</p>
-              <h2 id="youtube-results-title" className="text-2xl font-bold tracking-tight text-brand-dark sm:text-3xl">Your next collaboration starts here.</h2>
+              <h2 data-analytics-section={isOpen ? "results" : undefined} id="youtube-results-title" className="text-2xl font-bold tracking-tight text-brand-dark sm:text-3xl">Your next collaboration starts here.</h2>
               <p className="mt-1 max-w-2xl truncate text-sm text-gray-500" title={query}>{query ? `Results for “${query}”` : "Explore your channel shortlist"}</p>
               <div className="mt-3 flex flex-wrap gap-2 text-[11px]"><span className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1 text-gray-500"><Users className="h-3 w-3" />{totalFound} discovered</span><span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1 text-emerald-600"><Mail className="h-3 w-3" />{withEmail} with public email</span>{costUsd != null && <span className="rounded-full border border-border px-3 py-1 text-gray-500">Source cost ${Number(costUsd).toFixed(5)}</span>}</div>
             </div>
             <div className="flex items-center gap-2">
-              <button type="button" onClick={onExport} disabled={!data.length} className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2.5 text-xs font-semibold text-white disabled:opacity-40"><Download className="h-4 w-4" />Export CSV</button>
-              <button type="button" onClick={onExportJson} disabled={!data.length} className="rounded-xl border border-border px-3 py-2.5 text-xs font-semibold text-brand-dark disabled:opacity-40">JSON</button>
+              <button type="button" data-analytics-action="export_csv" onClick={onExport} disabled={!data.length} className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2.5 text-xs font-semibold text-white disabled:opacity-40"><Download className="h-4 w-4" />Export CSV</button>
+              <button type="button" data-analytics-action="export_json" onClick={onExportJson} disabled={!data.length} className="rounded-xl border border-border px-3 py-2.5 text-xs font-semibold text-brand-dark disabled:opacity-40">JSON</button>
               <button ref={closeRef} type="button" onClick={onClose} aria-label="Close results" className="rounded-full border border-border p-2.5 text-gray-500 hover:bg-[var(--rw-surface-hover)]"><X className="h-4 w-4" /></button>
             </div>
           </header>

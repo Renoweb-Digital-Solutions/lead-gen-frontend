@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { trackInteraction, leadgenSettings } from "../lib/interactionAnalytics";
 import Papa from "papaparse";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
@@ -71,6 +72,12 @@ export default function LeadGenApp() {
   const contentRef = useRef(null);
   const wsRef = useRef(null);
 
+  // # Debounce persisted module hydration so hidden/default modules do not gain false views.
+  useEffect(() => {
+    const timer = window.setTimeout(() => trackInteraction("module_viewed", activeModule), 180);
+    return () => window.clearTimeout(timer);
+  }, [activeModule]);
+
   const handleCancelExport = () => {
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify({ type: "cancel" }));
@@ -80,6 +87,7 @@ export default function LeadGenApp() {
 
   const goToStep = (index) => {
     setDirection(index > activeStep ? "forward" : "backward");
+    trackInteraction("section_viewed", "leadgen", { section: `step_${index + 1}` });
     setActiveStep(index);
     setSidebarOpen(false); // Close sidebar on mobile when navigating
     // State is intentionally persisted when navigating between steps
@@ -148,6 +156,8 @@ export default function LeadGenApp() {
   };
 
   const handleExport = async () => {
+    // # Capture only approved final settings; never descriptions, names or search terms.
+    trackInteraction("run_submitted", "leadgen", { settings: leadgenSettings(formState) });
     setIsExporting(true);
     const format = formState.exportFormat;
     
@@ -352,7 +362,7 @@ export default function LeadGenApp() {
       />
 
       {/* ── Google Maps Module ─────────────────────────── */}
-      <div className="rw-main-layout" style={{ display: activeModule === "gmaps" ? "flex" : "none" }}>
+      <div data-analytics-module="gmaps" className="rw-main-layout" style={{ display: activeModule === "gmaps" ? "flex" : "none" }}>
         {/* Render sidebar for mobile only in GMaps view so the hamburger menu works */}
         <div className="lg:hidden block">
           <Sidebar
@@ -370,7 +380,7 @@ export default function LeadGenApp() {
       </div>
 
       {/* ── YouTube Module ─────────────────────────────── */}
-      <div className="rw-main-layout" style={{ display: activeModule === "youtube" ? "flex" : "none" }}>
+      <div data-analytics-module="youtube" className="rw-main-layout" style={{ display: activeModule === "youtube" ? "flex" : "none" }}>
         <div className="lg:hidden block">
           <Sidebar
             activeStep={0}
@@ -387,7 +397,7 @@ export default function LeadGenApp() {
       </div>
 
       {/* ── Instagram Module ─────────────────────────────── */}
-      <div className="rw-main-layout" style={{ display: activeModule === "instagram" ? "flex" : "none" }}>
+      <div data-analytics-module="instagram" className="rw-main-layout" style={{ display: activeModule === "instagram" ? "flex" : "none" }}>
         <div className="lg:hidden block">
           <Sidebar
             activeStep={0}
@@ -404,7 +414,7 @@ export default function LeadGenApp() {
       </div>
 
       {/* ── B2B Module ─────────────────────────────────── */}
-      <div className="rw-main-layout" style={{ display: activeModule === "b2b" ? "flex" : "none" }}>
+      <div data-analytics-module="b2b" className="rw-main-layout" style={{ display: activeModule === "b2b" ? "flex" : "none" }}>
         <div className="lg:hidden block">
           <Sidebar
             activeStep={0}
@@ -421,7 +431,7 @@ export default function LeadGenApp() {
       </div>
 
       {/* ── Investors Module ────────────────────────────── */}
-      <div className="rw-main-layout" style={{ display: activeModule === "investors" ? "flex" : "none" }}>
+      <div data-analytics-module="investors" className="rw-main-layout" style={{ display: activeModule === "investors" ? "flex" : "none" }}>
         <div className="lg:hidden block">
           <Sidebar
             activeStep={0}
@@ -438,7 +448,7 @@ export default function LeadGenApp() {
       </div>
 
       {/* ── Lead Gen Pipeline ───────────────────────────── */}
-      <div className="rw-main-layout" style={{ display: activeModule === "leadgen" ? "flex" : "none" }}>
+      <div data-analytics-module="leadgen" className="rw-main-layout" style={{ display: activeModule === "leadgen" ? "flex" : "none" }}>
         <Sidebar
           activeStep={activeStep}
           onStepChange={goToStep}
@@ -577,7 +587,7 @@ export default function LeadGenApp() {
             <button
               type="button"
               className="rw-btn rw-btn-secondary"
-              onClick={prevStep}
+              data-analytics-action="previous_step" onClick={prevStep}
               disabled={activeStep === 0}
               style={{
                 opacity: activeStep === 0 ? 0.4 : 1,
@@ -602,7 +612,7 @@ export default function LeadGenApp() {
               <button
                 type="button"
                 className="rw-btn rw-btn-primary"
-                onClick={nextStep}
+                data-analytics-action="next_step" onClick={nextStep}
               >
                 Next Step
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">

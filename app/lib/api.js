@@ -629,10 +629,14 @@ export async function sendAnalyticsEvent(eventName, deviceId, payload = {}) {
   return res.json();
 }
 
-export async function fetchAnalyticsSummary() {
-  const res = await fetchWithAuth(`/analytics/summary`);
+export async function fetchAnalyticsSummary(days = 30, module = "all", signal) {
+  // # Reports have independent cancellation and filters; pipeline requests are untouched.
+  const res = await fetchWithAuth(`/analytics/summary?${new URLSearchParams({ days: String(days), module, version: "2" })}`, { signal });
   if (!res.ok) throw new Error("Failed to fetch analytics summary");
-  return res.json();
+  const report = await res.json();
+  // # An older backend must show a report error rather than crash the new admin interface.
+  if (!report.metrics || !Array.isArray(report.modules) || !Array.isArray(report.funnel)) throw new Error("Customer behaviour reports are not available yet. Please try again shortly.");
+  return report;
 }
 
 // ═══════════════════════════════════════════════════════════

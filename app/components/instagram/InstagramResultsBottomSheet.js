@@ -1,4 +1,5 @@
 "use client";
+// # Header visibility records results exposure without inspecting table contents.
 
 import { useEffect, useState } from "react";
 import { useSpring, animated } from "@react-spring/web";
@@ -115,7 +116,7 @@ export default function InstagramResultsBottomSheet({ isOpen, onOpen, onClose, o
         {/* Header */}
         <div className="px-8 pb-4 border-b border-pink-500/5 flex items-center justify-between shrink-0">
           <div>
-            <h2 className="text-2xl font-bold font-display text-brand-dark leading-tight">
+            <h2 data-analytics-section={isOpen ? "results" : undefined} className="text-2xl font-bold font-display text-brand-dark leading-tight">
               Instagram Extraction Results
             </h2>
             <p className="text-[13px] font-medium text-gray-500">
@@ -125,7 +126,7 @@ export default function InstagramResultsBottomSheet({ isOpen, onOpen, onClose, o
 
           <div className="flex items-center gap-4">
             <button
-              onClick={onExport}
+              data-analytics-action="export_csv" onClick={onExport}
               className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-xl font-bold text-[13px] hover:shadow-lg hover:shadow-pink-500/20 transition-all duration-300"
             >
               <Download className="w-4 h-4" />

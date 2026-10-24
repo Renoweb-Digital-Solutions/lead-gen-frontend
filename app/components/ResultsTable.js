@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+// # Only result-link categories are recorded; addresses and cell contents stay private.
 import { AgGridReact } from "ag-grid-react";
 import { AllCommunityModule, ModuleRegistry, themeQuartz } from "ag-grid-community";
 import { X } from "lucide-react";
@@ -95,7 +96,7 @@ function EmailCellRenderer(params) {
   if (!value) return null;
   
   return (
-    <a href={`mailto:${value}`} style={linkStyle} title={`Email ${value}`}>
+    <a data-analytics-action="open_result_email" href={`mailto:${value}`} style={linkStyle} title={`Email ${value}`}>
       {value}
     </a>
   );
@@ -112,7 +113,7 @@ function PhoneCellRenderer(params) {
   if (!value) return null;
   
   return (
-    <a href={`tel:${value}`} style={linkStyle} title={`Call ${value}`}>
+    <a data-analytics-action="open_result_phone" href={`tel:${value}`} style={linkStyle} title={`Call ${value}`}>
       {value}
     </a>
   );
@@ -134,7 +135,7 @@ function UrlCellRenderer(params) {
   
   const href = firstUrl.startsWith("http") ? firstUrl : `https://${firstUrl}`;
   return (
-    <a
+    <a data-analytics-action="open_result_link"
       href={href}
       target="_blank"
       rel="noopener noreferrer"
@@ -181,7 +182,7 @@ function SmartFallbackRenderer(params) {
   // Check if URL
   if (strVal.startsWith("http://") || strVal.startsWith("https://")) {
     return (
-      <a href={strVal} target="_blank" rel="noopener noreferrer" style={linkStyle} title={`Open ${strVal}`}>
+      <a data-analytics-action="open_result_link" href={strVal} target="_blank" rel="noopener noreferrer" style={linkStyle} title={`Open ${strVal}`}>
         {strVal}
       </a>
     );
@@ -191,7 +192,7 @@ function SmartFallbackRenderer(params) {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (emailRegex.test(strVal)) {
     return (
-      <a href={`mailto:${strVal}`} style={linkStyle} title={`Email ${strVal}`}>
+      <a data-analytics-action="open_result_email" href={`mailto:${strVal}`} style={linkStyle} title={`Email ${strVal}`}>
         {strVal}
       </a>
     );
@@ -202,7 +203,7 @@ function SmartFallbackRenderer(params) {
   const phoneRegex = /^\+?[\d\s\-\(\)]{7,20}$/;
   if (!isMetric && phoneRegex.test(strVal) && strVal.replace(/[^\d]/g, '').length >= 7) {
     return (
-      <a href={`tel:${strVal}`} style={linkStyle} title={`Call ${strVal}`}>
+      <a data-analytics-action="open_result_phone" href={`tel:${strVal}`} style={linkStyle} title={`Call ${strVal}`}>
         {strVal}
       </a>
     );
