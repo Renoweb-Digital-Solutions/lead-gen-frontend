@@ -73,6 +73,8 @@ export async function identityApi(path, body, form = false, signal) {
 
 // # Starting login returns an OTP challenge, never a session token.
 export const apiRequestLoginOtp = (username, password) => identityApi("/request-login-otp", { username, password }, true);
+// # Admin requests support legacy email-as-username accounts through a scoped endpoint.
+export const apiRequestAdminLoginOtp = (username, password) => identityApi("/admin/request-login-otp", { username, password }, true);
 export const apiLogin = apiRequestLoginOtp;
 export const apiSignup = (username, email, password) => identityApi("/create-user", { username, email, password });
 export const apiVerifyLoginOtp = (challenge, otp, username) => identityApi("/verify-challenge", {
