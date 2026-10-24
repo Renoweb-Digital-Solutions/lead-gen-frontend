@@ -15,6 +15,7 @@ import CompanyStep from "./steps/CompanyStep";
 import JobsStep from "./steps/JobsStep";
 import ScoringStep from "./steps/ScoringStep";
 import ExportStep from "./steps/ExportStep";
+import LeadGenCredits from "./LeadGenCredits";
 import LiveContextSidebar from "./LiveContextSidebar";
 import { useFormState } from "../hooks/useFormState";
 import { AnimatePresence, motion } from "framer-motion";
@@ -34,16 +35,16 @@ import { PIPELINES } from "../lib/pipelinesConfig";
 
 /**
  * Component: LeadGenApp
- * 
+ *
  * WHAT IT DOES:
- * This is the main orchestrator component for the entire Lead Generation UI. 
- * It manages the multi-step wizard logic, tracks the active step, and holds the layout 
- * shell (Header, Sidebar, Main Content area). It serves as the bridge connecting the UI 
+ * This is the main orchestrator component for the entire Lead Generation UI.
+ * It manages the multi-step wizard logic, tracks the active step, and holds the layout
+ * shell (Header, Sidebar, Main Content area). It serves as the bridge connecting the UI
  * to the `useFormState` custom hook, passing down updater functions to individual step components.
- * 
+ *
  * PROPS RECEIVED:
  * - None (It acts as a top-level route component rendered by page.js)
- * 
+ *
  * PROPS OUTGOING (to children):
  * - to <Header>: `onClearAll` (function to show clear modal) -> e:\WORK\Renoweb\lead-gen\app\components\Header.js
  * - to <Sidebar>: `activeStep` (number), `onStepChange` (function) -> e:\WORK\Renoweb\lead-gen\app\components\Sidebar.js
@@ -54,10 +55,13 @@ import { PIPELINES } from "../lib/pipelinesConfig";
 export default function LeadGenApp() {
   const { formState, updateField, updateFields, clearAll } = useFormState();
   const [activeStep, setActiveStep] = useSessionState("renoweb-active-step", 0);
-  const [activeModule, setActiveModule] = useSessionState("renoweb-active-module", "leadgen");
-  
+  const [activeModule, setActiveModule] = useSessionState(
+    "renoweb-active-module",
+    "leadgen",
+  );
+
   useEffect(() => {
-    if (PIPELINES.length > 0 && !PIPELINES.some(p => p.id === activeModule)) {
+    if (PIPELINES.length > 0 && !PIPELINES.some((p) => p.id === activeModule)) {
       setActiveModule(PIPELINES[0].id);
     }
   }, [activeModule, setActiveModule]);
@@ -150,123 +154,141 @@ export default function LeadGenApp() {
   const handleExport = async () => {
     setIsExporting(true);
     const format = formState.exportFormat;
-    
-    setExportResults(prev => ({
+
+    setExportResults((prev) => ({
       ...prev,
       [format]: {
         ...prev[format],
         error: null,
+        errorCode: null,
         success: null,
         data: null,
         file: null,
-        progress: { percent: 0, message: "Initializing...", status: "running" }
-      }
+        progress: { percent: 0, message: "Initializing...", status: "running" },
+      },
     }));
 
     try {
       const jobData = await startPipelineJob(formState);
-      const wsAbsoluteUrl = jobData.ws_url.startsWith('ws') 
-        ? jobData.ws_url 
-        : `${process.env.NEXT_PUBLIC_API_URL.replace('http', 'ws')}${jobData.ws_url}`;
-      
+      const wsAbsoluteUrl = jobData.ws_url.startsWith("ws")
+        ? jobData.ws_url
+        : `${process.env.NEXT_PUBLIC_API_URL.replace("http", "ws")}${jobData.ws_url}`;
+
       const ws = new WebSocket(wsAbsoluteUrl);
-      
+
       // Store the ws connection to allow cancellation
       wsRef.current = ws;
 
       ws.onmessage = (event) => {
         try {
           const msg = JSON.parse(event.data);
-          
-          setExportResults(prev => {
+
+          setExportResults((prev) => {
             const current = prev[format] || {};
             return {
               ...prev,
               [format]: {
                 ...current,
-                progress: { 
-                  percent: msg.percent || current.progress?.percent || 0, 
-                  message: msg.message || current.progress?.message || "Running...", 
-                  status: msg.status || current.progress?.status || "running" 
-                }
-              }
+                progress: {
+                  percent: msg.percent || current.progress?.percent || 0,
+                  message:
+                    msg.message || current.progress?.message || "Running...",
+                  status: msg.status || current.progress?.status || "running",
+                  // # Keep service-confirmed credit status alongside existing WebSocket progress.
+                  credits: msg.credits || current.progress?.credits,
+                },
+              },
             };
           });
 
           if (msg.status === "completed") {
             ws.close();
-            
+
             let parsedData = msg.data || msg.result || msg.results || null;
             let resultFile = null;
 
             const completeExport = () => {
-              setExportResults(prev => ({
+              setExportResults((prev) => ({
                 ...prev,
                 [format]: {
                   ...prev[format],
                   success: `Successfully completed pipeline! Downloads ready.`,
                   error: null,
                   data: parsedData,
-                  file: resultFile
-                }
+                  file: resultFile,
+                },
               }));
               setIsExporting(false);
             };
 
-            if (!parsedData && jobData.downloads && Object.keys(jobData.downloads).length > 0) {
+            if (
+              !parsedData &&
+              jobData.downloads &&
+              Object.keys(jobData.downloads).length > 0
+            ) {
               // Find the URL that matches the selected format, fallback to finding by string include
               const urlPaths = Object.values(jobData.downloads);
-              const fileUrlPath = jobData.downloads[format] || urlPaths.find(url => url.includes(format)) || urlPaths[0];
+              const fileUrlPath =
+                jobData.downloads[format] ||
+                urlPaths.find((url) => url.includes(format)) ||
+                urlPaths[0];
               const fileUrl = `${process.env.NEXT_PUBLIC_API_URL}${fileUrlPath}`;
-              
+
               fetch(fileUrl, {
-                headers: { "Authorization": `Bearer ${localStorage.getItem("renoweb_jwt")}` }
+                headers: {
+                  Authorization: `Bearer ${localStorage.getItem("renoweb_jwt")}`,
+                },
               })
-              .then(res => res.blob())
-              .then(blob => {
-                const ext = format === "bundle" ? ".zip" : ".csv";
-                let finalName = formState.filename || `${format}${ext}`;
-                if (!finalName.endsWith(ext)) {
-                  // Replace any incorrect extension with the correct one
-                  finalName = finalName.replace(/\.[^/.]+$/, "") + ext;
-                }
-                resultFile = { blob, filename: finalName };
-                
-                if (format !== "bundle") {
-                  return blob.text().then(text => {
-                    Papa.parse(text, {
-                      header: true,
-                      skipEmptyLines: true,
-                      complete: (results) => {
-                        parsedData = results.data;
-                        completeExport();
-                      },
-                      error: () => {
-                        completeExport();
-                      }
+                .then((res) => res.blob())
+                .then((blob) => {
+                  const ext = format === "bundle" ? ".zip" : ".csv";
+                  let finalName = formState.filename || `${format}${ext}`;
+                  if (!finalName.endsWith(ext)) {
+                    // Replace any incorrect extension with the correct one
+                    finalName = finalName.replace(/\.[^/.]+$/, "") + ext;
+                  }
+                  resultFile = { blob, filename: finalName };
+
+                  if (format !== "bundle") {
+                    return blob.text().then((text) => {
+                      Papa.parse(text, {
+                        header: true,
+                        skipEmptyLines: true,
+                        complete: (results) => {
+                          parsedData = results.data;
+                          completeExport();
+                        },
+                        error: () => {
+                          completeExport();
+                        },
+                      });
                     });
-                  });
-                } else {
+                  } else {
+                    completeExport();
+                  }
+                })
+                .catch((err) => {
+                  console.error("Failed to fetch export file:", err);
                   completeExport();
-                }
-              })
-              .catch(err => {
-                console.error("Failed to fetch export file:", err);
-                completeExport();
-              });
+                });
             } else {
               completeExport();
             }
           } else if (msg.status === "failed") {
             ws.close();
-            setExportResults(prev => ({
+            setExportResults((prev) => ({
               ...prev,
               [format]: {
                 ...prev[format],
-                error: msg.error || "Pipeline failed.",
-                success: null
-              }
+                error: msg.error || msg.message || "Pipeline failed.",
+                errorCode: msg.error_code,
+                success: null,
+              },
             }));
+            setIsExporting(false);
+          } else if (msg.status === "cancelled") {
+            // # Cancellation can carry a final credit release update before the socket closes.
+            ws.close();
             setIsExporting(false);
           }
         } catch (e) {
@@ -275,12 +297,12 @@ export default function LeadGenApp() {
       };
 
       ws.onerror = (error) => {
-        setExportResults(prev => ({
+        setExportResults((prev) => ({
           ...prev,
           [format]: {
             ...prev[format],
             error: "WebSocket error occurred.",
-          }
+          },
         }));
         setIsExporting(false);
       };
@@ -288,16 +310,16 @@ export default function LeadGenApp() {
       ws.onclose = () => {
         setIsExporting(false);
       };
-      
     } catch (err) {
       console.error("Pipeline error in handleExport:", err);
-      setExportResults(prev => ({
+      setExportResults((prev) => ({
         ...prev,
         [format]: {
           ...prev[format],
           error: err.message || "Pipeline failed to start.",
-          success: null
-        }
+          errorCode: err.code,
+          success: null,
+        },
       }));
       setIsExporting(false);
     }
@@ -330,7 +352,10 @@ export default function LeadGenApp() {
             onCancel={handleCancelExport}
             onDownload={() => {
               if (currentExportState.file) {
-                downloadBlob(currentExportState.file.blob, currentExportState.file.filename);
+                downloadBlob(
+                  currentExportState.file.blob,
+                  currentExportState.file.filename,
+                );
               }
             }}
           />
@@ -341,7 +366,11 @@ export default function LeadGenApp() {
   };
 
   return (
-    <div className="rw-app-container" data-theme={isDark ? "dark" : "light"} style={{ background: "var(--rw-bg)", color: "var(--rw-text)" }}>
+    <div
+      className="rw-app-container"
+      data-theme={isDark ? "dark" : "light"}
+      style={{ background: "var(--rw-bg)", color: "var(--rw-text)" }}
+    >
       <Header
         onClearAll={() => setShowClearModal(true)}
         activeModule={activeModule}
@@ -352,12 +381,15 @@ export default function LeadGenApp() {
       />
 
       {/* ── Google Maps Module ─────────────────────────── */}
-      <div className="rw-main-layout" style={{ display: activeModule === "gmaps" ? "flex" : "none" }}>
+      <div
+        className="rw-main-layout"
+        style={{ display: activeModule === "gmaps" ? "flex" : "none" }}
+      >
         {/* Render sidebar for mobile only in GMaps view so the hamburger menu works */}
         <div className="lg:hidden block">
           <Sidebar
             activeStep={0}
-            onStepChange={()=>{}}
+            onStepChange={() => {}}
             isOpen={sidebarOpen}
             onClose={() => setSidebarOpen(false)}
             activeModule={activeModule}
@@ -370,11 +402,14 @@ export default function LeadGenApp() {
       </div>
 
       {/* ── YouTube Module ─────────────────────────────── */}
-      <div className="rw-main-layout" style={{ display: activeModule === "youtube" ? "flex" : "none" }}>
+      <div
+        className="rw-main-layout"
+        style={{ display: activeModule === "youtube" ? "flex" : "none" }}
+      >
         <div className="lg:hidden block">
           <Sidebar
             activeStep={0}
-            onStepChange={()=>{}}
+            onStepChange={() => {}}
             isOpen={sidebarOpen}
             onClose={() => setSidebarOpen(false)}
             activeModule={activeModule}
@@ -387,11 +422,14 @@ export default function LeadGenApp() {
       </div>
 
       {/* ── Instagram Module ─────────────────────────────── */}
-      <div className="rw-main-layout" style={{ display: activeModule === "instagram" ? "flex" : "none" }}>
+      <div
+        className="rw-main-layout"
+        style={{ display: activeModule === "instagram" ? "flex" : "none" }}
+      >
         <div className="lg:hidden block">
           <Sidebar
             activeStep={0}
-            onStepChange={()=>{}}
+            onStepChange={() => {}}
             isOpen={sidebarOpen}
             onClose={() => setSidebarOpen(false)}
             activeModule={activeModule}
@@ -404,11 +442,14 @@ export default function LeadGenApp() {
       </div>
 
       {/* ── B2B Module ─────────────────────────────────── */}
-      <div className="rw-main-layout" style={{ display: activeModule === "b2b" ? "flex" : "none" }}>
+      <div
+        className="rw-main-layout"
+        style={{ display: activeModule === "b2b" ? "flex" : "none" }}
+      >
         <div className="lg:hidden block">
           <Sidebar
             activeStep={0}
-            onStepChange={()=>{}}
+            onStepChange={() => {}}
             isOpen={sidebarOpen}
             onClose={() => setSidebarOpen(false)}
             activeModule={activeModule}
@@ -421,11 +462,14 @@ export default function LeadGenApp() {
       </div>
 
       {/* ── Investors Module ────────────────────────────── */}
-      <div className="rw-main-layout" style={{ display: activeModule === "investors" ? "flex" : "none" }}>
+      <div
+        className="rw-main-layout"
+        style={{ display: activeModule === "investors" ? "flex" : "none" }}
+      >
         <div className="lg:hidden block">
           <Sidebar
             activeStep={0}
-            onStepChange={()=>{}}
+            onStepChange={() => {}}
             isOpen={sidebarOpen}
             onClose={() => setSidebarOpen(false)}
             activeModule={activeModule}
@@ -438,7 +482,10 @@ export default function LeadGenApp() {
       </div>
 
       {/* ── Lead Gen Pipeline ───────────────────────────── */}
-      <div className="rw-main-layout" style={{ display: activeModule === "leadgen" ? "flex" : "none" }}>
+      <div
+        className="rw-main-layout"
+        style={{ display: activeModule === "leadgen" ? "flex" : "none" }}
+      >
         <Sidebar
           activeStep={activeStep}
           onStepChange={goToStep}
@@ -450,10 +497,7 @@ export default function LeadGenApp() {
         />
 
         {/* Main content area */}
-        <main
-          ref={contentRef}
-          className="rw-main-content"
-        >
+        <main ref={contentRef} className="rw-main-content">
           {/* Step header */}
           <div
             style={{
@@ -494,6 +538,14 @@ export default function LeadGenApp() {
               {STEPS[activeStep].description}
             </p>
           </div>
+
+          {/* # Mount wallet requests only for Lead Gen; other modules keep their existing behavior. */}
+          {activeModule === "leadgen" && (
+            <LeadGenCredits
+              progressState={currentExportState.progress}
+              errorCode={currentExportState.errorCode}
+            />
+          )}
 
           {/* Alerts */}
           {currentExportState.error && (
@@ -539,9 +591,7 @@ export default function LeadGenApp() {
           )}
 
           {/* Step content */}
-          <div
-            className="w-full relative z-10"
-          >
+          <div className="w-full relative z-10">
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeStep}
@@ -549,14 +599,19 @@ export default function LeadGenApp() {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: direction === "forward" ? -20 : 20 }}
                 transition={{ duration: 0.3, ease: "easeOut" }}
-                className={activeStep < 4 ? "grid grid-cols-1 lg:grid-cols-[65%_1fr] gap-8" : "w-full"}
+                className={
+                  activeStep < 4
+                    ? "grid grid-cols-1 lg:grid-cols-[65%_1fr] gap-8"
+                    : "w-full"
+                }
               >
-                <div className="w-full">
-                  {renderStep()}
-                </div>
+                <div className="w-full">{renderStep()}</div>
                 {activeStep < 4 && (
                   <div className="hidden lg:block relative">
-                    <LiveContextSidebar formState={formState} activeStep={activeStep} />
+                    <LiveContextSidebar
+                      formState={formState}
+                      activeStep={activeStep}
+                    />
                   </div>
                 )}
               </motion.div>
@@ -596,8 +651,6 @@ export default function LeadGenApp() {
               Back
             </button>
 
-
-
             {activeStep < STEPS.length - 1 ? (
               <button
                 type="button"
@@ -627,7 +680,9 @@ export default function LeadGenApp() {
         isOpen={showClearModal}
         onClose={() => setShowClearModal(false)}
         onConfirm={handleClearAll}
-        title={activeModule === "gmaps" ? "Clear GMaps Data?" : "Clear All Data?"}
+        title={
+          activeModule === "gmaps" ? "Clear GMaps Data?" : "Clear All Data?"
+        }
         description={
           activeModule === "gmaps"
             ? "This will reset your GMaps search parameters and clear current results. Your past runs will remain unaffected."

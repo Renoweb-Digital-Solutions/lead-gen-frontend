@@ -1,7 +1,9 @@
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 if (!BASE_URL) {
-  console.warn("Warning: NEXT_PUBLIC_API_URL is not defined in the environment variables.");
+  console.warn(
+    "Warning: NEXT_PUBLIC_API_URL is not defined in the environment variables.",
+  );
 }
 
 import { EXPORT_FORMATS } from "./constants";
@@ -10,7 +12,8 @@ import { EXPORT_FORMATS } from "./constants";
  * Helper to automatically attach the Authorization token.
  */
 async function fetchWithAuth(endpoint, options = {}) {
-  const token = typeof window !== 'undefined' ? localStorage.getItem("renoweb_jwt") : null;
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("renoweb_jwt") : null;
   const headers = {
     ...options.headers,
   };
@@ -24,7 +27,7 @@ async function fetchWithAuth(endpoint, options = {}) {
   });
 
   // Auto-logout on token expiration (401 Unauthorized)
-  if (res.status === 401 && typeof window !== 'undefined') {
+  if (res.status === 401 && typeof window !== "undefined") {
     localStorage.removeItem("renoweb_jwt");
     window.location.href = "/";
   }
@@ -33,14 +36,22 @@ async function fetchWithAuth(endpoint, options = {}) {
 }
 
 export async function adminEmailApi(path = "/studio", data, method = "POST") {
-  const res = await fetchWithAuth(`/admin/email${path}`, data === undefined ? {} : {
-    method,
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
+  const res = await fetchWithAuth(
+    `/admin/email${path}`,
+    data === undefined
+      ? {}
+      : {
+          method,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        },
+  );
   if (!res.ok) {
     const payload = await res.json().catch(() => ({}));
-    const detail = typeof payload.detail === "string" ? payload.detail : "Please check the email fields and try again.";
+    const detail =
+      typeof payload.detail === "string"
+        ? payload.detail
+        : "Please check the email fields and try again.";
     const error = new Error(detail);
     error.status = res.status;
     throw error;
@@ -53,7 +64,11 @@ export async function adminEmailApi(path = "/studio", data, method = "POST") {
 export async function identityApi(path, body, form = false, signal) {
   const res = await fetch(`${BASE_URL}/auth${path}`, {
     method: "POST",
-    headers: { "Content-Type": form ? "application/x-www-form-urlencoded" : "application/json" },
+    headers: {
+      "Content-Type": form
+        ? "application/x-www-form-urlencoded"
+        : "application/json",
+    },
     body: form ? new URLSearchParams(body) : JSON.stringify(body),
     cache: "no-store",
     // # Popup cancellation aborts pending status/exchange calls as well as UI timers.
@@ -62,7 +77,12 @@ export async function identityApi(path, body, form = false, signal) {
   const payload = await res.json().catch(() => ({}));
   if (!res.ok) {
     const detail = payload.detail;
-    const error = new Error(typeof detail === "string" ? detail : detail?.message || "We could not complete authentication. Please try again.");
+    const error = new Error(
+      typeof detail === "string"
+        ? detail
+        : detail?.message ||
+            "We could not complete authentication. Please try again.",
+    );
     error.code = detail?.code;
     error.email = detail?.email;
     error.status = res.status;
@@ -72,15 +92,23 @@ export async function identityApi(path, body, form = false, signal) {
 }
 
 // # Starting login returns an OTP challenge, never a session token.
-export const apiRequestLoginOtp = (username, password) => identityApi("/request-login-otp", { username, password }, true);
+export const apiRequestLoginOtp = (username, password) =>
+  identityApi("/request-login-otp", { username, password }, true);
 export const apiLogin = apiRequestLoginOtp;
-export const apiSignup = (username, email, password) => identityApi("/create-user", { username, email, password });
-export const apiVerifyLoginOtp = (challenge, otp, username) => identityApi("/verify-challenge", {
-  challenge_id: challenge.challenge_id, browser_secret: challenge.browser_secret, otp, username,
-});
-export const apiResendChallenge = (challenge) => identityApi("/resend-challenge", {
-  challenge_id: challenge.challenge_id, browser_secret: challenge.browser_secret,
-});
+export const apiSignup = (username, email, password) =>
+  identityApi("/create-user", { username, email, password });
+export const apiVerifyLoginOtp = (challenge, otp, username) =>
+  identityApi("/verify-challenge", {
+    challenge_id: challenge.challenge_id,
+    browser_secret: challenge.browser_secret,
+    otp,
+    username,
+  });
+export const apiResendChallenge = (challenge) =>
+  identityApi("/resend-challenge", {
+    challenge_id: challenge.challenge_id,
+    browser_secret: challenge.browser_secret,
+  });
 
 export async function apiForgotPassword(email) {
   const res = await fetch(`${BASE_URL}/auth/forgot-password`, {
@@ -136,16 +164,15 @@ export async function apiResetPassword(email, otp, newPassword) {
   return res.json();
 }
 
-
 /**
  * Function: checkHealth
- * 
- * WHAT IT DOES: 
+ *
+ * WHAT IT DOES:
  * Pings the backend health endpoint to ensure the API is running and reachable.
- * 
+ *
  * WHERE IT IS USED:
  * - e:\WORK\Renoweb\lead-gen\app\components\Header.js (polled every 30s to update connection status)
- * 
+ *
  * RETURNS: Object containing health status and version info.
  */
 export async function checkHealth() {
@@ -156,15 +183,15 @@ export async function checkHealth() {
 
 /**
  * Function: buildRequestBody
- * 
- * WHAT IT DOES: 
+ *
+ * WHAT IT DOES:
  * Transforms the local frontend `formState` object into the exact JSON schema expected by the backend API.
  * This is a crucial mapping function that bridges the frontend state and the backend API requirements.
- * 
+ *
  * ARGUMENTS:
  * - `formState` (Object): The complete state tree managed by `useFormState`.
- * 
- * RETURNS: 
+ *
+ * RETURNS:
  * - Object: A nested JSON structure with `input`, `filename`, `limit_items`, etc., ready to be sent as the POST request body.
  */
 function buildRequestBody(formState, defaultFilename = "summary.csv") {
@@ -172,7 +199,8 @@ function buildRequestBody(formState, defaultFilename = "summary.csv") {
     input: {
       totalResults: formState.totalResults,
       resetSavedProgress: formState.resetProgress,
-      emailStatus: formState.emailStatus === null ? undefined : formState.emailStatus,
+      emailStatus:
+        formState.emailStatus === null ? undefined : formState.emailStatus,
       hasEmail: formState.hasEmail,
       hasPhone: formState.hasPhone,
       personTitleIncludes: formState.personTitleIncludes,
@@ -218,11 +246,11 @@ function buildRequestBody(formState, defaultFilename = "summary.csv") {
 
 /**
  * Function: startPipelineJob
- * 
+ *
  * WHAT IT DOES:
  * Acts as the primary API caller to start the lead generation pipeline on the backend via the new Async flow.
  * It builds the payload via `buildRequestBody`, and makes a POST request to `/jobs/pipeline/start`.
- * 
+ *
  * WHERE IT IS USED:
  * - e:\WORK\Renoweb\lead-gen\app\components\steps\ExportStep.js
  */
@@ -241,24 +269,64 @@ export async function startPipelineJob(formState) {
   });
 
   if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`Pipeline start failed: ${res.status} — ${text}`);
+    // # Preserve the credit error code so LeadGenApp can show an actionable wallet state.
+    const payload = await res.json().catch(() => ({}));
+    const detail = payload.detail;
+    const error = new Error(
+      res.status === 402
+        ? "You do not have enough credits for this run. Please add credits and try again."
+        : (typeof detail === "string" ? detail : detail?.message) ||
+            "The pipeline could not start. Please try again.",
+    );
+    error.status = res.status;
+    error.code = res.status === 402 ? "INSUFFICIENT_CREDITS" : detail?.code;
+    throw error;
   }
 
   return res.json(); // returns { job_id, ws_url, status_url, cancel_url, downloads }
 }
 
+// # LeadGenCredits reads only the authenticated user's wallet through FastAPI.
+// # Internal service credentials and arbitrary wallet IDs never enter the browser.
+export async function getLeadGenCreditBalance(signal) {
+  const res = await fetchWithAuth("/leadgen/credits/balance", {
+    cache: "no-store",
+    signal,
+  });
+  const payload = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const detail = payload.detail;
+    throw new Error(
+      (typeof detail === "string" ? detail : detail?.message) ||
+        "Credit balance is currently unavailable.",
+    );
+  }
+  // # Missing or invalid totals must appear as unavailable, never as a zero balance.
+  if (
+    ![
+      payload.availableCredits,
+      payload.reservedCredits,
+      payload.totalCredits,
+    ].every(
+      (value) =>
+        typeof value === "number" && Number.isFinite(value) && value >= 0,
+    )
+  ) {
+    throw new Error("Credit balance is currently unavailable.");
+  }
+  return payload;
+}
 
 /**
  * Function: downloadBlob
- * 
+ *
  * WHAT IT DOES:
  * Takes a Blob (binary data) received from the API and artificially triggers a browser file download.
  * It creates a temporary URL pointing to the Blob, creates a hidden <a> tag, clicks it, and cleans up.
- * 
+ *
  * WHERE IT IS USED:
  * - e:\WORK\Renoweb\lead-gen\app\components\LeadGenApp.js (called after `exportLeads` succeeds)
- * 
+ *
  * ARGUMENTS:
  * - `blob` (Blob): The binary file data to download.
  * - `filename` (String): The name the file should be saved as (e.g. "leads.csv").
@@ -311,7 +379,7 @@ export async function gmapsSearch({ keywords, location, limit }) {
       instagrams: true,
       tiktoks: false,
       twitters: false,
-      youtubes: false
+      youtubes: false,
     },
     scrapeTableReservationProvider: false,
     searchStringsArray: keywords,
@@ -326,7 +394,7 @@ export async function gmapsSearch({ keywords, location, limit }) {
     reviewsFilterString: "",
     reviewsOrigin: "all",
     maxImages: 0,
-    allPlacesNoSearchAction: ""
+    allPlacesNoSearchAction: "",
   };
 
   const res = await fetchWithAuth(`/gmaps/search-job`, {
@@ -366,7 +434,7 @@ export async function gmapsBulkSearch({ keywords, location, limit }) {
     body: JSON.stringify({
       keywords,
       location,
-      limit_per_keyword: limit
+      limit_per_keyword: limit,
     }),
   });
   if (!res.ok) {
@@ -440,13 +508,21 @@ export async function gmapsExportCsv(runId) {
 // # HTTP status and cancellation remain available if the live socket disconnects.
 export async function fetchYoutubeJobStatus(jobId) {
   const res = await fetchWithAuth(`/jobs/${encodeURIComponent(jobId)}/status`);
-  if (!res.ok) throw new Error("Could not retrieve YouTube search progress. Please try again.");
+  if (!res.ok)
+    throw new Error(
+      "Could not retrieve YouTube search progress. Please try again.",
+    );
   return res.json();
 }
 
 export async function cancelYoutubeJob(jobId) {
-  const res = await fetchWithAuth(`/jobs/${encodeURIComponent(jobId)}/cancel`, { method: "POST" });
-  if (!res.ok) throw new Error("Could not cancel the YouTube search. Please try Cancel again.");
+  const res = await fetchWithAuth(`/jobs/${encodeURIComponent(jobId)}/cancel`, {
+    method: "POST",
+  });
+  if (!res.ok)
+    throw new Error(
+      "Could not cancel the YouTube search. Please try Cancel again.",
+    );
   return res.json();
 }
 
@@ -455,7 +531,7 @@ export async function fetchYoutubeLeads(params, signal) {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(params),
-    signal
+    signal,
   });
 
   if (!res.ok) {
@@ -478,7 +554,7 @@ export async function fetchYoutubeLeads(params, signal) {
 
 export async function fetchYoutubeData(jobId) {
   const res = await fetchWithAuth(`/jobs/${jobId}/youtube-data`);
-  
+
   if (!res.ok) {
     let errorDetail = "Failed to fetch YouTube data";
     try {
@@ -501,7 +577,7 @@ export async function extractInstagramLeads(params, signal) {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(params),
-    signal
+    signal,
   });
 
   if (!res.ok) {
@@ -527,7 +603,7 @@ export async function fetchB2BLeads(params, signal) {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(params),
-    signal
+    signal,
   });
 
   if (!res.ok) {
@@ -555,9 +631,13 @@ export async function fetchB2BLeads(params, signal) {
 // # Admin login uses the same OTP gate. Backend admin dependencies remain authoritative.
 export async function apiAdminLogin(challenge, otp) {
   const data = await apiVerifyLoginOtp(challenge, otp);
-  const encoded = data.access_token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+  const encoded = data.access_token
+    .split(".")[1]
+    .replace(/-/g, "+")
+    .replace(/_/g, "/");
   const decoded = JSON.parse(atob(encoded));
-  if (!decoded.is_admin) throw new Error("Only administrators can access this portal.");
+  if (!decoded.is_admin)
+    throw new Error("Only administrators can access this portal.");
   return data;
 }
 
@@ -573,7 +653,12 @@ export async function fetchAdminUsersAndRuns() {
 // SUPPORT TICKETS API FUNCTIONS
 // ═══════════════════════════════════════════════════════════
 
-export async function submitSupportTicket(title, type, description, sourcePage) {
+export async function submitSupportTicket(
+  title,
+  type,
+  description,
+  sourcePage,
+) {
   const res = await fetchWithAuth(`/tickets/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -621,7 +706,11 @@ export async function sendAnalyticsEvent(eventName, deviceId, payload = {}) {
   const res = await fetchWithAuth(`/analytics/event`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ event_name: eventName, device_id: deviceId, payload }),
+    body: JSON.stringify({
+      event_name: eventName,
+      device_id: deviceId,
+      payload,
+    }),
   });
   if (!res.ok) throw new Error("Failed to send analytics event");
   return res.json();
@@ -637,11 +726,19 @@ export async function fetchAnalyticsSummary() {
 // INVESTOR DATA PIPELINE API FUNCTIONS
 // ═══════════════════════════════════════════════════════════
 
-export async function fetchInvestors(target, fullEnrichment = true, investorLimit = 50) {
+export async function fetchInvestors(
+  target,
+  fullEnrichment = true,
+  investorLimit = 50,
+) {
   const res = await fetchWithAuth(`/investors/enrich`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ target, full_enrichment: fullEnrichment, investor_limit: investorLimit }),
+    body: JSON.stringify({
+      target,
+      full_enrichment: fullEnrichment,
+      investor_limit: investorLimit,
+    }),
   });
 
   if (!res.ok) {
@@ -649,7 +746,7 @@ export async function fetchInvestors(target, fullEnrichment = true, investorLimi
     try {
       const errData = await res.json();
       if (Array.isArray(errData.detail)) {
-        errorDetail = errData.detail.map(e => e.msg).join(", ");
+        errorDetail = errData.detail.map((e) => e.msg).join(", ");
       } else {
         errorDetail = errData.detail || errData.error || errorDetail;
       }
@@ -665,7 +762,13 @@ export async function fetchInvestors(target, fullEnrichment = true, investorLimi
   return res.json();
 }
 
-export async function discoverInvestors(companyDescription, industry, targetAudience, investmentStage, investorLimit = 10) {
+export async function discoverInvestors(
+  companyDescription,
+  industry,
+  targetAudience,
+  investmentStage,
+  investorLimit = 10,
+) {
   const res = await fetchWithAuth(`/investors/discover`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -674,7 +777,7 @@ export async function discoverInvestors(companyDescription, industry, targetAudi
       industry,
       target_audience: targetAudience,
       investment_stage: investmentStage,
-      investor_limit: investorLimit
+      investor_limit: investorLimit,
     }),
   });
 
@@ -683,7 +786,7 @@ export async function discoverInvestors(companyDescription, industry, targetAudi
     try {
       const errData = await res.json();
       if (Array.isArray(errData.detail)) {
-        errorDetail = errData.detail.map(e => e.msg).join(", ");
+        errorDetail = errData.detail.map((e) => e.msg).join(", ");
       } else {
         errorDetail = errData.detail || errData.error || errorDetail;
       }
@@ -699,7 +802,14 @@ export async function discoverInvestors(companyDescription, industry, targetAudi
   return res.json();
 }
 
-export async function discoverInvestorsV2(companyDescription, industry, targetAudience, investmentStage, investorLimit = 50, country = null) {
+export async function discoverInvestorsV2(
+  companyDescription,
+  industry,
+  targetAudience,
+  investmentStage,
+  investorLimit = 50,
+  country = null,
+) {
   const res = await fetchWithAuth(`/investors_v2/discover`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -709,7 +819,7 @@ export async function discoverInvestorsV2(companyDescription, industry, targetAu
       target_audience: targetAudience,
       investment_stage: investmentStage,
       investor_limit: investorLimit,
-      country
+      country,
     }),
   });
 
@@ -718,7 +828,7 @@ export async function discoverInvestorsV2(companyDescription, industry, targetAu
     try {
       const errData = await res.json();
       if (Array.isArray(errData.detail)) {
-        errorDetail = errData.detail.map(e => e.msg).join(", ");
+        errorDetail = errData.detail.map((e) => e.msg).join(", ");
       } else {
         errorDetail = errData.detail || errData.error || errorDetail;
       }
@@ -807,5 +917,3 @@ export async function apiUnsuspendUser(userId) {
   }
   return res.json();
 }
-
-
