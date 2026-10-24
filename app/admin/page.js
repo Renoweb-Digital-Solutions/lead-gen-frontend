@@ -6,6 +6,7 @@ import { useSessionState } from "../hooks/useSessionState";
 import ThemeToggle from "../components/ThemeToggle";
 import EmailStudio from "./EmailStudio";
 import BehaviourDashboard from "./BehaviourDashboard";
+import TicketManager from "./TicketManager";
 import { fetchAdminUsersAndRuns, apiSuspendUser, apiUnsuspendUser } from "../lib/api";
 import { LogOut, Users, Activity, CheckCircle, XCircle, AlertCircle, Calendar, ChevronDown, ChevronUp, MessageSquare, RefreshCw, BarChart3, Ban, Unlock, Mail } from "lucide-react";
 
@@ -289,9 +290,9 @@ export default function AdminDashboard() {
           >
             <MessageSquare className="w-5 h-5 mr-3" />
             Support Tickets
-            {tickets.filter(t => t.status === "open").length > 0 && (
+            {tickets.filter(t => !t.archived && t.status !== "closed").length > 0 && (
               <span className={`ml-auto px-2 py-0.5 text-xs font-bold rounded-full ${activeTab === 'tickets' ? 'bg-red-100 text-red-600' : 'bg-red-500 text-white'}`}>
-                {tickets.filter(t => t.status === "open").length}
+                {tickets.filter(t => !t.archived && t.status !== "closed").length}
               </span>
             )}
           </button>
@@ -412,48 +413,15 @@ export default function AdminDashboard() {
               </>
             )}
 
-            {activeTab === "tickets" && (
-              <div className="divide-y divide-gray-200">
-                {tickets.length === 0 ? (
-                  <div className="p-10 text-center text-gray-500 font-medium">
-                    No support tickets received yet.
-                  </div>
-                ) : (
-                  tickets.map((ticket) => (
-                    <div key={ticket.id} className="p-6 hover:bg-gray-50 transition-colors">
-                      <div className="flex justify-between items-start mb-2">
-                        <div>
-                          <h3 className="text-lg font-bold text-gray-900 mb-1">{ticket.title}</h3>
-                          <p className="text-sm text-gray-500 font-medium">
-                            From: <span className="text-gray-900">{ticket.username}</span>
-                          </p>
-                        </div>
-                        <div className="flex gap-2">
-                          <button onClick={() => setEmailStudio({ type: "feedback", user: users.find((user) => user._id === String(ticket.user_id)) })} disabled={!users.some((user) => user._id === String(ticket.user_id) && user.email)} className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 px-3 py-1.5 text-xs font-semibold text-[#308fef] hover:bg-blue-50 disabled:opacity-40 disabled:cursor-not-allowed"><Mail className="w-3.5 h-3.5" />Ask for feedback</button>
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider ${ticket.type === 'error' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-[var(--rw-deep-blue)]'}`}>
-                            {ticket.type}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="mt-4 bg-gray-50 p-4 rounded-xl border border-gray-200">
-                        <p className="text-gray-700 font-medium text-sm whitespace-pre-wrap">
-                          {ticket.description}
-                        </p>
-                      </div>
-                      <div className="mt-4 flex justify-between items-center text-xs font-medium text-gray-400">
-                        <div className="flex items-center">
-                          <Calendar className="w-4 h-4 mr-1" />
-                          {new Date(ticket.created_at).toLocaleString()}
-                        </div>
-                        <span className="inline-flex items-center px-2 py-1 rounded bg-yellow-100 text-yellow-800 uppercase tracking-widest font-bold">
-                          {ticket.status}
-                        </span>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            )}
+            {/* # Ticket lifecycle controls preserve the independent customer and archive views. */}
+            {activeTab === "tickets" && <TicketManager
+              tickets={tickets}
+              users={users}
+              isDark={isDark}
+              onTicketUpdated={updated => setTickets(previous => previous.map(ticket => ticket.id === updated.id ? updated : ticket))}
+              onFeedback={user => setEmailStudio({ type: "feedback", user })}
+              onRefresh={() => loadData(true)}
+            />}
 
             {/* # Behaviour reports own their loading/errors and cannot block user administration. */}
             {activeTab === "analytics" && <BehaviourDashboard refreshKey={refreshing} />}

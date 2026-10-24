@@ -605,6 +605,22 @@ export async function fetchAdminTickets() {
   return res.json();
 }
 
+export async function updateAdminTicket(ticketId, action, payload) {
+  // # Ticket operations use existing authenticated requests and never share pipeline handlers.
+  const retry = action === "resolution-email/retry";
+  const res = await fetchWithAuth(`/admin/tickets/${encodeURIComponent(ticketId)}/${action}`, {
+    method: retry ? "POST" : "PATCH",
+    ...(retry ? {} : { headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const error = new Error(typeof data.detail === "string" ? data.detail : "Could not update the ticket. Refresh and try again.");
+    error.status = res.status;
+    throw error;
+  }
+  return data;
+}
+
 export async function suggestFaqs(query) {
   const res = await fetchWithAuth(`/tickets/suggest-faq`, {
     method: "POST",
