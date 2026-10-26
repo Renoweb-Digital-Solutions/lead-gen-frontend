@@ -1,5 +1,8 @@
 "use client";
 
+// # Feedback observes the existing run lifecycle without blocking pipeline work.
+import usePipelineFeedback from "../../hooks/usePipelineFeedback";
+
 // # Analytics metadata is allowlisted; search text and result contents are never captured.
 import { trackInteraction } from "../../lib/interactionAnalytics";
 
@@ -23,6 +26,7 @@ export default function InvestorsView() {
   const [country, setCountry] = useState("");
   const [investorLimit, setInvestorLimit] = useState(10);
   const [isSearching, setIsSearching] = useState(false);
+  usePipelineFeedback("investors", isSearching);
   const [results, setResults] = useState(null);
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");

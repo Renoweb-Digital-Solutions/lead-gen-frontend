@@ -1,5 +1,8 @@
 "use client";
 
+// # Feedback observes the existing run lifecycle without blocking pipeline work.
+import usePipelineFeedback from "../../hooks/usePipelineFeedback";
+
 // # Analytics metadata is allowlisted; search text and result contents are never captured.
 import { trackInteraction } from "../../lib/interactionAnalytics";
 
@@ -107,6 +110,7 @@ export default function B2BView() {
 
   // ─── Search State ────────────────────────────────────────
   const [isSearching, setIsSearching] = useState(false);
+  usePipelineFeedback("b2b", isSearching);
   const [errorMsg, setErrorMsg] = useState(null);
   const [successMsg, setSuccessMsg] = useState(null);
   const [resultData, setResultData] = useSessionState("b2b-results", null);

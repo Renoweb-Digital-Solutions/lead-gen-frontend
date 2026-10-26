@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { checkHealth } from "../lib/api";
-import { Target, Map, Trash2, Activity, LogOut, Menu, Camera, User, Sun, Moon } from "lucide-react";
+import { Target, Map, Trash2, Activity, LogOut, Menu, Camera, Sun, Moon } from "lucide-react";
 import { useAuth } from "../lib/AuthContext";
 import { useRouter } from "next/navigation";
 
@@ -214,17 +214,7 @@ export default function Header({ onClearAll, activeModule, onModuleChange, onTog
           <span className="hidden lg:inline font-bold text-[13px] ml-1">{isDark ? 'Light' : 'Dark'}</span>
         </button>
 
-        {/* Profile button */}
-        <button
-          type="button"
-          className="rw-btn rw-btn-ghost hover:bg-[var(--rw-surface-hover)] p-2 lg:px-3 lg:py-2 text-brand-sky"
-          onClick={() => router.push('/profile')}
-          title="Profile"
-        >
-          <User className="w-5 h-5 lg:w-4 lg:h-4 text-brand-sky hover:text-brand-sky/80" />
-          <span className="hidden lg:inline font-bold text-[13px] text-brand-sky">Profile</span>
-        </button>
-
+        {/* # Profile navigation lives on the sidebar account name and avatar. */}
         {/* Logout button (Visible on all screens) */}
         <button
           type="button"

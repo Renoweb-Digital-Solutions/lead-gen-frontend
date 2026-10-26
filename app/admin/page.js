@@ -7,8 +7,9 @@ import ThemeToggle from "../components/ThemeToggle";
 import EmailStudio from "./EmailStudio";
 import BehaviourDashboard from "./BehaviourDashboard";
 import TicketManager from "./TicketManager";
+import FeedbackInbox from "./FeedbackInbox";
 import { fetchAdminUsersAndRuns, apiSuspendUser, apiUnsuspendUser } from "../lib/api";
-import { LogOut, Users, Activity, CheckCircle, XCircle, AlertCircle, Calendar, ChevronDown, ChevronUp, MessageSquare, RefreshCw, BarChart3, Ban, Unlock, Mail } from "lucide-react";
+import { LogOut, Users, Activity, CheckCircle, XCircle, AlertCircle, Calendar, ChevronDown, ChevronUp, MessageSquare, MessageCircleHeart, RefreshCw, BarChart3, Ban, Unlock, Mail } from "lucide-react";
 
 function UserRow({ user, onSuspendClick, onUnsuspendClick, onEmailClick }) {
   const [expanded, setExpanded] = useState(false);
@@ -141,7 +142,7 @@ function UserRow({ user, onSuspendClick, onUnsuspendClick, onEmailClick }) {
 
 export default function AdminDashboard() {
   const [isDark, setIsDark] = useSessionState("renoweb-theme-dark", false);
-  const [activeTab, setActiveTab] = useState("users"); // "users", "tickets", "analytics"
+  const [activeTab, setActiveTab] = useState("users"); // # Users, tickets, analytics, and product feedback have separate views.
   const [users, setUsers] = useState([]);
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -297,6 +298,12 @@ export default function AdminDashboard() {
             )}
           </button>
 
+          {/* # Emoji feedback has a dedicated private inbox, separate from support tickets. */}
+          <button onClick={() => setActiveTab("feedback")}
+            className={`w-full flex items-center px-4 py-3 rounded-xl transition-all font-medium ${activeTab === "feedback" ? "bg-[var(--rw-surface)] text-[var(--rw-deep-blue)] shadow-md" : "text-[#dbeafe] hover:bg-white/10"}`}>
+            <MessageCircleHeart className="w-5 h-5 mr-3" />Feedback
+          </button>
+
           <button
             onClick={() => setActiveTab("analytics")}
             className={`w-full flex items-center px-4 py-3 rounded-xl transition-all font-medium ${
@@ -326,6 +333,8 @@ export default function AdminDashboard() {
             <h1 className="text-3xl font-bold text-gray-900 font-oswald tracking-wide flex items-center">
               {activeTab === "users" ? (
                 <><Activity className="w-7 h-7 mr-3 text-[#308fef]" /> Platform Activity</>
+              ) : activeTab === "feedback" ? (
+                <><MessageCircleHeart className="w-7 h-7 mr-3 text-[#308fef]" /> Customer Feedback</>
               ) : activeTab === "analytics" ? (
                 <><BarChart3 className="w-7 h-7 mr-3 text-[#308fef]" /> User Behaviour</>
               ) : (
@@ -335,6 +344,8 @@ export default function AdminDashboard() {
             <p className="mt-2 text-sm text-gray-500 font-medium">
               {activeTab === "users" 
                 ? "Monitor user accounts and their lead generation runs across all tools."
+                : activeTab === "feedback"
+                ? "See how users feel about Simpleads and what they would like us to improve."
                 : activeTab === "analytics"
                 ? "Understand which modules customers use and the choices they make."
                 : "Review and manage user feedback and error reports."
@@ -356,7 +367,8 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {error ? (
+        {/* # Feedback loading and errors stay independent of user/run and support requests. */}
+        {activeTab === "feedback" ? <FeedbackInbox refreshKey={refreshing} /> : error ? (
           <div className="bg-red-50 border border-red-200 p-4 rounded-xl text-red-600 font-medium">
             {error}
           </div>

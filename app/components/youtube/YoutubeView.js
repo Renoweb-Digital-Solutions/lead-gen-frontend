@@ -1,5 +1,8 @@
 "use client";
 
+// # Feedback observes the existing run lifecycle without blocking pipeline work.
+import usePipelineFeedback from "../../hooks/usePipelineFeedback";
+
 // # Analytics metadata is allowlisted; search text and result contents are never captured.
 import { trackInteraction } from "../../lib/interactionAnalytics";
 
@@ -26,6 +29,7 @@ export default function YoutubeView() {
   const [onlyEmail, setOnlyEmail] = useState(false);
   const [sort, setSort] = useState("subscribers");
   const [searching, setSearching] = useState(false);
+  usePipelineFeedback("youtube", searching);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const openSheet = useCallback(() => setIsSheetOpen(true), []);
   const closeSheet = useCallback(() => setIsSheetOpen(false), []);

@@ -1,5 +1,8 @@
 "use client";
 
+// # Feedback observes the existing run lifecycle without blocking pipeline work.
+import usePipelineFeedback from "../hooks/usePipelineFeedback";
+
 import { useState, useRef, useEffect } from "react";
 import { trackInteraction, leadgenSettings } from "../lib/interactionAnalytics";
 import Papa from "papaparse";
@@ -65,6 +68,7 @@ export default function LeadGenApp() {
 
   const [showClearModal, setShowClearModal] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  usePipelineFeedback("leadgen", isExporting);
   const [exportResults, setExportResults] = useState({});
   const [direction, setDirection] = useState("forward");
   const [sidebarOpen, setSidebarOpen] = useState(false);

@@ -48,6 +48,21 @@ export async function adminEmailApi(path = "/studio", data, method = "POST") {
   return res.json();
 }
 
+// # Feedback requests use authenticated endpoints and preserve retry/cooldown status codes.
+export async function feedbackApi(path = "/feedback/eligibility", data, signal) {
+  const res = await fetchWithAuth(path, {
+    method: data === undefined ? "GET" : "POST", cache: "no-store", signal,
+    ...(data === undefined ? {} : { headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) }),
+  });
+  const payload = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const error = new Error(typeof payload.detail === "string" ? payload.detail : "Feedback could not be saved. Please try again.");
+    error.status = res.status;
+    throw error;
+  }
+  return payload;
+}
+
 // # Identity requests deliberately omit outreach authorization and stored JWTs.
 // # Errors retain machine-readable account-switch hints while displaying plain text.
 export async function identityApi(path, body, form = false, signal) {
