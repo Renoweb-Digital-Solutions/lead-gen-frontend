@@ -59,6 +59,21 @@ export async function adminEmailApi(path = "/studio", data, method = "POST") {
   return res.json();
 }
 
+// # Feedback requests use authenticated endpoints and preserve retry/cooldown status codes.
+export async function feedbackApi(path = "/feedback/eligibility", data, signal) {
+  const res = await fetchWithAuth(path, {
+    method: data === undefined ? "GET" : "POST", cache: "no-store", signal,
+    ...(data === undefined ? {} : { headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) }),
+  });
+  const payload = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const error = new Error(typeof payload.detail === "string" ? payload.detail : "Feedback could not be saved. Please try again.");
+    error.status = res.status;
+    throw error;
+  }
+  return payload;
+}
+
 // # Identity requests deliberately omit outreach authorization and stored JWTs.
 // # Errors retain machine-readable account-switch hints while displaying plain text.
 export async function identityApi(path, body, form = false, signal) {
@@ -92,8 +107,9 @@ export async function identityApi(path, body, form = false, signal) {
 }
 
 // # Starting login returns an OTP challenge, never a session token.
-export const apiRequestLoginOtp = (username, password) =>
-  identityApi("/request-login-otp", { username, password }, true);
+export const apiRequestLoginOtp = (username, password) => identityApi("/request-login-otp", { username, password }, true);
+// # Admin requests support legacy email-as-username accounts through a scoped endpoint.
+export const apiRequestAdminLoginOtp = (username, password) => identityApi("/admin/request-login-otp", { username, password }, true);
 export const apiLogin = apiRequestLoginOtp;
 export const apiSignup = (username, email, password) =>
   identityApi("/create-user", { username, email, password });
@@ -688,6 +704,22 @@ export async function fetchAdminTickets() {
   return res.json();
 }
 
+export async function updateAdminTicket(ticketId, action, payload) {
+  // # Ticket operations use existing authenticated requests and never share pipeline handlers.
+  const retry = action === "resolution-email/retry";
+  const res = await fetchWithAuth(`/admin/tickets/${encodeURIComponent(ticketId)}/${action}`, {
+    method: retry ? "POST" : "PATCH",
+    ...(retry ? {} : { headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const error = new Error(typeof data.detail === "string" ? data.detail : "Could not update the ticket. Refresh and try again.");
+    error.status = res.status;
+    throw error;
+  }
+  return data;
+}
+
 export async function suggestFaqs(query) {
   const res = await fetchWithAuth(`/tickets/suggest-faq`, {
     method: "POST",
@@ -716,10 +748,14 @@ export async function sendAnalyticsEvent(eventName, deviceId, payload = {}) {
   return res.json();
 }
 
-export async function fetchAnalyticsSummary() {
-  const res = await fetchWithAuth(`/analytics/summary`);
+export async function fetchAnalyticsSummary(days = 30, module = "all", signal) {
+  // # Reports have independent cancellation and filters; pipeline requests are untouched.
+  const res = await fetchWithAuth(`/analytics/summary?${new URLSearchParams({ days: String(days), module, version: "2" })}`, { signal });
   if (!res.ok) throw new Error("Failed to fetch analytics summary");
-  return res.json();
+  const report = await res.json();
+  // # An older backend must show a report error rather than crash the new admin interface.
+  if (!report.metrics || !Array.isArray(report.modules) || !Array.isArray(report.funnel)) throw new Error("Customer behaviour reports are not available yet. Please try again shortly.");
+  return report;
 }
 
 // ═══════════════════════════════════════════════════════════

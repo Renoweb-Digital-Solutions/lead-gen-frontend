@@ -4,6 +4,8 @@ import { motion } from "framer-motion";
 import { Users, Building2, Briefcase, Zap, Rocket, Check, Target, Map, Trash2, LogOut, X, Activity, Menu, Camera } from "lucide-react";
 import { useAuth } from "../lib/AuthContext";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import AccountAvatar from "./AccountAvatar";
 import { STEPS } from "../lib/constants";
 import { useSessionState } from "../hooks/useSessionState";
 import { PIPELINES } from "../lib/pipelinesConfig";
@@ -26,12 +28,13 @@ export default function Sidebar({
   onClearAll,
   isMobileOnly
 }) {
-  const { logout, token } = useAuth();
+  const { token, account } = useAuth();
   const router = useRouter();
   const [isDark] = useSessionState("renoweb-theme-dark", false);
 
-  let userEmail = "admin@renoweb.com";
-  let userName = "Noah Smith";
+  // # Never show a fabricated account while the stored identity is loading.
+  let userEmail = "";
+  let userName = "Your account";
   
   if (token) {
     try {
@@ -57,6 +60,9 @@ export default function Sidebar({
     }
   }
 
+  // # Prefer the server's actual email and username over token display fallbacks.
+  userEmail = account?.email || userEmail;
+  userName = account?.username || userName;
   const avatarLetter = userName ? userName.charAt(0).toUpperCase() : "U";
   return (
     <>
@@ -191,15 +197,14 @@ export default function Sidebar({
 
       {/* Footer branding */}
       <div className="rw-sidebar-footer relative z-10 mt-auto pt-6 pb-2">
-        <div className="flex items-center gap-3 mb-5 p-2.5 rounded-xl border border-transparent hover:border-[var(--rw-border)] hover:bg-[var(--rw-surface-hover)] transition-all cursor-pointer">
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-brand-blue to-brand-cyan text-white flex items-center justify-center font-bold text-[14px] shadow-sm shrink-0">
-            {avatarLetter}
-          </div>
+        {/* # The account name and avatar form one keyboard-accessible profile link. */}
+        <Link href="/profile" onClick={() => onClose?.()} aria-label={`Open profile for ${userName}`} className="flex items-center gap-3 mb-5 p-2.5 rounded-xl border border-transparent hover:border-[var(--rw-border)] hover:bg-[var(--rw-surface-hover)] focus-visible:outline-2 focus-visible:outline-brand-sky transition-all cursor-pointer">
+          <AccountAvatar picture={account?.picture} fallback={avatarLetter} className="w-9 h-9 rounded-full bg-gradient-to-br from-brand-blue to-brand-cyan text-white flex items-center justify-center font-bold text-[14px] shadow-sm shrink-0" />
           <div className="flex flex-col min-w-0">
             <span className="text-[13px] font-bold text-[var(--rw-text)] truncate leading-tight">{userName}</span>
             <span className="text-[11px] text-[var(--rw-text-muted)] truncate mt-0.5">{userEmail}</span>
           </div>
-        </div>
+        </Link>
         <div className="text-[10px] text-brand-sky font-bold tracking-[0.1em] uppercase px-2.5">
           Renoweb Digital Solutions
           <br />

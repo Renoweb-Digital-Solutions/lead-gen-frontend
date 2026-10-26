@@ -5,9 +5,11 @@ import { useRouter } from "next/navigation";
 import { useSessionState } from "../hooks/useSessionState";
 import ThemeToggle from "../components/ThemeToggle";
 import EmailStudio from "./EmailStudio";
-import { fetchAdminUsersAndRuns, fetchAnalyticsSummary, apiSuspendUser, apiUnsuspendUser } from "../lib/api";
-import { LogOut, Users, Activity, CheckCircle, XCircle, AlertCircle, Calendar, ChevronDown, ChevronUp, MessageSquare, RefreshCw, BarChart3, Ban, Unlock, Mail } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import BehaviourDashboard from "./BehaviourDashboard";
+import TicketManager from "./TicketManager";
+import FeedbackInbox from "./FeedbackInbox";
+import { fetchAdminUsersAndRuns, apiSuspendUser, apiUnsuspendUser } from "../lib/api";
+import { LogOut, Users, Activity, CheckCircle, XCircle, AlertCircle, Calendar, ChevronDown, ChevronUp, MessageSquare, MessageCircleHeart, RefreshCw, BarChart3, Ban, Unlock, Mail } from "lucide-react";
 
 function UserRow({ user, onSuspendClick, onUnsuspendClick, onEmailClick }) {
   const [expanded, setExpanded] = useState(false);
@@ -140,10 +142,9 @@ function UserRow({ user, onSuspendClick, onUnsuspendClick, onEmailClick }) {
 
 export default function AdminDashboard() {
   const [isDark, setIsDark] = useSessionState("renoweb-theme-dark", false);
-  const [activeTab, setActiveTab] = useState("users"); // "users", "tickets", "analytics"
+  const [activeTab, setActiveTab] = useState("users"); // # Users, tickets, analytics, and product feedback have separate views.
   const [users, setUsers] = useState([]);
   const [tickets, setTickets] = useState([]);
-  const [analytics, setAnalytics] = useState({ total_visitors: 0, top_events: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [refreshing, setRefreshing] = useState(false);
@@ -177,16 +178,14 @@ export default function AdminDashboard() {
         return;
       }
 
-      const [usersData, ticketsData, analyticsData] = await Promise.all([
+      const [usersData, ticketsData] = await Promise.all([
         fetchAdminUsersAndRuns(),
-        import("../lib/api").then(api => api.fetchAdminTickets()),
-        fetchAnalyticsSummary().catch(() => ({ total_visitors: 0, top_events: [] }))
+        import("../lib/api").then(api => api.fetchAdminTickets())
       ]);
       
       setUsers(usersData.users || []);
       setError("");
       setTickets(ticketsData.tickets || []);
-      setAnalytics(analyticsData || { total_visitors: 0, top_events: [] });
     } catch (err) {
       setError(err.message || "Failed to load dashboard data");
       if (err.message.toLowerCase().includes("unauthorized") || err.message.toLowerCase().includes("forbidden")) {
@@ -292,11 +291,17 @@ export default function AdminDashboard() {
           >
             <MessageSquare className="w-5 h-5 mr-3" />
             Support Tickets
-            {tickets.filter(t => t.status === "open").length > 0 && (
+            {tickets.filter(t => !t.archived && t.status !== "closed").length > 0 && (
               <span className={`ml-auto px-2 py-0.5 text-xs font-bold rounded-full ${activeTab === 'tickets' ? 'bg-red-100 text-red-600' : 'bg-red-500 text-white'}`}>
-                {tickets.filter(t => t.status === "open").length}
+                {tickets.filter(t => !t.archived && t.status !== "closed").length}
               </span>
             )}
+          </button>
+
+          {/* # Emoji feedback has a dedicated private inbox, separate from support tickets. */}
+          <button onClick={() => setActiveTab("feedback")}
+            className={`w-full flex items-center px-4 py-3 rounded-xl transition-all font-medium ${activeTab === "feedback" ? "bg-[var(--rw-surface)] text-[var(--rw-deep-blue)] shadow-md" : "text-[#dbeafe] hover:bg-white/10"}`}>
+            <MessageCircleHeart className="w-5 h-5 mr-3" />Feedback
           </button>
 
           <button
@@ -328,8 +333,10 @@ export default function AdminDashboard() {
             <h1 className="text-3xl font-bold text-gray-900 font-oswald tracking-wide flex items-center">
               {activeTab === "users" ? (
                 <><Activity className="w-7 h-7 mr-3 text-[#308fef]" /> Platform Activity</>
+              ) : activeTab === "feedback" ? (
+                <><MessageCircleHeart className="w-7 h-7 mr-3 text-[#308fef]" /> Customer Feedback</>
               ) : activeTab === "analytics" ? (
-                <><BarChart3 className="w-7 h-7 mr-3 text-[#308fef]" /> Analytics Dashboard</>
+                <><BarChart3 className="w-7 h-7 mr-3 text-[#308fef]" /> User Behaviour</>
               ) : (
                 <><MessageSquare className="w-7 h-7 mr-3 text-[#308fef]" /> Support Tickets</>
               )}
@@ -337,8 +344,10 @@ export default function AdminDashboard() {
             <p className="mt-2 text-sm text-gray-500 font-medium">
               {activeTab === "users" 
                 ? "Monitor user accounts and their lead generation runs across all tools."
+                : activeTab === "feedback"
+                ? "See how users feel about Simpleads and what they would like us to improve."
                 : activeTab === "analytics"
-                ? "View platform usage, top events, and unique visitor counts."
+                ? "Understand which modules customers use and the choices they make."
                 : "Review and manage user feedback and error reports."
               }
             </p>
@@ -358,7 +367,8 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {error ? (
+        {/* # Feedback loading and errors stay independent of user/run and support requests. */}
+        {activeTab === "feedback" ? <FeedbackInbox refreshKey={refreshing} /> : error ? (
           <div className="bg-red-50 border border-red-200 p-4 rounded-xl text-red-600 font-medium">
             {error}
           </div>
@@ -415,86 +425,19 @@ export default function AdminDashboard() {
               </>
             )}
 
-            {activeTab === "tickets" && (
-              <div className="divide-y divide-gray-200">
-                {tickets.length === 0 ? (
-                  <div className="p-10 text-center text-gray-500 font-medium">
-                    No support tickets received yet.
-                  </div>
-                ) : (
-                  tickets.map((ticket) => (
-                    <div key={ticket.id} className="p-6 hover:bg-gray-50 transition-colors">
-                      <div className="flex justify-between items-start mb-2">
-                        <div>
-                          <h3 className="text-lg font-bold text-gray-900 mb-1">{ticket.title}</h3>
-                          <p className="text-sm text-gray-500 font-medium">
-                            From: <span className="text-gray-900">{ticket.username}</span>
-                          </p>
-                        </div>
-                        <div className="flex gap-2">
-                          <button onClick={() => setEmailStudio({ type: "feedback", user: users.find((user) => user._id === String(ticket.user_id)) })} disabled={!users.some((user) => user._id === String(ticket.user_id) && user.email)} className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 px-3 py-1.5 text-xs font-semibold text-[#308fef] hover:bg-blue-50 disabled:opacity-40 disabled:cursor-not-allowed"><Mail className="w-3.5 h-3.5" />Ask for feedback</button>
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider ${ticket.type === 'error' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-[var(--rw-deep-blue)]'}`}>
-                            {ticket.type}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="mt-4 bg-gray-50 p-4 rounded-xl border border-gray-200">
-                        <p className="text-gray-700 font-medium text-sm whitespace-pre-wrap">
-                          {ticket.description}
-                        </p>
-                      </div>
-                      <div className="mt-4 flex justify-between items-center text-xs font-medium text-gray-400">
-                        <div className="flex items-center">
-                          <Calendar className="w-4 h-4 mr-1" />
-                          {new Date(ticket.created_at).toLocaleString()}
-                        </div>
-                        <span className="inline-flex items-center px-2 py-1 rounded bg-yellow-100 text-yellow-800 uppercase tracking-widest font-bold">
-                          {ticket.status}
-                        </span>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            )}
+            {/* # Ticket lifecycle controls preserve the independent customer and archive views. */}
+            {activeTab === "tickets" && <TicketManager
+              tickets={tickets}
+              users={users}
+              isDark={isDark}
+              onTicketUpdated={updated => setTickets(previous => previous.map(ticket => ticket.id === updated.id ? updated : ticket))}
+              onFeedback={user => setEmailStudio({ type: "feedback", user })}
+              onRefresh={() => loadData(true)}
+            />}
 
-            {activeTab === "analytics" && (
-              <div className="p-6">
-                <div className="mb-6 bg-[var(--rw-surface-hover)] rounded-xl p-6 border border-[#308fef]/20">
-                  <h3 className="text-sm font-semibold text-[var(--rw-deep-blue)] uppercase tracking-wider mb-2">Total Unique Visitors</h3>
-                  <div className="text-4xl font-black text-gray-900">{analytics.total_visitors}</div>
-                  <p className="text-sm text-gray-500 mt-1">Based on unique device IDs</p>
-                </div>
+            {/* # Behaviour reports own their loading/errors and cannot block user administration. */}
+            {activeTab === "analytics" && <BehaviourDashboard refreshKey={refreshing} />}
 
-                <div className="bg-[var(--rw-surface)] border border-gray-100 rounded-xl p-6 shadow-sm">
-                  <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center">
-                    <Activity className="w-5 h-5 mr-2 text-[#308fef]" />
-                    Top Events
-                  </h3>
-                  
-                  {analytics.top_events.length === 0 ? (
-                    <div className="text-center py-10 text-gray-500 font-medium">
-                      No analytics data collected yet.
-                    </div>
-                  ) : (
-                    <div className="h-80 w-full">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={analytics.top_events} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                          <XAxis type="number" stroke="var(--rw-text-secondary)" />
-                          <YAxis dataKey="name" type="category" width={150} tick={{fontSize: 12, fill: "var(--rw-text-secondary)"}} stroke="var(--rw-text-secondary)" />
-                          <Tooltip 
-                            contentStyle={{ background: 'var(--rw-surface)', color: 'var(--rw-text)', borderRadius: '8px', border: '1px solid var(--rw-border)', boxShadow: 'var(--rw-shadow-md)' }}
-                            itemStyle={{ color: 'var(--rw-bright-blue)' }}
-                            cursor={{ fill: 'rgba(48, 143, 239, 0.1)' }}
-                          />
-                          <Bar dataKey="count" fill="#308fef" radius={[0, 4, 4, 0]} barSize={24} />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
           </div>
         )}
       </main>

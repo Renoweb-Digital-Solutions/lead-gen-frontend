@@ -1,5 +1,11 @@
 "use client";
 
+// # Feedback observes the existing run lifecycle without blocking pipeline work.
+import usePipelineFeedback from "../../hooks/usePipelineFeedback";
+
+// # Analytics metadata is allowlisted; search text and result contents are never captured.
+import { trackInteraction } from "../../lib/interactionAnalytics";
+
 import { useState, useEffect, useRef } from "react";
 import {
   suggestKeywords,
@@ -28,6 +34,7 @@ export default function GmapsView() {
 
   // ─── Search State ────────────────────────────────────────
   const [isSearching, setIsSearching] = useState(false);
+  usePipelineFeedback("gmaps", isSearching);
   const [isSuggesting, setIsSuggesting] = useState(false);
   const [searchError, setSearchError] = useState(null);
   const [searchSuccess, setSearchSuccess] = useState(null);
@@ -110,6 +117,8 @@ export default function GmapsView() {
       return;
     }
 
+    // # Track validated submission without awaiting analytics or changing pipeline inputs.
+    trackInteraction("run_submitted", "gmaps", { settings: { result_limit: Number(limit) } });
     setIsSearching(true);
     setSearchError(null);
     setSearchSuccess(null);
@@ -355,7 +364,7 @@ export default function GmapsView() {
                 <button
                   key={runId}
                   type="button"
-                  onClick={() => handleLoadRun(runId)}
+                  data-analytics-action="load_run" onClick={() => handleLoadRun(runId)}
                   className={`
                     px-4 py-2 rounded-xl text-[13px] transition-all font-medium border
                     ${isActive 

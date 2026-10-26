@@ -1,4 +1,5 @@
 "use client";
+// # Stable action identifiers are consumed by the passive interaction observer.
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -303,7 +304,7 @@ export default function ExportStep({
                   : "bg-gradient-to-r from-brand-blue to-brand-cyan shadow-md hover:shadow-lg hover:-translate-y-0.5"
                 }
               `}
-              onClick={onExport}
+              data-analytics-action="start_search" onClick={onExport}
               disabled={isExporting || isSuspended}
               title={isSuspended ? "Your account is suspended. You cannot run pipelines." : ""}
             >
@@ -335,7 +336,7 @@ export default function ExportStep({
             {isExporting && (
               <button
                 type="button"
-                onClick={onCancel}
+                data-analytics-action="cancel_search" onClick={onCancel}
                 className="mt-2 text-sm text-red-500 hover:text-red-600 font-semibold flex items-center justify-center gap-1.5 transition-colors"
               >
                 <span>Cancel Operation</span>

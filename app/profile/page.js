@@ -10,6 +10,7 @@ import { useAuth } from "../lib/AuthContext";
 import { useSessionState } from "../hooks/useSessionState";
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
+import AccountAvatar from "../components/AccountAvatar";
 import ChangePasswordModal from "../components/profile/ChangePasswordModal";
 import { ActivityMap, EmailSignature, ErrorNote, LoadingNote, PasswordVault, PipelinePassport, ReportTimeline, SupportThread } from "../components/profile/ProfileLogbook";
 import styles from "../components/profile/ProfileLogbook.module.css";
@@ -105,9 +106,9 @@ export default function ProfilePage() {
         <div className="lg:hidden"><Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} isMobileOnly onModuleChange={(module) => { sessionStorage.setItem("renoweb-active-module", JSON.stringify(module)); window.dispatchEvent(new Event("local-session-storage")); router.push("/dashboard"); }} /></div>
         <main className={styles.paper} id="account-logbook">
           <div className={styles.masthead}><span><BookOpen size={15} />Simpleads / Account overview</span><a href="/dashboard">Back to the workspace<ArrowUpRight size={14} /></a></div>
-          {/* # The account email generates the identity mark; no avatar or membership metadata is invented. */}
+          {/* # Show the verified Google photo, with the email signature as a fallback. */}
           <header className={styles.identity}>
-            <div className={styles.identityAnchor}>{email && <EmailSignature email={email} />}<div>{identity.loading ? <LoadingNote>Reading your account identity...</LoadingNote> : identity.error ? <ErrorNote onRetry={retry}>{identity.error}</ErrorNote> : <><p className={styles.welcome}>Welcome,</p><p className={styles.email}>{email || identity.account?.username}</p>{!email && <p className={styles.muted}>No email address is available for this account.</p>}<p className={styles.signatureCaption}>{email ? "Your address. Your signature. Your work." : "Your personal work logbook."}</p></>}</div></div>
+            <div className={styles.identityAnchor}>{email && <AccountAvatar picture={identity.account?.picture} fallback={<EmailSignature email={email} />} className={styles.signature} />}<div>{identity.loading ? <LoadingNote>Reading your account identity...</LoadingNote> : identity.error ? <ErrorNote onRetry={retry}>{identity.error}</ErrorNote> : <><p className={styles.welcome}>Welcome,</p><p className={styles.email}>{email || identity.account?.username}</p>{!email && <p className={styles.muted}>No email address is available for this account.</p>}<p className={styles.signatureCaption}>{email ? "Your address. Your signature. Your work." : "Your personal work logbook."}</p></>}</div></div>
             <span className={styles.edition}>Personal logbook</span>
           </header>
           <div className={styles.introduction}><div><p className={styles.eyebrow}>A record, not a dashboard</p><h1>Your work,<br /><em>on the record.</em></h1><p className={styles.introDescription}>Follow the days, revisit the runs, and see the shape of your work.</p></div>{history.total != null && <div className={styles.total}><strong>{history.total.toLocaleString()}</strong><span>reports recorded</span><span className={styles.totalRule} /></div>}</div>

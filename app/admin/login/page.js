@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Lock, User, ArrowRight, Loader2, ShieldCheck } from "lucide-react";
-import { apiAdminLogin, apiRequestLoginOtp, apiResendChallenge } from "../../lib/api";
+import { apiAdminLogin, apiRequestAdminLoginOtp, apiResendChallenge } from "../../lib/api";
 import { useAuth } from "../../lib/AuthContext";
 import { useSessionState } from "../../hooks/useSessionState";
 import ThemeToggle from "../../components/ThemeToggle";
@@ -27,7 +27,8 @@ export default function AdminLogin() {
 
     try {
       if (!challenge) {
-        setChallenge(await apiRequestLoginOtp(email, password));
+        // # Keep legacy admin identity lookup scoped to the admin login flow.
+        setChallenge(await apiRequestAdminLoginOtp(email, password));
         setPassword("");
         return;
       }

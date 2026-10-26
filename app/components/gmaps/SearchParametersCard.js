@@ -1,4 +1,5 @@
 "use client";
+// # Stable action identifiers are consumed by the passive interaction observer.
 
 import { motion } from "framer-motion";
 import { Search, MapPin, Loader2, X, AlertTriangle } from "lucide-react";
@@ -69,7 +70,7 @@ export default function SearchParametersCard({
           <div className="flex justify-end">
             <motion.button
               type="button"
-              onClick={onSuggestKeywords}
+              data-analytics-action="suggest_keywords" onClick={onSuggestKeywords}
               disabled={isSuggesting || isSuspended}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -131,7 +132,7 @@ export default function SearchParametersCard({
       </div>
 
       <div className="mb-8">
-        <SliderInput
+        <SliderInput analyticsControl="result_limit"
           label="Max Results"
           hint="Maximum number of places to crawl"
           value={limit}
@@ -146,7 +147,7 @@ export default function SearchParametersCard({
         {isSearching && (
           <motion.button
             type="button"
-            onClick={onAbort}
+            data-analytics-action="cancel_search" onClick={onAbort}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             className="px-6 py-3.5 rounded-xl text-white font-bold text-[15px] tracking-wide flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 shadow-md transition-all duration-300"
@@ -157,7 +158,7 @@ export default function SearchParametersCard({
         )}
         <motion.button
           type="button"
-          onClick={onSearch}
+          data-analytics-action="start_search" onClick={onSearch}
           disabled={isSearching || isSuspended}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}

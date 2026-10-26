@@ -1,7 +1,7 @@
 "use client";
 
-import { createContext, useContext, useSyncExternalStore } from "react";
-import { apiSignup, apiRequestLoginOtp, apiVerifyLoginOtp } from "./api";
+import { createContext, useContext, useEffect, useState, useSyncExternalStore } from "react";
+import { apiSignup, apiRequestLoginOtp, apiVerifyLoginOtp, fetchAccountIdentity } from "./api";
 
 const AuthContext = createContext();
 const SESSION_EVENT = "simpleads:session-changed";
@@ -38,6 +38,18 @@ export function AuthProvider({ children }) {
   const token = useSyncExternalStore(subscribe, readToken, serverToken);
   const isInitializing = useSyncExternalStore(subscribe, hydrated, serverHydrating);
   const payload = token ? decode(token) : null;
+  const [identity, setIdentity] = useState(null);
+
+  useEffect(() => {
+    // # Load shared account details for every sign-in method, including existing sessions.
+    // # Bind results to their token so a late response cannot show another account.
+    if (!token) return;
+    let cancelled = false;
+    fetchAccountIdentity().then((account) => {
+      if (!cancelled) setIdentity({ token, account });
+    }).catch(() => { /* # Keep token-based identity available when the API is offline. */ });
+    return () => { cancelled = true; };
+  }, [token]);
 
   const acceptVerifiedSession = (data) => {
     // # Only OTP verification supplies a session; starting a challenge cannot log in.
@@ -55,7 +67,7 @@ export function AuthProvider({ children }) {
     window.dispatchEvent(new Event(SESSION_EVENT));
   };
 
-  return <AuthContext.Provider value={{ token, isInitializing, isSuspended: !!payload?.is_suspended, isAdmin: !!payload?.is_admin,
+  return <AuthContext.Provider value={{ token, account: identity?.token === token ? identity.account : null, isInitializing, isSuspended: !!payload?.is_suspended, isAdmin: !!payload?.is_admin,
     login: apiRequestLoginOtp, requestLoginOtp: apiRequestLoginOtp, verifyLoginOtp,
     signup: apiSignup, logout, acceptVerifiedSession }}>{children}</AuthContext.Provider>;
 }

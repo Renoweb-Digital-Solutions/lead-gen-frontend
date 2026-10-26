@@ -1,5 +1,11 @@
 "use client";
 
+// # Feedback observes the existing run lifecycle without blocking pipeline work.
+import usePipelineFeedback from "../../hooks/usePipelineFeedback";
+
+// # Analytics metadata is allowlisted; search text and result contents are never captured.
+import { trackInteraction } from "../../lib/interactionAnalytics";
+
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Info, Loader2, Search, Video, X } from "lucide-react";
 import { Country } from "country-state-city";
@@ -23,6 +29,7 @@ export default function YoutubeView() {
   const [onlyEmail, setOnlyEmail] = useState(false);
   const [sort, setSort] = useState("subscribers");
   const [searching, setSearching] = useState(false);
+  usePipelineFeedback("youtube", searching);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const openSheet = useCallback(() => setIsSheetOpen(true), []);
   const closeSheet = useCallback(() => setIsSheetOpen(false), []);
@@ -59,13 +66,13 @@ export default function YoutubeView() {
   const renderFilters = () => (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <label className="text-sm font-semibold text-brand-dark">Minimum subscribers
-            <input className={`${inputClass} mt-2`} type="number" min={0} step={1} placeholder="No minimum" value={minSubscribers} onChange={(e) => setMinSubscribers(e.target.value)} />
+            <input data-analytics-control="min_subscribers" className={`${inputClass} mt-2`} type="number" min={0} step={1} placeholder="No minimum" value={minSubscribers} onChange={(e) => setMinSubscribers(e.target.value)} />
           </label>
           <label className="text-sm font-semibold text-brand-dark">Country
-            <select className={`${inputClass} mt-2`} value={country} onChange={(e) => setCountry(e.target.value)}><option value="">Any</option>{countries.map((name) => <option key={name} value={name}>{name}</option>)}</select>
+            <select data-analytics-control="country" className={`${inputClass} mt-2`} value={country} onChange={(e) => setCountry(e.target.value)}><option value="">Any</option>{countries.map((name) => <option key={name} value={name}>{name}</option>)}</select>
           </label>
           <label className="text-sm font-semibold text-brand-dark">Sort by
-            <select className={`${inputClass} mt-2`} value={ageAvailable ? sort : "subscribers"} onChange={(e) => setSort(e.target.value)}><option value="subscribers">Subscribers (highest first)</option><option value="age" disabled={!ageAvailable}>Channel age (oldest first)</option></select>
+            <select data-analytics-control="sort" className={`${inputClass} mt-2`} value={ageAvailable ? sort : "subscribers"} onChange={(e) => setSort(e.target.value)}><option value="subscribers">Subscribers (highest first)</option><option value="age" disabled={!ageAvailable}>Channel age (oldest first)</option></select>
           </label>
         </div>
   );
@@ -77,6 +84,8 @@ export default function YoutubeView() {
       setError("Enter a niche and location, and a target between 1 and 500 channels.");
       return;
     }
+    // # Track validated submission without awaiting analytics or changing pipeline inputs.
+    trackInteraction("run_submitted", "youtube", { settings: { result_limit: Number(target), only_email: onlyEmail } });
     setSearching(true);
     setIsSheetOpen(false);
     setCancelling(false);
@@ -168,15 +177,15 @@ export default function YoutubeView() {
             <input className={`${inputClass} mt-2`} value={query} onChange={(e) => setQuery(e.target.value)} placeholder="e.g. vloggers in mumbai" maxLength={500} required disabled={searching} />
           </label>
           <label className="text-sm font-semibold text-brand-dark">Target channels
-            <input className={`${inputClass} mt-2`} type="number" min={1} max={500} step={1} value={target} onChange={(e) => setTarget(e.target.value)} required disabled={searching} />
+            <input data-analytics-control="result_limit" className={`${inputClass} mt-2`} type="number" min={1} max={500} step={1} value={target} onChange={(e) => setTarget(e.target.value)} required disabled={searching} />
           </label>
         </div>
         {renderFilters()}
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <label className="flex items-center gap-2 text-sm text-brand-dark"><input type="checkbox" checked={onlyEmail} onChange={(e) => setOnlyEmail(e.target.checked)} className="accent-red-500" />Only channels with email</label>
+          <label className="flex items-center gap-2 text-sm text-brand-dark"><input data-analytics-control="only_email" type="checkbox" checked={onlyEmail} onChange={(e) => setOnlyEmail(e.target.checked)} className="accent-red-500" />Only channels with email</label>
           <div className="flex items-center gap-3">
-            {searching && <button type="button" onClick={handleCancel} disabled={cancelling || !canCancel} className="flex items-center gap-2 px-5 py-3 rounded-xl border border-border text-sm disabled:opacity-50"><X className="w-4 h-4" />{cancelling ? "Cancelling..." : "Cancel"}</button>}
-            <button type="submit" disabled={searching || isSuspended} className="flex items-center gap-2 px-6 py-3 rounded-xl bg-red-600 text-white font-semibold text-sm disabled:opacity-50">{searching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}{isSuspended ? "Account suspended" : searching ? "Searching..." : "Search"}</button>
+            {searching && <button type="button" data-analytics-action="cancel_search" onClick={handleCancel} disabled={cancelling || !canCancel} className="flex items-center gap-2 px-5 py-3 rounded-xl border border-border text-sm disabled:opacity-50"><X className="w-4 h-4" />{cancelling ? "Cancelling..." : "Cancel"}</button>}
+            <button data-analytics-action="start_search" type="submit" disabled={searching || isSuspended} className="flex items-center gap-2 px-6 py-3 rounded-xl bg-red-600 text-white font-semibold text-sm disabled:opacity-50">{searching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}{isSuspended ? "Account suspended" : searching ? "Searching..." : "Search"}</button>
           </div>
         </div>
         {!!result?.keywords?.length && <p className="text-xs text-gray-500">Search angles: {result.keywords.join(" · ")}</p>}
@@ -210,7 +219,7 @@ export default function YoutubeView() {
           message={result.message}
           filters={<>
             {renderFilters()}
-            <label className="mt-3 flex items-center gap-2 text-xs text-brand-dark"><input type="checkbox" checked={onlyEmail} onChange={(e) => setOnlyEmail(e.target.checked)} className="accent-red-500" />Only channels with email</label>
+            <label className="mt-3 flex items-center gap-2 text-xs text-brand-dark"><input data-analytics-control="only_email" type="checkbox" checked={onlyEmail} onChange={(e) => setOnlyEmail(e.target.checked)} className="accent-red-500" />Only channels with email</label>
             {!ageAvailable && <p className="mt-2 text-xs text-gray-500">Channel age is unavailable for this data source in these results.</p>}
           </>}
         />
