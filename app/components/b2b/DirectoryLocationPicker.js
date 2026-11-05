@@ -2,6 +2,7 @@
 
 import { LockKeyhole } from "lucide-react";
 import SearchableDropdown from "../inputs/SearchableDropdown";
+import styles from "./B2BView.module.css";
 import {
   directoryCountry,
   directoryStates,
@@ -23,12 +24,10 @@ export default function DirectoryLocationPicker({
     : [];
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className={styles.locationGrid}>
       <div>
-        <p className="mb-1.5 text-[13px] font-semibold uppercase tracking-wide text-brand-dark">
-          Country
-        </p>
-        <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-[var(--rw-surface-hover)] px-4 py-2.5 text-sm font-medium text-brand-dark">
+        <p className="rw-label">Country</p>
+        <div className={styles.lockedCountry}>
           <span>{country.name}</span>
           <LockKeyhole
             size={14}
@@ -45,21 +44,18 @@ export default function DirectoryLocationPicker({
         onChange={(stateCode) => onChange({ stateCode, city: "" })}
         placeholder="Select a state or region"
       />
-      {selectedState && (
-        <SearchableDropdown
-          label="City"
-          hint="Optional"
-          options={[
-            { value: "", label: "All cities in this state" },
-            ...cities,
-          ]}
-          value={value.city || ""}
-          onChange={(city) =>
-            onChange({ stateCode: selectedState.value, city })
-          }
-          placeholder="All cities in this state"
-        />
-      )}
+      {/* # Reserve the city column before state selection so choosing a region never moves the form. */}
+      <SearchableDropdown
+        label="City"
+        hint="Optional"
+        options={[{ value: "", label: "All cities in this state" }, ...cities]}
+        value={selectedState ? value.city || "" : ""}
+        disabled={!selectedState}
+        onChange={(city) => onChange({ stateCode: selectedState.value, city })}
+        placeholder={
+          selectedState ? "All cities in this state" : "Select a state first"
+        }
+      />
     </div>
   );
 }

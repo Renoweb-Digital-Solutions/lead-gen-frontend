@@ -472,23 +472,43 @@ export default function B2BView() {
           </AnimatePresence>
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-6 mb-6">
-          <div className="flex-[2]">
+        {/* # Query controls form one row; geography gets a full-width row with equal field columns. */}
+        <div className={styles.queryRow}>
+          <div className={styles.keywordField}>
             <TagInput
-              label="Search Keywords"
-              hint="Press enter to add multiple products/industries"
+              label="Search keywords"
               tags={keywords}
               onChange={setKeywords}
               placeholder="e.g. software, textiles..."
               icon={Search}
             />
+            <p className={styles.fieldHint}>
+              Press Enter to add multiple products or industries.
+            </p>
             {isEuropages && !hasKeywords && (
               <p className="mt-2 text-xs text-amber-700">Add at least one keyword and press Enter.</p>
             )}
           </div>
+          <div>
+            <label htmlFor="b2b-result-limit" className="rw-label">
+              Max results
+            </label>
+            <input
+              id="b2b-result-limit"
+              data-analytics-control="result_limit"
+              type="number"
+              className={styles.formInput}
+              value={maxResults}
+              onChange={(e) => setMaxResults(e.target.value)}
+              min={1}
+              max={100}
+            />
+          </div>
+        </div>
 
+        <section aria-label="Search location" className={styles.locationSection}>
           {isEuropages ? (
-            <div className="flex-1 relative group min-w-0">
+            <div className="relative min-w-0">
               <label className="text-[13px] font-semibold text-brand-dark block mb-1.5 uppercase tracking-wide">
                 Countries
               </label>
@@ -541,7 +561,7 @@ export default function B2BView() {
               {countries.length === 0 && <p className="mt-2 text-xs text-amber-700">Select at least one country.</p>}
             </div>
           ) : (
-            <div className="flex-[2] min-w-0">
+            <div className="min-w-0">
               <DirectoryLocationPicker
                 directory={directory}
                 value={selectedArea}
@@ -549,21 +569,7 @@ export default function B2BView() {
               />
             </div>
           )}
-
-          <div className="flex-1 relative group">
-            <label className="text-[13px] font-semibold text-brand-dark block mb-1.5 uppercase tracking-wide">
-              Max Results
-            </label>
-            <input data-analytics-control="result_limit"
-              type="number"
-              className="w-full px-4 py-2.5 text-sm bg-surface border border-border rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all hover:border-indigo-500/40 text-brand-dark font-medium"
-              value={maxResults}
-              onChange={(e) => setMaxResults(e.target.value)}
-              min={1}
-              max={100}
-            />
-          </div>
-        </div>
+        </section>
 
         {!validMaxResults && <p className="mb-3 text-xs text-amber-700">Max Results must be a whole number from 1 to 100.</p>}
         {isEuropages && (

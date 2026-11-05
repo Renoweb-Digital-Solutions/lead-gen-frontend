@@ -843,7 +843,7 @@ export async function discoverInvestorsV2(
   industry,
   targetAudience,
   investmentStage,
-  investorLimit = 50,
+  investorLimit = 10,
   country = null,
 ) {
   const res = await fetchWithAuth(`/investors_v2/discover`, {
@@ -866,7 +866,10 @@ export async function discoverInvestorsV2(
       if (Array.isArray(errData.detail)) {
         errorDetail = errData.detail.map((e) => e.msg).join(", ");
       } else {
-        errorDetail = errData.detail || errData.error || errorDetail;
+        errorDetail =
+          typeof errData.detail === "string"
+            ? errData.detail
+            : errData.detail?.message || errData.error || errorDetail;
       }
     } catch {
       const text = await res.text();
@@ -877,6 +880,31 @@ export async function discoverInvestorsV2(
     throw err;
   }
 
+  return res.json();
+}
+
+// # Investor jobs outlive browser requests; FastAPI scopes status to their owner.
+export async function fetchInvestorJobStatus(jobId) {
+  const res = await fetchWithAuth(
+    `/investors_v2/jobs/${encodeURIComponent(jobId)}`,
+    { cache: "no-store" },
+  );
+  if (!res.ok) {
+    const error = new Error("Could not retrieve investor discovery progress.");
+    error.status = res.status;
+    throw error;
+  }
+  return res.json();
+}
+
+export async function cancelInvestorJob(jobId) {
+  const res = await fetchWithAuth(
+    `/investors_v2/jobs/${encodeURIComponent(jobId)}/cancel`,
+    { method: "POST" },
+  );
+  if (!res.ok) {
+    throw new Error("Could not cancel investor discovery. Please retry.");
+  }
   return res.json();
 }
 

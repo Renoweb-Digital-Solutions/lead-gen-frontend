@@ -1444,20 +1444,101 @@ body {
 
 .rounded-inherit { border-radius: inherit; }
 
-/* # Wrap header actions onto a second row when a phone cannot fit the wallet and logo. */
+/* # Explicit mobile rows keep the brand, utility controls and wallet aligned. */
+.rw-header-brand {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  height: 100%;
+}
+
+.rw-header-logo {
+  flex-shrink: 0;
+  margin-right: 24px;
+}
+
+.rw-header-wordmark {
+  font-size: 22px;
+}
+
 @media (max-width: 639px) {
   .rw-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 40px 40px;
+    align-items: center;
     height: auto;
     min-height: 57px;
-    flex-wrap: wrap;
     gap: 8px;
-    padding-top: 10px;
-    padding-bottom: 10px;
+    padding: 8px 12px 10px;
   }
 
+  .rw-header-brand {
+    grid-column: 1;
+    grid-row: 1;
+    height: 40px;
+    gap: 8px;
+  }
+
+  .rw-header-menu {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 36px;
+    height: 40px;
+    margin-right: 0;
+  }
+
+  .rw-header-logo {
+    margin-right: 0;
+  }
+
+  .rw-header-wordmark {
+    font-size: 20px;
+  }
+
+  /* # Keep the action grouping while assigning each control a stable grid cell. */
   .rw-header-actions {
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    margin-left: auto;
+    display: contents;
+  }
+
+  .rw-header-theme,
+  .rw-header-logout {
+    grid-row: 1;
+    width: 40px;
+    height: 40px;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .rw-header-theme {
+    grid-column: 2;
+  }
+
+  .rw-header-logout {
+    grid-column: 3;
+  }
+
+  .rw-header-wallet {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    min-width: 0;
+  }
+
+  .rw-header-wallet > div {
+    width: 100%;
+    min-height: 40px;
+  }
+
+  .rw-header-wallet [aria-live] {
+    flex: 1;
+    min-width: 0;
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 359px) {
+  .rw-header-wordmark {
+    font-size: 18px;
   }
 }

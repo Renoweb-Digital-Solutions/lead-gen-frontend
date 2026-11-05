@@ -18,7 +18,9 @@
   border: 1px solid rgba(16, 185, 129, 0.22);
   border-left: 3px solid #10b981;
   border-radius: 16px;
-  background: linear-gradient(110deg, rgba(16, 185, 129, 0.09), transparent 65%), var(--rw-surface);
+  background:
+    linear-gradient(110deg, rgba(16, 185, 129, 0.09), transparent 65%),
+    var(--rw-surface);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
 }
 
@@ -34,8 +36,13 @@
   color: var(--b2b-success-text);
 }
 
-.alertTitle { color: var(--rw-text); }
-.alertMessage { color: var(--rw-text-secondary); line-height: 1.6; }
+.alertTitle {
+  color: var(--rw-text);
+}
+.alertMessage {
+  color: var(--rw-text-secondary);
+  line-height: 1.6;
+}
 
 .dismiss {
   position: absolute;
@@ -48,17 +55,31 @@
   height: 30px;
   border-radius: 8px;
   color: var(--rw-text-secondary);
-  transition: background 160ms, color 160ms;
+  transition:
+    background 160ms,
+    color 160ms;
 }
-.dismiss:hover { background: var(--rw-surface-hover); color: var(--rw-text); }
-.dismiss:focus-visible { outline: 2px solid var(--rw-bright-blue); outline-offset: 2px; }
+.dismiss:hover {
+  background: var(--rw-surface-hover);
+  color: var(--rw-text);
+}
+.dismiss:focus-visible {
+  outline: 2px solid var(--rw-bright-blue);
+  outline-offset: 2px;
+}
 
 .errorAlert {
   border-color: rgba(239, 68, 68, 0.24);
   border-left-color: #ef4444;
-  background: linear-gradient(110deg, rgba(239, 68, 68, 0.08), transparent 65%), var(--rw-surface);
+  background:
+    linear-gradient(110deg, rgba(239, 68, 68, 0.08), transparent 65%),
+    var(--rw-surface);
 }
-.errorAlert .alertIcon { color: var(--b2b-error-text); background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); }
+.errorAlert .alertIcon {
+  color: var(--b2b-error-text);
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.2);
+}
 
 .sourceCard {
   position: relative;
@@ -72,20 +93,33 @@
   border-radius: 13px;
   background: var(--rw-surface);
   text-align: left;
-  transition: border-color 180ms, background 180ms, box-shadow 180ms, transform 180ms;
+  transition:
+    border-color 180ms,
+    background 180ms,
+    box-shadow 180ms,
+    transform 180ms;
 }
 .sourceCard:hover:not(:disabled) {
   border-color: var(--directory-accent);
-  background: linear-gradient(115deg, var(--directory-tint), transparent), var(--rw-surface);
+  background:
+    linear-gradient(115deg, var(--directory-tint), transparent),
+    var(--rw-surface);
   transform: translateY(-1px);
 }
 .sourceCard[aria-pressed="true"] {
   border-color: var(--directory-accent);
-  background: linear-gradient(115deg, var(--directory-tint), transparent 95%), var(--rw-surface);
+  background:
+    linear-gradient(115deg, var(--directory-tint), transparent 95%),
+    var(--rw-surface);
   box-shadow: 0 0 0 3px var(--directory-tint);
 }
-.sourceCard:focus-visible { outline: 2px solid var(--directory-accent); outline-offset: 4px; }
-.sourceCard:disabled { opacity: 0.6; }
+.sourceCard:focus-visible {
+  outline: 2px solid var(--directory-accent);
+  outline-offset: 4px;
+}
+.sourceCard:disabled {
+  opacity: 0.6;
+}
 
 .sourceIcon {
   display: grid;
@@ -97,10 +131,29 @@
   background: var(--rw-surface-hover);
   color: var(--rw-text-secondary);
 }
-.sourceCard[aria-pressed="true"] .sourceIcon { background: var(--directory-tint); color: var(--directory-accent); }
-.sourceName { margin: 0; color: var(--rw-text); font-size: 13px; line-height: 1.4; font-weight: 650; }
-.sourceDescription { margin-top: 4px; color: var(--rw-text-secondary); font-size: 10px; line-height: 1.4; }
-.selectedMark { position: absolute; right: 8px; top: 7px; color: var(--directory-accent); }
+.sourceCard[aria-pressed="true"] .sourceIcon {
+  background: var(--directory-tint);
+  color: var(--directory-accent);
+}
+.sourceName {
+  margin: 0;
+  color: var(--rw-text);
+  font-size: 13px;
+  line-height: 1.4;
+  font-weight: 650;
+}
+.sourceDescription {
+  margin-top: 4px;
+  color: var(--rw-text-secondary);
+  font-size: 10px;
+  line-height: 1.4;
+}
+.selectedMark {
+  position: absolute;
+  right: 8px;
+  top: 7px;
+  color: var(--directory-accent);
+}
 
 .note {
   display: flex;
@@ -114,18 +167,137 @@
   font-size: 12px;
   line-height: 1.6;
 }
-.note > svg { color: var(--b2b-success-text); flex-shrink: 0; }
-.yellowNote { border-color: rgba(245, 158, 11, 0.2); background: rgba(245, 158, 11, 0.06); }
-.yellowNote > svg { color: #d97706; }
+.note > svg {
+  color: var(--b2b-success-text);
+  flex-shrink: 0;
+}
+.yellowNote {
+  border-color: rgba(245, 158, 11, 0.2);
+  background: rgba(245, 158, 11, 0.06);
+}
+.yellowNote > svg {
+  color: #d97706;
+}
 .countryChip {
   color: var(--b2b-success-text);
   background: rgba(16, 185, 129, 0.09);
   border: 1px solid rgba(16, 185, 129, 0.24);
 }
-.countryChip:hover { background: rgba(16, 185, 129, 0.17); }
+.countryChip:hover {
+  background: rgba(16, 185, 129, 0.17);
+}
 
 .completeBadge {
   border: 1px solid rgba(16, 185, 129, 0.25);
-  background: linear-gradient(120deg, rgba(16, 185, 129, 0.12), transparent), var(--rw-surface);
+  background:
+    linear-gradient(120deg, rgba(16, 185, 129, 0.12), transparent),
+    var(--rw-surface);
 }
-.completeLabel { color: var(--b2b-success-text); }
+.completeLabel {
+  color: var(--b2b-success-text);
+}
+
+/* # Keep query controls aligned and let the location row use the full card width. */
+.queryRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 160px;
+  align-items: start;
+  gap: 20px;
+}
+
+.keywordField {
+  min-width: 0;
+}
+
+.keywordField :global(.group) {
+  min-height: 44px;
+}
+
+.fieldHint {
+  margin-top: 8px;
+  color: var(--rw-text-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.formInput {
+  display: block;
+  width: 100%;
+  height: 44px;
+  padding: 10px 14px;
+  border: 1px solid var(--rw-border);
+  border-radius: 10px;
+  background: var(--rw-surface);
+  color: var(--rw-text);
+  font-size: 14px;
+  outline: none;
+  transition:
+    border-color 160ms,
+    box-shadow 160ms;
+}
+
+.formInput:focus-visible {
+  border-color: var(--rw-bright-blue);
+  box-shadow: 0 0 0 3px rgba(48, 143, 239, 0.1);
+}
+
+.locationSection {
+  margin-top: 22px;
+  margin-bottom: 22px;
+  padding-top: 22px;
+  border-top: 1px solid var(--rw-border);
+}
+
+.locationGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
+  gap: 20px;
+}
+
+/* # Shared dropdowns normally add their own bottom margin; grid gap owns spacing in this row. */
+.locationGrid :global(.rw-field) {
+  min-width: 0;
+  margin-bottom: 0;
+}
+
+.locationGrid :global(.rw-dropdown-trigger) {
+  height: 44px;
+  border-radius: 10px;
+}
+
+.locationGrid :global(.rw-dropdown-trigger) > span:first-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.locationGrid :global(.rw-dropdown-trigger:disabled) {
+  cursor: not-allowed;
+  color: var(--rw-text-muted);
+  background: var(--rw-bg);
+}
+
+.lockedCountry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  height: 44px;
+  padding: 10px 14px;
+  border: 1px solid var(--rw-border);
+  border-radius: 10px;
+  background: var(--rw-bg);
+  color: var(--rw-text);
+  font-size: 14px;
+}
+
+/* # Stack complete field groups on phones without leaving gaps for hidden controls. */
+@media (max-width: 639px) {
+  .queryRow,
+  .locationGrid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+}

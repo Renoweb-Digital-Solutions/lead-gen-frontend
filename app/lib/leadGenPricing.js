@@ -11,7 +11,10 @@ export const PIPELINE_PRICING_OPERATIONS = [
 
 // # Validation is shared by server responses and IndexedDB fallback records.
 // # Match the requested operation so cached prices from another module cannot leak into an estimate.
-export function normalizeLeadGenPricing(value, operation = "LEAD_GEN_PIPELINE") {
+export function normalizeLeadGenPricing(
+  value,
+  operation = "LEAD_GEN_PIPELINE",
+) {
   if (
     !value ||
     value.application !== "SIMPLEADS" ||
@@ -42,6 +45,8 @@ export function normalizeLeadGenPricing(value, operation = "LEAD_GEN_PIPELINE") 
       type: conf.type,
       basePricePerUnit: conf.basePricePerUnit,
       addons: readMap(conf.addons),
+      // # Fixed run extras are display metadata; FastAPI reserves their service sub-operations.
+      fixedAddons: readMap(conf.fixedAddons),
       multipliers: readMap(conf.multipliers),
     };
   } else if (conf?.type === "FLAT_TIERS") {
@@ -88,7 +93,10 @@ export function normalizeLeadGenPricing(value, operation = "LEAD_GEN_PIPELINE") 
     pricingConfig.defaultQuantity = conf.defaultQuantity;
   }
   if (conf.minimumQuantity !== undefined) {
-    if (!Number.isSafeInteger(conf.minimumQuantity) || conf.minimumQuantity < 1) {
+    if (
+      !Number.isSafeInteger(conf.minimumQuantity) ||
+      conf.minimumQuantity < 1
+    ) {
       throw new Error("Invalid minimum pricing quantity.");
     }
     pricingConfig.minimumQuantity = conf.minimumQuantity;
@@ -146,6 +154,10 @@ export function calculateLeadGenEstimate(pricing, quantity, features = []) {
         multiplier *= conf.multipliers[feature];
     }
     credits = Math.ceil(unitCost * quantity * multiplier);
+    // # Unlike per-channel addons, fixed extras are added once after quantity pricing.
+    for (const feature of new Set(features)) {
+      credits += conf.fixedAddons?.[feature] || 0;
+    }
   }
   if (!Number.isSafeInteger(credits) || credits < 0)
     throw new Error("Invalid run estimate.");

@@ -16,8 +16,10 @@ export default function PipelineCreditEstimate({
   minResults = 1,
   maxResults,
   resultLabel = "results",
+  unitLabel,
   options = [],
   features = [],
+  onPricingChange,
 }) {
   const [refresh, setRefresh] = useState(0);
   const [resource, setResource] = useState(null);
@@ -38,13 +40,20 @@ export default function PipelineCreditEstimate({
         if (!cancelled) setResource({ operation, refresh, ...value });
       },
       (error) => {
-        if (!cancelled) setResource({ operation, refresh, error: error.message });
+        if (!cancelled)
+          setResource({ operation, refresh, error: error.message });
       },
     );
     return () => {
       cancelled = true;
     };
   }, [operation, refresh]);
+
+  // # Optional form copy shares this exact rule and refresh lifecycle, without a second fetch.
+  // # The callback should be stable (for example, a React state setter).
+  useEffect(() => {
+    onPricingChange?.(current?.pricing || null);
+  }, [current, onPricingChange]);
 
   let estimate;
   let defaultEstimate;
@@ -56,6 +65,7 @@ export default function PipelineCreditEstimate({
     const unpricedFeature = features.some(
       (feature) =>
         !Object.hasOwn(config.addons || {}, feature) &&
+        !Object.hasOwn(config.fixedAddons || {}, feature) &&
         !Object.hasOwn(config.multipliers || {}, feature),
     );
     if (unpricedFeature) {
@@ -83,6 +93,17 @@ export default function PipelineCreditEstimate({
     }
   }
 
+  // # An optional unit-rate label uses this same cached rule, never another pricing request.
+  // # Show it only for plain per-result pricing so tiers or selected extras cannot imply a false rate.
+  const unitRate =
+    estimate &&
+    unitLabel &&
+    perResult &&
+    current.pricing.pricingConfig.type === "DYNAMIC_FEATURES" &&
+    features.length === 0
+      ? current.pricing.pricingConfig.basePricePerUnit
+      : null;
+
   return (
     <section
       aria-label="Estimated credit usage"
@@ -90,7 +111,11 @@ export default function PipelineCreditEstimate({
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <Coins size={19} className="shrink-0 text-amber-500" aria-hidden="true" />
+          <Coins
+            size={19}
+            className="shrink-0 text-amber-500"
+            aria-hidden="true"
+          />
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-[var(--rw-text-muted)]">
               Estimated credit usage
@@ -107,6 +132,15 @@ export default function PipelineCreditEstimate({
                     ? `${estimate.credits.toLocaleString()} credits`
                     : "Pricing unavailable"}
             </p>
+            {unitRate !== null && (
+              <p className="mt-1 text-xs font-medium text-[var(--rw-text)]">
+                <span className="text-amber-600 dark:text-amber-400">
+                  {unitRate.toLocaleString()}{" "}
+                  {unitRate === 1 ? "credit" : "credits"}
+                </span>{" "}
+                per {unitLabel}
+              </p>
+            )}
           </div>
         </div>
         <button
@@ -121,7 +155,9 @@ export default function PipelineCreditEstimate({
         >
           <RefreshCw
             size={15}
-            className={!current ? "animate-spin motion-reduce:animate-none" : ""}
+            className={
+              !current ? "animate-spin motion-reduce:animate-none" : ""
+            }
             aria-hidden="true"
           />
         </button>
@@ -139,9 +175,11 @@ export default function PipelineCreditEstimate({
             : "Current pricing is per run; the result limit does not change this estimate."}
           {defaultEstimate && (
             <span className="mt-1 block">
-              {current.pricing.pricingConfig.minimumQuantity === defaultEstimate.quantity
+              {current.pricing.pricingConfig.minimumQuantity ===
+              defaultEstimate.quantity
                 ? "Minimum"
-                : "Base"}: {defaultEstimate.credits.toLocaleString()} credits for{" "}
+                : "Base"}
+              : {defaultEstimate.credits.toLocaleString()} credits for{" "}
               {defaultEstimate.quantity.toLocaleString()} {resultLabel}.
             </span>
           )}

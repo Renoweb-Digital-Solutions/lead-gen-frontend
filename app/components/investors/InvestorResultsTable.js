@@ -2,7 +2,11 @@
 
 import { useMemo, useState } from "react";
 import { AgGridReact } from "ag-grid-react";
-import { AllCommunityModule, ModuleRegistry, themeQuartz } from "ag-grid-community";
+import {
+  AllCommunityModule,
+  ModuleRegistry,
+  themeQuartz,
+} from "ag-grid-community";
 import { X, ExternalLink, ChevronRight, Info } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -29,7 +33,14 @@ function getInitials(name) {
   return name.substring(0, 2).toUpperCase();
 }
 
-const COLORS = ["#023dbb", "#4460ef", "#308fef", "#4ec8ef", "#71717a", "#a1a1aa"];
+const COLORS = [
+  "#023dbb",
+  "#4460ef",
+  "#308fef",
+  "#4ec8ef",
+  "#71717a",
+  "#a1a1aa",
+];
 function getAvatarColor(name) {
   if (!name) return COLORS[4];
   let hash = 0;
@@ -52,7 +63,7 @@ function NameCellRenderer(params) {
 
   return (
     <div className="flex items-center gap-3 h-full cursor-pointer hover:opacity-80 transition-opacity">
-      <div 
+      <div
         className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0 shadow-sm"
         style={{ backgroundColor: color }}
       >
@@ -60,7 +71,9 @@ function NameCellRenderer(params) {
       </div>
       <div className="flex flex-col justify-center leading-tight">
         <span className="font-bold text-sm text-[var(--rw-text)]">{name}</span>
-        <span className="text-xs text-[var(--rw-text-secondary)] mt-0.5">{firm}</span>
+        <span className="text-xs text-[var(--rw-text-secondary)] mt-0.5">
+          {firm}
+        </span>
       </div>
     </div>
   );
@@ -80,19 +93,39 @@ function TypeCellRenderer(params) {
   );
 }
 
+// # Share one normalization rule so the preview count matches the drawer contents.
+// # Restore the five-area selection for historical rows saved before the backend
+// # cap was restored. The drawer displays all selected areas, including hidden badges.
+function getFocusAreas(focus) {
+  const values = Array.isArray(focus)
+    ? focus
+    : typeof focus === "string"
+      ? focus.split(",")
+      : [];
+  return [
+    ...new Set(
+      values
+        .filter((value) => typeof value === "string")
+        .map((value) => value.trim())
+        .filter(Boolean),
+    ),
+  ].slice(0, 5);
+}
+
 function FocusCellRenderer(params) {
-  const focus = params.value;
-  if (!focus) return <span className="text-gray-400 text-xs">—</span>;
-  
-  // If array, grab first 2
-  let items = Array.isArray(focus) ? focus : String(focus).split(',').map(s => s.trim());
+  const items = getFocusAreas(params.value);
+  if (!items.length)
+    return <span className="text-gray-400 text-xs">&mdash;</span>;
   const displayItems = items.slice(0, 2);
   const extra = items.length - 2;
 
   return (
     <div className="flex items-center gap-1.5 h-full flex-wrap">
       {displayItems.map((f, i) => (
-        <span key={i} className="px-2 py-0.5 text-[11px] font-medium rounded-full bg-gray-50 border border-gray-200 text-gray-600 whitespace-nowrap">
+        <span
+          key={i}
+          className="px-2 py-0.5 text-[11px] font-medium rounded-full bg-gray-50 border border-gray-200 text-gray-600 whitespace-nowrap"
+        >
           {f}
         </span>
       ))}
@@ -111,17 +144,32 @@ function ScoreCellRenderer(params) {
 
   // We use inline styles for the subtle success/warning colors so they work in both modes,
   // blending with the surface color by using low opacity.
-  let colorStyle = { background: "var(--rw-surface-hover)", color: "var(--rw-text)", borderColor: "var(--rw-border)" };
-  
+  let colorStyle = {
+    background: "var(--rw-surface-hover)",
+    color: "var(--rw-text)",
+    borderColor: "var(--rw-border)",
+  };
+
   if (score >= 85) {
-    colorStyle = { background: "rgba(16, 185, 129, 0.15)", color: "var(--rw-text)", borderColor: "rgba(16, 185, 129, 0.3)" }; // Emerald tint
+    colorStyle = {
+      background: "rgba(16, 185, 129, 0.15)",
+      color: "var(--rw-text)",
+      borderColor: "rgba(16, 185, 129, 0.3)",
+    }; // Emerald tint
   } else if (score < 50) {
-    colorStyle = { background: "rgba(245, 158, 11, 0.15)", color: "var(--rw-text)", borderColor: "rgba(245, 158, 11, 0.3)" }; // Amber tint
+    colorStyle = {
+      background: "rgba(245, 158, 11, 0.15)",
+      color: "var(--rw-text)",
+      borderColor: "rgba(245, 158, 11, 0.3)",
+    }; // Amber tint
   }
 
   return (
     <div className="flex items-center h-full">
-      <span className="px-2.5 py-1 text-xs font-bold rounded-md border" style={colorStyle}>
+      <span
+        className="px-2.5 py-1 text-xs font-bold rounded-md border"
+        style={colorStyle}
+      >
         {score} / 100
       </span>
     </div>
@@ -144,28 +192,43 @@ function LocationCellRenderer(params) {
 function DetailDrawer({ data, onClose }) {
   if (!data) return null;
 
+  const focusAreas = getFocusAreas(data.industry_focus);
+
   const renderField = (label, value) => {
-    if (!value || value === "Unknown" || value === "None" || (typeof value === 'object' && Object.keys(value).length === 0)) return null;
-    
+    if (
+      !value ||
+      value === "Unknown" ||
+      value === "None" ||
+      (typeof value === "object" && Object.keys(value).length === 0)
+    )
+      return null;
+
     let displayValue = value;
-    if (typeof value === 'object') {
+    if (typeof value === "object") {
       if (Array.isArray(value)) {
-        displayValue = value.join(', ');
+        displayValue = value.join(", ");
       } else {
         displayValue = (
           <ul className="list-disc pl-4 space-y-1">
             {Object.entries(value).map(([k, v]) => (
-              <li key={k}><span className="font-medium text-[var(--rw-text)]">{k}:</span> {v}</li>
+              <li key={k}>
+                <span className="font-medium text-[var(--rw-text)]">{k}:</span>{" "}
+                {v}
+              </li>
             ))}
           </ul>
         );
       }
     }
-    
+
     return (
       <div className="mb-6">
-        <h4 className="text-xs font-bold text-[var(--rw-text-muted)] uppercase tracking-wider mb-2">{label}</h4>
-        <div className="text-sm text-[var(--rw-text-secondary)] leading-relaxed">{displayValue}</div>
+        <h4 className="text-xs font-bold text-[var(--rw-text-muted)] uppercase tracking-wider mb-2">
+          {label}
+        </h4>
+        <div className="text-sm text-[var(--rw-text-secondary)] leading-relaxed">
+          {displayValue}
+        </div>
       </div>
     );
   };
@@ -185,45 +248,68 @@ function DetailDrawer({ data, onClose }) {
           exit={{ x: "100%" }}
           transition={{ type: "spring", damping: 25, stiffness: 200 }}
           className="absolute right-0 top-0 bottom-0 w-full max-w-[450px] bg-[var(--rw-surface)] border-l border-[var(--rw-border)] shadow-2xl flex flex-col"
-          onClick={e => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
           <div className="px-6 py-5 border-b border-[var(--rw-border)] flex items-center justify-between bg-[var(--rw-bg)]">
             <div className="flex items-center gap-3">
-              <div 
+              <div
                 className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-sm"
-                style={{ backgroundColor: getAvatarColor(data.investor_name || data.name) }}
+                style={{
+                  backgroundColor: getAvatarColor(
+                    data.investor_name || data.name,
+                  ),
+                }}
               >
                 {getInitials(data.investor_name || data.name)}
               </div>
               <div>
-                <h3 className="font-bold text-lg text-[var(--rw-text)] leading-tight">{data.investor_name || data.name || "Unknown"}</h3>
-                <p className="text-sm text-[var(--rw-text-secondary)]">{data.firm_name || data.company}</p>
+                <h3 className="font-bold text-lg text-[var(--rw-text)] leading-tight">
+                  {data.investor_name || data.name || "Unknown"}
+                </h3>
+                <p className="text-sm text-[var(--rw-text-secondary)]">
+                  {data.firm_name || data.company}
+                </p>
               </div>
             </div>
-            <button onClick={onClose} className="p-2 hover:bg-[var(--rw-surface-hover)] rounded-full text-[var(--rw-text-muted)] transition-colors">
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-[var(--rw-surface-hover)] rounded-full text-[var(--rw-text-muted)] transition-colors"
+            >
               <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* Scrollable Body */}
           <div className="flex-1 overflow-y-auto p-6">
-            
             {/* Action Links */}
             <div className="flex items-center gap-3 mb-8">
               {(data.profile_url || data.linkedin || data.linkedin_url) && (
-                <a href={data.profile_url || data.linkedin || data.linkedin_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs font-semibold text-brand-sky hover:text-brand-blue bg-brand-blue/10 px-3 py-1.5 rounded-md transition-colors">
+                <a
+                  href={data.profile_url || data.linkedin || data.linkedin_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 text-xs font-semibold text-brand-sky hover:text-brand-blue bg-brand-blue/10 px-3 py-1.5 rounded-md transition-colors"
+                >
                   <ExternalLink className="w-3.5 h-3.5" /> Profile
                 </a>
               )}
               {(data.website || data.firm_website) && (
-                <a href={data.website || data.firm_website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs font-semibold text-brand-sky hover:text-brand-blue bg-brand-blue/10 px-3 py-1.5 rounded-md transition-colors">
+                <a
+                  href={data.website || data.firm_website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 text-xs font-semibold text-brand-sky hover:text-brand-blue bg-brand-blue/10 px-3 py-1.5 rounded-md transition-colors"
+                >
                   <ExternalLink className="w-3.5 h-3.5" /> Website
                 </a>
               )}
               {data.source && (
                 <span className="flex items-center gap-1.5 text-xs font-semibold text-[var(--rw-text-secondary)] bg-[var(--rw-surface-hover)] px-3 py-1.5 rounded-md">
-                  <Info className="w-3.5 h-3.5" /> Source: {Array.isArray(data.source) ? data.source.join(", ") : data.source}
+                  <Info className="w-3.5 h-3.5" /> Source:{" "}
+                  {Array.isArray(data.source)
+                    ? data.source.join(", ")
+                    : data.source}
                 </span>
               )}
             </div>
@@ -231,29 +317,71 @@ function DetailDrawer({ data, onClose }) {
             {/* Core details */}
             <div className="grid grid-cols-2 gap-4 mb-6">
               <div>
-                <h4 className="text-[10px] font-bold text-[var(--rw-text-muted)] uppercase tracking-wider mb-1">Score</h4>
-                <div className="text-sm font-bold text-[var(--rw-text)]">{data.fit_score ? `${data.fit_score}/100` : '—'}</div>
+                <h4 className="text-[10px] font-bold text-[var(--rw-text-muted)] uppercase tracking-wider mb-1">
+                  Score
+                </h4>
+                <div className="text-sm font-bold text-[var(--rw-text)]">
+                  {data.fit_score ? `${data.fit_score}/100` : "—"}
+                </div>
               </div>
               <div>
-                <h4 className="text-[10px] font-bold text-[var(--rw-text-muted)] uppercase tracking-wider mb-1">Check Size</h4>
-                <div className="text-sm font-medium text-[var(--rw-text-secondary)]">{data.check_size || data.investment_size || '—'}</div>
+                <h4 className="text-[10px] font-bold text-[var(--rw-text-muted)] uppercase tracking-wider mb-1">
+                  Check Size
+                </h4>
+                <div className="text-sm font-medium text-[var(--rw-text-secondary)]">
+                  {data.check_size || data.investment_size || "—"}
+                </div>
               </div>
             </div>
 
             {renderField("Location", data.location || data.headquarters)}
-            
-            {renderField("Fit Summary", data.fit_summary)}
-            
-            {renderField("Eligibility Criteria", data.eligibility_criteria)}
-            
-            {renderField("Investment Stages", data.investment_stage || data.stages)}
-            
-            {data.extra_details?.portfolio_companies_count && renderField("Portfolio Companies", data.extra_details.portfolio_companies_count)}
-            
-            {data.extra_details?.deals_count && renderField("Total Deals", data.extra_details.deals_count)}
-            
-            {data.extra_details?.stages_breakdown && renderField("Deals by Stage", data.extra_details.stages_breakdown)}
 
+            {/* # The table shows two badges plus a count; details always show all areas. */}
+            <section className="mb-6" aria-label="Focus areas">
+              <h4 className="text-xs font-bold text-[var(--rw-text-muted)] uppercase tracking-wider mb-2">
+                Focus areas
+              </h4>
+              {focusAreas.length ? (
+                <div className="flex flex-wrap gap-2">
+                  {focusAreas.map((focus) => (
+                    <span
+                      key={focus}
+                      className="max-w-full break-words rounded-full border border-[var(--rw-border)] bg-[var(--rw-surface-hover)] px-3 py-1 text-xs text-[var(--rw-text-secondary)]"
+                    >
+                      {focus}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-[var(--rw-text-muted)]">
+                  Not available
+                </p>
+              )}
+            </section>
+
+            {renderField("Fit Summary", data.fit_summary)}
+
+            {renderField("Eligibility Criteria", data.eligibility_criteria)}
+
+            {renderField(
+              "Investment Stages",
+              data.investment_stage || data.stages,
+            )}
+
+            {data.extra_details?.portfolio_companies_count &&
+              renderField(
+                "Portfolio Companies",
+                data.extra_details.portfolio_companies_count,
+              )}
+
+            {data.extra_details?.deals_count &&
+              renderField("Total Deals", data.extra_details.deals_count)}
+
+            {data.extra_details?.stages_breakdown &&
+              renderField(
+                "Deals by Stage",
+                data.extra_details.stages_breakdown,
+              )}
           </div>
         </motion.div>
       </motion.div>
@@ -261,66 +389,73 @@ function DetailDrawer({ data, onClose }) {
   );
 }
 
-
 // ── Main Table Component ──
 
 export default function InvestorResultsTable({ data }) {
   const [selectedRowData, setSelectedRowData] = useState(null);
 
-  const colDefs = useMemo(() => [
-    {
-      headerName: "Investor & Firm",
-      field: "investor_name",
-      cellRenderer: NameCellRenderer,
-      minWidth: 260,
-      flex: 2,
-    },
-    {
-      headerName: "Fit Score",
-      field: "fit_score",
-      cellRenderer: ScoreCellRenderer,
-      minWidth: 120,
-      flex: 1,
-    },
-    {
-      headerName: "Type",
-      field: "investor_type",
-      cellRenderer: TypeCellRenderer,
-      minWidth: 160,
-      flex: 1,
-    },
-    {
-      headerName: "Focus Area",
-      field: "industry_focus",
-      cellRenderer: FocusCellRenderer,
-      minWidth: 220,
-      flex: 1.5,
-    },
-    {
-      headerName: "Check Size",
-      field: "check_size",
-      minWidth: 160,
-      flex: 1,
-      cellRenderer: (params) => (
-        <div className="flex items-center h-full">
-          <span className="text-sm font-medium text-[var(--rw-text-secondary)]">{params.value || "—"}</span>
-        </div>
-      )
-    },
-    {
-      headerName: "Location",
-      field: "location",
-      cellRenderer: LocationCellRenderer,
-      minWidth: 160,
-      flex: 1,
-    }
-  ], []);
+  const colDefs = useMemo(
+    () => [
+      {
+        headerName: "Investor & Firm",
+        field: "investor_name",
+        cellRenderer: NameCellRenderer,
+        minWidth: 260,
+        flex: 2,
+      },
+      {
+        headerName: "Fit Score",
+        field: "fit_score",
+        cellRenderer: ScoreCellRenderer,
+        minWidth: 120,
+        flex: 1,
+      },
+      {
+        headerName: "Type",
+        field: "investor_type",
+        cellRenderer: TypeCellRenderer,
+        minWidth: 160,
+        flex: 1,
+      },
+      {
+        headerName: "Focus Area",
+        field: "industry_focus",
+        cellRenderer: FocusCellRenderer,
+        minWidth: 220,
+        flex: 1.5,
+      },
+      {
+        headerName: "Check Size",
+        field: "check_size",
+        minWidth: 160,
+        flex: 1,
+        cellRenderer: (params) => (
+          <div className="flex items-center h-full">
+            <span className="text-sm font-medium text-[var(--rw-text-secondary)]">
+              {params.value || "—"}
+            </span>
+          </div>
+        ),
+      },
+      {
+        headerName: "Location",
+        field: "location",
+        cellRenderer: LocationCellRenderer,
+        minWidth: 160,
+        flex: 1,
+      },
+    ],
+    [],
+  );
 
-  const defaultColDef = useMemo(() => ({
-    resizable: true,
-    sortable: true,
-    filter: true,
-  }), []);
+  const defaultColDef = useMemo(
+    () => ({
+      resizable: true,
+      sortable: true,
+      filter: true,
+    }),
+    [],
+  );
 
   if (!data || data.length === 0) {
     return (
@@ -383,7 +518,10 @@ export default function InvestorResultsTable({ data }) {
 
       {/* Side Panel for Row Details */}
       {selectedRowData && (
-        <DetailDrawer data={selectedRowData} onClose={() => setSelectedRowData(null)} />
+        <DetailDrawer
+          data={selectedRowData}
+          onClose={() => setSelectedRowData(null)}
+        />
       )}
     </div>
   );

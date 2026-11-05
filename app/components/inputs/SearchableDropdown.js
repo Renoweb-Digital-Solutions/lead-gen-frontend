@@ -10,6 +10,7 @@ export default function SearchableDropdown({
   onChange,
   placeholder = "Select...",
   dropUp = false,
+  disabled = false,
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -68,6 +69,8 @@ export default function SearchableDropdown({
           type="button"
           className="rw-dropdown-trigger"
           data-open={isOpen}
+          // # Dependent fields can stay visible while their prerequisite selection is missing.
+          disabled={disabled}
           onClick={() => setIsOpen(!isOpen)}
         >
           <span style={{ flex: 1, textAlign: "left" }}>
@@ -94,7 +97,7 @@ export default function SearchableDropdown({
           </svg>
         </button>
 
-        {isOpen && (
+        {isOpen && !disabled && (
           <div 
             className="rw-dropdown-menu"
             style={dropUp ? { bottom: "calc(100% + 4px)", top: "auto" } : {}}
@@ -136,6 +139,7 @@ export default function SearchableDropdown({
                   );
                 })
               )}
+
             </div>
           </div>
         )}

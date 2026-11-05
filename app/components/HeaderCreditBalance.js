@@ -56,7 +56,10 @@ export default function HeaderCreditBalance({ refreshKey = "" }) {
       controller?.abort();
       window.clearInterval(interval);
       window.removeEventListener("focus", refreshVisibleBalance);
-      window.removeEventListener("simpleads:credits-changed", refreshVisibleBalance);
+      window.removeEventListener(
+        "simpleads:credits-changed",
+        refreshVisibleBalance,
+      );
     };
   }, [token, requestKey]);
 
@@ -77,7 +80,7 @@ export default function HeaderCreditBalance({ refreshKey = "" }) {
         aria-atomic="true"
       >
         <span className="text-xs font-medium text-[var(--rw-text-muted)]">
-          <span className="hidden sm:inline">Available </span>credits
+          Available credits
         </span>
         <span className="text-sm font-bold tabular-nums text-[var(--rw-text)]">
           {amount}

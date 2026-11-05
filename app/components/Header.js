@@ -3,7 +3,17 @@
 import { useState, useEffect } from "react";
 import { checkHealth } from "../lib/api";
 import HeaderCreditBalance from "./HeaderCreditBalance";
-import { Target, Map, Trash2, Activity, LogOut, Menu, Camera, Sun, Moon } from "lucide-react";
+import {
+  Target,
+  Map,
+  Trash2,
+  Activity,
+  LogOut,
+  Menu,
+  Camera,
+  Sun,
+  Moon,
+} from "lucide-react";
 import { useAuth } from "../lib/AuthContext";
 import { useRouter } from "next/navigation";
 
@@ -66,10 +76,10 @@ export default function Header({
   return (
     <header className="rw-header shadow-sm border-b border-border bg-surface/90 backdrop-blur-md">
       {/* Left: Logo + Module Tabs */}
-      <div style={{ display: "flex", alignItems: "center", gap: 0, height: "100%" }}>
+      <div className="rw-header-brand">
         {/* Hamburger (Mobile Only) */}
         <button
-          className="lg:hidden mr-3 text-brand-dark p-2 hover:bg-[var(--rw-border)] rounded-md transition-colors"
+          className="rw-header-menu lg:hidden mr-3 text-brand-dark p-2 hover:bg-[var(--rw-border)] rounded-md transition-colors"
           onClick={onToggleSidebar ? onToggleSidebar : undefined}
           aria-label="Toggle menu"
         >
@@ -77,18 +87,18 @@ export default function Header({
         </button>
 
         {/* Logo */}
-        <div 
-          onClick={() => router.push('/dashboard')}
-          className="cursor-pointer transition-opacity hover:opacity-80"
-          style={{ display: "flex", alignItems: "center", gap: 3, marginRight: 24 }}
+        <div
+          onClick={() => router.push("/dashboard")}
+          className="rw-header-logo cursor-pointer transition-opacity hover:opacity-80"
+          style={{ display: "flex", alignItems: "center", gap: 3 }}
         >
           <div
+            className="rw-header-wordmark"
             style={{
               display: "flex",
               alignItems: "center",
               gap: 3,
               fontWeight: 800,
-              fontSize: 22,
               letterSpacing: "-0.02em",
             }}
           >
@@ -99,6 +109,7 @@ export default function Header({
 
         {/* Divider */}
         <div
+          className="hidden lg:block"
           style={{
             width: 1,
             height: 24,
@@ -112,17 +123,30 @@ export default function Header({
           {/* Active Module Trigger */}
           <div className="flex items-center gap-2 px-4 h-full cursor-pointer text-brand-dark font-semibold border-b-[2.5px] border-brand-sky transition-colors hover:text-brand-sky">
             {(() => {
-              const activeModuleObj = MODULES.find(m => m.id === activeModule) || MODULES[0];
+              const activeModuleObj =
+                MODULES.find((m) => m.id === activeModule) || MODULES[0];
               const ActiveIcon = activeModuleObj.icon;
               return (
                 <>
                   <ActiveIcon className="w-4 h-4 text-brand-sky" />
-                  <span className="text-[14px] font-bold">{activeModuleObj.label}</span>
+                  <span className="text-[14px] font-bold">
+                    {activeModuleObj.label}
+                  </span>
                 </>
               );
             })()}
-            <svg className="w-4 h-4 text-gray-400 group-hover:rotate-180 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            <svg
+              className="w-4 h-4 text-gray-400 group-hover:rotate-180 transition-transform duration-200"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
             </svg>
           </div>
 
@@ -139,14 +163,19 @@ export default function Header({
                     if (onModuleChange) {
                       onModuleChange(mod.id);
                     } else {
-                      sessionStorage.setItem("renoweb-active-module", JSON.stringify(mod.id));
+                      sessionStorage.setItem(
+                        "renoweb-active-module",
+                        JSON.stringify(mod.id),
+                      );
                       window.dispatchEvent(new Event("local-session-storage"));
-                      router.push('/dashboard');
+                      router.push("/dashboard");
                     }
                   }}
-                  className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-[var(--rw-surface-hover)] ${isActive ? 'bg-[var(--rw-surface-hover)]/50 text-[#023dbb] font-semibold' : 'text-gray-600'}`}
+                  className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-[var(--rw-surface-hover)] ${isActive ? "bg-[var(--rw-surface-hover)]/50 text-[#023dbb] font-semibold" : "text-gray-600"}`}
                 >
-                  <Icon className={`w-4 h-4 ${isActive ? 'text-[#308fef]' : 'text-gray-400'}`} />
+                  <Icon
+                    className={`w-4 h-4 ${isActive ? "text-[#308fef]" : "text-gray-400"}`}
+                  />
                   <span className="text-[13.5px]">{mod.label}</span>
                 </button>
               );
@@ -158,86 +187,102 @@ export default function Header({
       {/* Right side */}
       <div className="flex items-center gap-2 lg:gap-4 rw-header-actions">
         {/* # Keep the wallet visible beside API status in every dashboard module. */}
-        <HeaderCreditBalance refreshKey={creditRefreshKey} />
+        <div className="rw-header-wallet">
+          <HeaderCreditBalance refreshKey={creditRefreshKey} />
+        </div>
         {/* Desktop-only items */}
         <div className="hidden lg:flex items-center gap-4">
-        {/* Health status */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-            fontSize: 12,
-            color: "var(--rw-text-muted)",
-          }}
-        >
+          {/* Health status */}
           <div
-            className={`rw-status-dot relative ${
-              health?.ok ? "rw-status-dot-online shadow-[0_0_8px_rgba(16,185,129,0.6)]" : "rw-status-dot-offline shadow-[0_0_8px_rgba(239,68,68,0.6)]"
-            }`}
-          >
-            {health?.ok ? (
-              <div className="absolute inset-0 rounded-full bg-emerald-400 animate-ping opacity-75" />
-            ) : (
-              <div className="absolute inset-0 rounded-full bg-red-400 animate-ping opacity-75" />
-            )}
-          </div>
-          <span className="font-medium">{health?.ok ? "API Online" : "API Offline"}</span>
-        </div>
-
-        {/* Clear Data button */}
-        {onClearAll && (
-          <button
-            type="button"
-            className="rw-btn rw-btn-ghost hover:bg-red-50"
-            onClick={onClearAll}
             style={{
-              color: "var(--rw-error)",
-              fontSize: 13,
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              fontSize: 12,
+              color: "var(--rw-text-muted)",
             }}
           >
-            <Trash2 className="w-4 h-4" />
-            <span className="rw-hide-mobile font-medium">
-              {activeModule === "gmaps" ? "Clear GMaps Data" : 
-               activeModule === "youtube" ? "Clear YouTube Data" :
-               activeModule === "instagram" ? "Clear Instagram Data" :
-               activeModule === "b2b" ? "Clear B2B Data" :
-               activeModule === "investors" ? "Clear Investor Data" :
-               "Clear Pipeline"}
+            <div
+              className={`rw-status-dot relative ${
+                health?.ok
+                  ? "rw-status-dot-online shadow-[0_0_8px_rgba(16,185,129,0.6)]"
+                  : "rw-status-dot-offline shadow-[0_0_8px_rgba(239,68,68,0.6)]"
+              }`}
+            >
+              {health?.ok ? (
+                <div className="absolute inset-0 rounded-full bg-emerald-400 animate-ping opacity-75" />
+              ) : (
+                <div className="absolute inset-0 rounded-full bg-red-400 animate-ping opacity-75" />
+              )}
+            </div>
+            <span className="font-medium">
+              {health?.ok ? "API Online" : "API Offline"}
             </span>
-          </button>
-        )}
+          </div>
 
+          {/* Clear Data button */}
+          {onClearAll && (
+            <button
+              type="button"
+              className="rw-btn rw-btn-ghost hover:bg-red-50"
+              onClick={onClearAll}
+              style={{
+                color: "var(--rw-error)",
+                fontSize: 13,
+              }}
+            >
+              <Trash2 className="w-4 h-4" />
+              <span className="rw-hide-mobile font-medium">
+                {activeModule === "gmaps"
+                  ? "Clear GMaps Data"
+                  : activeModule === "youtube"
+                    ? "Clear YouTube Data"
+                    : activeModule === "instagram"
+                      ? "Clear Instagram Data"
+                      : activeModule === "b2b"
+                        ? "Clear B2B Data"
+                        : activeModule === "investors"
+                          ? "Clear Investor Data"
+                          : "Clear Pipeline"}
+              </span>
+            </button>
+          )}
         </div>
 
         {/* Theme Toggle button */}
         <button
           type="button"
-          className="rw-btn rw-btn-ghost hover:bg-[var(--rw-surface-hover)] p-2 lg:px-3 lg:py-2 text-brand-sky"
+          className="rw-header-theme rw-btn rw-btn-ghost hover:bg-[var(--rw-surface-hover)] p-2 lg:px-3 lg:py-2 text-brand-sky"
           onClick={onToggleTheme}
           title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+          aria-label={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
         >
           {isDark ? (
             <Sun className="w-5 h-5 lg:w-4 lg:h-4 text-brand-sky hover:text-brand-sky/80" />
           ) : (
             <Moon className="w-5 h-5 lg:w-4 lg:h-4 text-brand-sky hover:text-brand-sky/80" />
           )}
-          <span className="hidden lg:inline font-bold text-[13px] ml-1">{isDark ? 'Light' : 'Dark'}</span>
+          <span className="hidden lg:inline font-bold text-[13px] ml-1">
+            {isDark ? "Light" : "Dark"}
+          </span>
         </button>
 
         {/* # Profile navigation lives on the sidebar account name and avatar. */}
         {/* Logout button (Visible on all screens) */}
         <button
           type="button"
-          className="rw-btn rw-btn-ghost hover:bg-[var(--rw-surface-hover)] p-2 lg:px-3 lg:py-2"
+          className="rw-header-logout rw-btn rw-btn-ghost hover:bg-[var(--rw-surface-hover)] p-2 lg:px-3 lg:py-2"
           onClick={handleLogout}
           style={{
             color: "var(--rw-text-muted)",
           }}
           title="Logout"
+          aria-label="Logout"
         >
           <LogOut className="w-5 h-5 lg:w-4 lg:h-4 text-gray-500 hover:text-gray-700" />
-          <span className="hidden lg:inline font-medium text-[13px]">Logout</span>
+          <span className="hidden lg:inline font-medium text-[13px]">
+            Logout
+          </span>
         </button>
       </div>
     </header>

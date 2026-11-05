@@ -8,10 +8,27 @@ import usePipelineFeedback from "../../hooks/usePipelineFeedback";
 // # Analytics metadata is allowlisted; search text and result contents are never captured.
 import { trackInteraction } from "../../lib/interactionAnalytics";
 
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Loader2, Building2, MapPin, Globe, Database, TrendingUp, AlertCircle, Briefcase, Zap, CheckCircle2, X } from "lucide-react";
-import { discoverInvestorsV2 } from "../../lib/api";
+import {
+  Search,
+  Loader2,
+  Building2,
+  MapPin,
+  Globe,
+  Database,
+  TrendingUp,
+  AlertCircle,
+  Briefcase,
+  Zap,
+  CheckCircle2,
+  X,
+} from "lucide-react";
+import {
+  discoverInvestorsV2,
+  fetchInvestorJobStatus,
+  cancelInvestorJob,
+} from "../../lib/api";
 import InvestorVisualizer from "./InvestorVisualizer";
 import InvestorResultsBottomSheet from "./InvestorResultsBottomSheet";
 import RippleArrivalSignal from "../gmaps/RippleArrivalSignal";
@@ -20,7 +37,7 @@ import ExportProgress from "../ExportProgress";
 import { useAuth } from "../../lib/AuthContext";
 
 export default function InvestorsView() {
-  const { isSuspended } = useAuth();
+  const { isSuspended, token } = useAuth();
   const [companyDescription, setCompanyDescription] = useState("");
   const [industry, setIndustry] = useState("");
   const [targetAudience, setTargetAudience] = useState("");
@@ -34,59 +51,193 @@ export default function InvestorsView() {
   const [successMsg, setSuccessMsg] = useState("");
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
+  const [progress, setProgress] = useState({ message: "", percent: 0 });
+  const [isCancelling, setIsCancelling] = useState(false);
+  const jobRef = useRef(null);
+  const timerRef = useRef(null);
+  const mountedRef = useRef(false);
+  const sessionRef = useRef(0);
+
+  const pollJob = useCallback(async function poll(jobId) {
+    if (!mountedRef.current || jobRef.current !== jobId) return;
+    const session = sessionRef.current;
+    try {
+      const snapshot = await fetchInvestorJobStatus(jobId);
+      if (
+        !mountedRef.current ||
+        jobRef.current !== jobId ||
+        session !== sessionRef.current
+      )
+        return;
+      setErrorMsg("");
+      setProgress({
+        message: snapshot.message || "Processing investor discovery...",
+        percent: snapshot.percent || 0,
+      });
+      if (["completed", "failed", "cancelled"].includes(snapshot.status)) {
+        jobRef.current = null;
+        setIsSearching(false);
+        setIsCancelling(false);
+        window.dispatchEvent(new Event("simpleads:credits-changed"));
+        if (snapshot.result?.investors?.length) {
+          setResults(snapshot.result);
+          setSuccessMsg(
+            snapshot.message ||
+              `${snapshot.result.investors.length} investors analysed successfully.`,
+          );
+        } else {
+          setErrorMsg(snapshot.message || "No analysed investors available.");
+        }
+        return;
+      }
+    } catch (err) {
+      if (
+        !mountedRef.current ||
+        jobRef.current !== jobId ||
+        session !== sessionRef.current
+      )
+        return;
+      if (err.status === 404 || err.status === 401) {
+        jobRef.current = null;
+        try {
+          sessionStorage.removeItem("investor-last-job");
+        } catch {}
+        setIsSearching(false);
+        setIsCancelling(false);
+        setErrorMsg("This investor job is unavailable for your account.");
+        return;
+      }
+      // # Network failure leaves backend work running and resumes polling automatically.
+      setErrorMsg(
+        "Connection interrupted. Reconnecting to investor discovery...",
+      );
+    }
+    timerRef.current = setTimeout(() => poll(jobId), 2000);
+  }, []);
+
+  useEffect(() => {
+    sessionRef.current += 1;
+    mountedRef.current = true;
+    setResults(null);
+    let saved;
+    try {
+      saved = token && sessionStorage.getItem("investor-last-job");
+    } catch {}
+    if (saved) {
+      jobRef.current = saved;
+      setIsSearching(true);
+      void pollJob(saved);
+    }
+    return () => {
+      sessionRef.current += 1;
+      mountedRef.current = false;
+      clearTimeout(timerRef.current);
+      jobRef.current = null;
+      // # Navigation never cancels a paid job; its saved ID restores results on return.
+    };
+  }, [token, pollJob]);
+
   const handleSearch = async (e) => {
-    if (e) e.preventDefault();
+    e?.preventDefault();
+    if (isSearching || isSuspended) return;
     if (!companyDescription.trim() || !industry || !investmentStage) {
       setErrorMsg("Please fill out all required fields.");
       return;
     }
-
-    // # Track validated submission without awaiting analytics or changing pipeline inputs.
-    trackInteraction("run_submitted", "investors", { settings: { industry, investment_stage: investmentStage, country, result_limit: Number(investorLimit) } });
+    trackInteraction("run_submitted", "investors", {
+      settings: {
+        industry,
+        investment_stage: investmentStage,
+        country,
+        result_limit: Number(investorLimit),
+      },
+    });
     setIsSearching(true);
+    setIsCancelling(false);
     setErrorMsg("");
     setSuccessMsg("");
     setResults(null);
     setIsSheetOpen(false);
-
+    setProgress({
+      message: "Reserving credits for investor analysis...",
+      percent: 0,
+    });
+    const session = sessionRef.current;
     try {
-      const data = await discoverInvestorsV2(companyDescription, industry, targetAudience, investmentStage, investorLimit, country || null);
-      setResults(data);
-      if (data.investors && data.investors.length > 0) {
-        setSuccessMsg(`Successfully discovered ${data.investors.length} relevant investors!`);
-      } else {
-        setErrorMsg("No relevant investors found for these criteria.");
-      }
+      const job = await discoverInvestorsV2(
+        companyDescription,
+        industry,
+        targetAudience,
+        investmentStage,
+        Number(investorLimit),
+        country || null,
+      );
+      // # A late response may persist this job after navigation, but never after account switching.
+      if (localStorage.getItem("renoweb_jwt") !== token) return;
+      // # Reserve is complete. Sliders still calculate estimates from cached pricing locally.
+      window.dispatchEvent(new Event("simpleads:credits-changed"));
+      try {
+        sessionStorage.setItem("investor-last-job", job.job_id);
+      } catch {}
+      if (!mountedRef.current || session !== sessionRef.current) return;
+      jobRef.current = job.job_id;
+      await pollJob(job.job_id);
     } catch (err) {
-      setErrorMsg(err.message || "Failed to fetch investor data.");
-    } finally {
+      window.dispatchEvent(new Event("simpleads:credits-changed"));
+      if (!mountedRef.current || session !== sessionRef.current) return;
+      setErrorMsg(err.message || "Failed to start investor discovery.");
       setIsSearching(false);
     }
   };
 
-  const handleAbort = () => {
-    setIsSearching(false);
-    setErrorMsg("Enrichment cancelled.");
+  const handleAbort = async () => {
+    if (!jobRef.current || isCancelling) return;
+    setIsCancelling(true);
+    try {
+      const response = await cancelInvestorJob(jobRef.current);
+      setProgress((current) => ({
+        ...current,
+        message: response.cancel_requested
+          ? "Cancelling discovery and releasing reserved credits..."
+          : "Results are already being settled...",
+      }));
+      if (!response.cancel_requested) setIsCancelling(false);
+    } catch (err) {
+      setErrorMsg(err.message);
+      setIsCancelling(false);
+    }
   };
 
   const handleExportCsv = () => {
     if (!results?.investors || results.investors.length === 0) return;
     try {
       const allKeys = new Set();
-      results.investors.forEach(row => Object.keys(row).forEach(k => allKeys.add(k)));
+      results.investors.forEach((row) =>
+        Object.keys(row).forEach((k) => allKeys.add(k)),
+      );
       const headers = Array.from(allKeys);
-      
+
       const csvContent = [
-        headers.map(h => h.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())).join(","),
+        headers
+          .map((h) =>
+            h.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()),
+          )
+          .join(","),
         ...results.investors.map((row) =>
           headers
             .map((h) => {
               let val = row[h];
-              if (val === null || val === undefined || val === "" || val === "None") val = "—";
+              if (
+                val === null ||
+                val === undefined ||
+                val === "" ||
+                val === "None"
+              )
+                val = "—";
               if (typeof val === "object") val = JSON.stringify(val);
               return `"${val.toString().replace(/"/g, '""')}"`;
             })
-            .join(",")
+            .join(","),
         ),
       ].join("\n");
       const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
@@ -107,23 +258,24 @@ export default function InvestorsView() {
     <div className="rw-main-content w-full relative min-h-screen pb-20">
       {/* Page header */}
       <div className="mb-8 animate-[rw-fadeInUp_0.3s_ease-out]">
-        <div className="flex items-center gap-3 mb-1">
-          <div className="w-10 h-10 bg-gradient-to-br from-[#023dbb]/10 to-[#308fef]/10 rounded-xl flex items-center justify-center border border-[#023dbb]/20 shadow-sm text-[#023dbb]">
+        <div className="flex min-w-0 items-center gap-3 mb-1">
+          <div className="w-10 h-10 shrink-0 bg-gradient-to-br from-[#023dbb]/10 to-[#308fef]/10 rounded-xl flex items-center justify-center border border-[#023dbb]/20 shadow-sm text-[#023dbb]">
             <Database className="w-5 h-5" />
           </div>
-          <h1 className="text-2xl font-bold text-brand-dark m-0 tracking-tight font-display">
+          <h1 className="min-w-0 break-words text-xl sm:text-2xl leading-tight font-bold text-brand-dark m-0 tracking-tight font-display">
             Investor Data Pipeline
           </h1>
         </div>
-        <p className="text-sm text-gray-500 m-0 ml-14">
-          Uncover relevant investors using LLM-powered query planning and filtering
+        <p className="text-sm leading-relaxed text-gray-500 mt-3 mb-0 sm:mt-0 sm:ml-14">
+          Uncover relevant investors using LLM-powered query planning and
+          filtering
         </p>
       </div>
 
       {/* Elegant Alerts */}
       <AnimatePresence>
         {errorMsg && (
-          <motion.div 
+          <motion.div
             key="error-alert"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -137,7 +289,7 @@ export default function InvestorsView() {
               <h4 className="text-sm font-bold text-red-800 m-0">Error</h4>
               <p className="text-sm text-red-700 mt-1 mb-0">{errorMsg}</p>
             </div>
-            <button 
+            <button
               onClick={() => setErrorMsg(null)}
               className="absolute top-4 right-4 text-red-400 hover:text-red-700 transition-colors"
             >
@@ -147,21 +299,34 @@ export default function InvestorsView() {
         )}
 
         {successMsg && !isSearching && (
-          <motion.div 
+          <motion.div
             key="success-alert"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
             className="mb-6 p-4 bg-emerald-50/80 backdrop-blur border border-emerald-200 rounded-xl shadow-sm flex items-start gap-3 relative"
           >
-             <div className="mt-0.5 bg-emerald-100 text-emerald-600 p-1 rounded-full shrink-0">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            <div className="mt-0.5 bg-emerald-100 text-emerald-600 p-1 rounded-full shrink-0">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
             </div>
             <div className="pr-6">
-              <h4 className="text-sm font-bold text-emerald-800 m-0">Success</h4>
+              <h4 className="text-sm font-bold text-emerald-800 m-0">
+                Success
+              </h4>
               <p className="text-sm text-emerald-700 mt-1 mb-0">{successMsg}</p>
             </div>
-            <button 
+            <button
               onClick={() => setSuccessMsg(null)}
               className="absolute top-4 right-4 text-emerald-400 hover:text-emerald-700 transition-colors"
             >
@@ -172,7 +337,7 @@ export default function InvestorsView() {
       </AnimatePresence>
 
       {/* ── ZONE 1: Search Form & Visualizer ───────────────────────────── */}
-      <div className="mb-10 grid grid-cols-1 lg:grid-cols-[55%_45%] gap-6 items-stretch">
+      <div className="mb-10 grid grid-cols-1 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] gap-6 items-stretch">
         <div className="flex flex-col">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -206,26 +371,50 @@ export default function InvestorsView() {
                   <label className="text-[13px] font-semibold text-brand-dark uppercase tracking-wide">
                     Industry
                   </label>
-                  <select data-analytics-control="industry"
+                  <select
+                    data-analytics-control="industry"
                     required
                     value={industry}
                     onChange={(e) => setIndustry(e.target.value)}
                     className="w-full px-4 py-3 text-sm bg-surface border border-border rounded-xl focus:outline-none focus:border-[#4ec8ef] focus:ring-4 focus:ring-[#4ec8ef]/10 transition-all hover:border-[#4ec8ef]/40 text-brand-dark font-medium"
                   >
-                    <option value="" disabled>Select industry</option>
+                    <option value="" disabled>
+                      Select industry
+                    </option>
                     {[
-                      "SaaS", "Fintech", "Healthtech", "E-commerce", "Marketing & Advertising Technology",
-                      "Artificial Intelligence", "Cybersecurity", "Enterprise Software", "Developer Tools",
-                      "HR Tech", "Real Estate Technology (Proptech)", "EdTech", "Logistics & Supply Chain",
-                      "CleanTech / Climate Tech", "Biotech", "Consumer Apps", "Gaming", "Web3 / Blockchain",
-                      "InsurTech", "Legal Tech", "Food & Beverage", "Hardware / IoT", "Media & Entertainment",
-                      "Travel & Hospitality", "Agriculture Technology (Agtech)"
-                    ].map(ind => (
-                      <option key={ind} value={ind}>{ind}</option>
+                      "SaaS",
+                      "Fintech",
+                      "Healthtech",
+                      "E-commerce",
+                      "Marketing & Advertising Technology",
+                      "Artificial Intelligence",
+                      "Cybersecurity",
+                      "Enterprise Software",
+                      "Developer Tools",
+                      "HR Tech",
+                      "Real Estate Technology (Proptech)",
+                      "EdTech",
+                      "Logistics & Supply Chain",
+                      "CleanTech / Climate Tech",
+                      "Biotech",
+                      "Consumer Apps",
+                      "Gaming",
+                      "Web3 / Blockchain",
+                      "InsurTech",
+                      "Legal Tech",
+                      "Food & Beverage",
+                      "Hardware / IoT",
+                      "Media & Entertainment",
+                      "Travel & Hospitality",
+                      "Agriculture Technology (Agtech)",
+                    ].map((ind) => (
+                      <option key={ind} value={ind}>
+                        {ind}
+                      </option>
                     ))}
                   </select>
                 </div>
-                
+
                 <div className="flex flex-col gap-1.5 relative">
                   <label className="text-[13px] font-semibold text-brand-dark uppercase tracking-wide">
                     Target Audience
@@ -246,47 +435,81 @@ export default function InvestorsView() {
                   <label className="text-[13px] font-semibold text-brand-dark uppercase tracking-wide">
                     Investment Stage
                   </label>
-                  <select data-analytics-control="investment_stage"
+                  <select
+                    data-analytics-control="investment_stage"
                     required
                     value={investmentStage}
                     onChange={(e) => setInvestmentStage(e.target.value)}
                     className="w-full px-4 py-3 text-sm bg-surface border border-border rounded-xl focus:outline-none focus:border-[#4ec8ef] focus:ring-4 focus:ring-[#4ec8ef]/10 transition-all hover:border-[#4ec8ef]/40 text-brand-dark font-medium"
                   >
-                    <option value="" disabled>Select target stage</option>
+                    <option value="" disabled>
+                      Select target stage
+                    </option>
                     {[
-                      "Pre Seed Round", "Seed Round", "Series A", "Series B", "Series C", "Series D", 
-                      "Venture Round", "Angel Round", "Convertible Note", "Grant", "Debt Financing", 
-                      "Private Equity Round", "Corporate Round"
-                    ].map(stage => (
-                      <option key={stage} value={stage}>{stage}</option>
+                      "Pre Seed Round",
+                      "Seed Round",
+                      "Series A",
+                      "Series B",
+                      "Series C",
+                      "Series D",
+                      "Venture Round",
+                      "Angel Round",
+                      "Convertible Note",
+                      "Grant",
+                      "Debt Financing",
+                      "Private Equity Round",
+                      "Corporate Round",
+                    ].map((stage) => (
+                      <option key={stage} value={stage}>
+                        {stage}
+                      </option>
                     ))}
                   </select>
                 </div>
-                
+
                 <div className="flex flex-col gap-1.5 relative">
                   <label className="text-[13px] font-semibold text-brand-dark uppercase tracking-wide flex items-center justify-between">
                     <span>Country</span>
-                    <span className="text-[10px] text-gray-400 font-normal normal-case">Optional</span>
+                    <span className="text-[10px] text-gray-400 font-normal normal-case">
+                      Optional
+                    </span>
                   </label>
-                  <select data-analytics-control="country"
+                  <select
+                    data-analytics-control="country"
                     value={country}
                     onChange={(e) => setCountry(e.target.value)}
                     className="w-full px-4 py-3 text-sm bg-surface border border-border rounded-xl focus:outline-none focus:border-[#4ec8ef] focus:ring-4 focus:ring-[#4ec8ef]/10 transition-all hover:border-[#4ec8ef]/40 text-brand-dark font-medium"
                   >
                     <option value="">Any country</option>
                     {[
-                      "United States", "United Kingdom", "Canada", "Germany", "France", 
-                      "India", "Australia", "Singapore", "Israel", "Switzerland", "Netherlands",
-                      "Sweden", "Spain", "Italy", "Japan", "South Korea"
-                    ].map(c => (
-                      <option key={c} value={c}>{c}</option>
+                      "United States",
+                      "United Kingdom",
+                      "Canada",
+                      "Germany",
+                      "France",
+                      "India",
+                      "Australia",
+                      "Singapore",
+                      "Israel",
+                      "Switzerland",
+                      "Netherlands",
+                      "Sweden",
+                      "Spain",
+                      "Italy",
+                      "Japan",
+                      "South Korea",
+                    ].map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
                     ))}
                   </select>
                 </div>
               </div>
 
               <div className="mb-2">
-                <SliderInput analyticsControl="result_limit"
+                <SliderInput
+                  analyticsControl="result_limit"
                   label="Max Investors to Fetch"
                   hint="Maximum number of candidates to merge and score"
                   value={investorLimit}
@@ -297,39 +520,50 @@ export default function InvestorsView() {
                 />
               </div>
 
-              {/* # Discovery reflects the current selection at the configured per-run rate. */}
+              {/* # Discovery estimates use the cached per-investor rule; slider changes stay local. */}
               <PipelineCreditEstimate
                 operation="INVESTOR_DATA_PIPELINE"
                 resultCount={investorLimit}
                 minResults={10}
                 maxResults={300}
                 resultLabel="investors"
+                unitLabel="analysed investor"
                 options={[industry, investmentStage, country || "Any country"]}
               />
+              <p className="text-xs text-[var(--rw-text-muted)]">
+                Only successfully analysed investors are charged. Unused
+                reserved credits are released.
+              </p>
 
               <div className="flex justify-end pt-6 border-t border-border gap-3 mt-auto">
                 {isSearching && (
                   <motion.button
                     type="button"
-                    data-analytics-action="cancel_search" onClick={handleAbort}
+                    data-analytics-action="cancel_search"
+                    onClick={handleAbort}
+                    disabled={isCancelling || !jobRef.current}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     className="px-6 py-3.5 rounded-xl text-white font-bold text-[15px] tracking-wide flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 shadow-md transition-all duration-300"
                   >
                     <X className="w-5 h-5" />
-                    <span>Abort</span>
+                    <span>
+                      {isCancelling ? "Cancelling..." : "Cancel discovery"}
+                    </span>
                   </motion.button>
                 )}
                 <motion.button
-                  data-analytics-action="start_search" type="submit"
+                  data-analytics-action="start_search"
+                  type="submit"
                   disabled={isSearching || !companyDescription || isSuspended}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   className={`
                     relative px-8 py-3.5 rounded-xl text-white font-bold text-[15px] tracking-wide flex items-center justify-center gap-2 overflow-hidden transition-all duration-300 min-w-[220px]
-                    ${(isSearching || !companyDescription || isSuspended)
-                      ? "bg-[var(--rw-surface-hover)] text-[var(--rw-text-muted)] shadow-inner pointer-events-none"
-                      : "bg-gradient-to-r from-brand-blue to-brand-cyan shadow-[0_0_15px_rgba(48,143,239,0.4)] hover:shadow-[0_0_25px_rgba(78,200,239,0.6)] border border-brand-sky/50"
+                    ${
+                      isSearching || !companyDescription || isSuspended
+                        ? "bg-[var(--rw-surface-hover)] text-[var(--rw-text-muted)] shadow-inner pointer-events-none"
+                        : "bg-gradient-to-r from-brand-blue to-brand-cyan shadow-[0_0_15px_rgba(48,143,239,0.4)] hover:shadow-[0_0_25px_rgba(78,200,239,0.6)] border border-brand-sky/50"
                     }
                   `}
                   title={isSuspended ? "Account suspended" : ""}
@@ -337,12 +571,14 @@ export default function InvestorsView() {
                   {isSearching ? (
                     <>
                       <Loader2 className="w-5 h-5 animate-spin" />
-                      <span>Discovering... (Up to 3 min)</span>
+                      <span>Analysing investors...</span>
                     </>
                   ) : (
                     <>
                       <Zap className="w-5 h-5" />
-                      <span>{isSuspended ? "Account Suspended" : "Run Discovery"}</span>
+                      <span>
+                        {isSuspended ? "Account Suspended" : "Run Discovery"}
+                      </span>
                     </>
                   )}
                 </motion.button>
@@ -350,14 +586,27 @@ export default function InvestorsView() {
             </form>
           </motion.div>
           <div className="mt-4">
-            <ExportProgress isActive={isSearching} logType="investors" />
+            <ExportProgress
+              isActive={isSearching}
+              logType="investors"
+              totalResults={Number(investorLimit)}
+              progressState={progress}
+            />
           </div>
         </div>
-        
+
         {/* Right Side Visualizer */}
         <div className="flex flex-col min-h-[500px]">
-          <InvestorVisualizer 
-            status={isSearching ? "scanning" : (results?.investors?.length > 0 ? "complete" : (companyDescription.trim() ? "locked" : "idle"))} 
+          <InvestorVisualizer
+            status={
+              isSearching
+                ? "scanning"
+                : results?.investors?.length > 0
+                  ? "complete"
+                  : companyDescription.trim()
+                    ? "locked"
+                    : "idle"
+            }
             targetUrl={companyDescription.substring(0, 20) + "..."}
             resultCount={results?.investors?.length || 0}
           />
@@ -402,16 +651,31 @@ export default function InvestorsView() {
                   {results.metadata?.eligibility_stats && (
                     <div className="flex flex-col gap-1.5 mt-2">
                       <p className="flex items-center justify-between text-gray-600 font-medium text-xs">
-                        <span className="flex items-center gap-1.5"><Zap className="w-3.5 h-3.5 text-green-500" /> Scraped Successfully:</span>
-                        <span className="font-bold text-gray-800">{results.metadata.eligibility_stats.success}</span>
+                        <span className="flex items-center gap-1.5">
+                          <Zap className="w-3.5 h-3.5 text-green-500" /> Scraped
+                          Successfully:
+                        </span>
+                        <span className="font-bold text-gray-800">
+                          {results.metadata.eligibility_stats.success}
+                        </span>
                       </p>
                       <p className="flex items-center justify-between text-gray-600 font-medium text-xs">
-                        <span className="flex items-center gap-1.5"><Zap className="w-3.5 h-3.5 text-amber-500" /> Scrape Failed:</span>
-                        <span className="font-bold text-gray-800">{results.metadata.eligibility_stats.scrape_failed}</span>
+                        <span className="flex items-center gap-1.5">
+                          <Zap className="w-3.5 h-3.5 text-amber-500" /> Scrape
+                          Failed:
+                        </span>
+                        <span className="font-bold text-gray-800">
+                          {results.metadata.eligibility_stats.scrape_failed}
+                        </span>
                       </p>
                       <p className="flex items-center justify-between text-gray-600 font-medium text-xs">
-                        <span className="flex items-center gap-1.5"><Zap className="w-3.5 h-3.5 text-gray-400" /> No URL Available:</span>
-                        <span className="font-bold text-gray-800">{results.metadata.eligibility_stats.no_url}</span>
+                        <span className="flex items-center gap-1.5">
+                          <Zap className="w-3.5 h-3.5 text-gray-400" /> No URL
+                          Available:
+                        </span>
+                        <span className="font-bold text-gray-800">
+                          {results.metadata.eligibility_stats.no_url}
+                        </span>
                       </p>
                     </div>
                   )}
@@ -419,29 +683,43 @@ export default function InvestorsView() {
               </div>
 
               <div className="bg-surface rounded-3xl shadow-md border border-border p-6 relative overflow-hidden">
-                 <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-green-500/10 to-transparent rounded-full -mr-10 -mt-10 pointer-events-none" />
+                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-green-500/10 to-transparent rounded-full -mr-10 -mt-10 pointer-events-none" />
                 <h3 className="text-lg font-bold text-[#191919] mb-5 flex items-center gap-2">
                   <CheckCircle2 className="w-5 h-5 text-green-500" />
                   Pipeline Status
                 </h3>
                 <div className="space-y-3">
-                  {results.metadata?.source_status && Object.entries(results.metadata.source_status).map(([key, status]) => {
-                    if (typeof status !== 'string') return null;
-                    return (
-                    <div key={key} className="flex items-center justify-between p-3 bg-[var(--rw-surface-hover)] rounded-xl border border-border">
-                      <span className="font-medium text-gray-600 capitalize text-xs">
-                        {key.replace(/-/g, " ")}
-                      </span>
-                      <span className={`text-[11px] font-bold px-2 py-1 rounded-full uppercase tracking-wider ${
-                        status.includes('success') ? 'bg-green-100 text-green-700' :
-                        status === 'skipped' ? 'bg-gray-200 text-gray-600' :
-                        status.includes('failed') ? 'bg-red-100 text-red-700' :
-                        'bg-yellow-100 text-yellow-700'
-                      }`}>
-                        {status.includes('success') ? 'SUCCESS' : status.split(':')[0]}
-                      </span>
-                    </div>
-                  )})}
+                  {results.metadata?.source_status &&
+                    Object.entries(results.metadata.source_status).map(
+                      ([key, status]) => {
+                        if (typeof status !== "string") return null;
+                        return (
+                          <div
+                            key={key}
+                            className="flex items-center justify-between p-3 bg-[var(--rw-surface-hover)] rounded-xl border border-border"
+                          >
+                            <span className="font-medium text-gray-600 capitalize text-xs">
+                              {key.replace(/-/g, " ")}
+                            </span>
+                            <span
+                              className={`text-[11px] font-bold px-2 py-1 rounded-full uppercase tracking-wider ${
+                                status.includes("success")
+                                  ? "bg-green-100 text-green-700"
+                                  : status === "skipped"
+                                    ? "bg-gray-200 text-gray-600"
+                                    : status.includes("failed")
+                                      ? "bg-red-100 text-red-700"
+                                      : "bg-yellow-100 text-yellow-700"
+                              }`}
+                            >
+                              {status.includes("success")
+                                ? "SUCCESS"
+                                : status.split(":")[0]}
+                            </span>
+                          </div>
+                        );
+                      },
+                    )}
                 </div>
               </div>
             </div>
@@ -450,19 +728,22 @@ export default function InvestorsView() {
       </AnimatePresence>
 
       {/* ── Results Delivery System ───────────────────────────────────── */}
-      {results && results.investors && results.investors.length > 0 && !isSearching && (
-        <>
-          <RippleArrivalSignal isActive={true} />
-          <InvestorResultsBottomSheet 
-            isOpen={isSheetOpen} 
-            onOpen={() => setIsSheetOpen(true)}
-            onClose={() => setIsSheetOpen(false)} 
-            onExport={handleExportCsv}
-            data={results.investors}
-            subtitle={`${results.investors.length} enriched investors ready for export`}
-          />
-        </>
-      )}
+      {results &&
+        results.investors &&
+        results.investors.length > 0 &&
+        !isSearching && (
+          <>
+            <RippleArrivalSignal isActive={true} />
+            <InvestorResultsBottomSheet
+              isOpen={isSheetOpen}
+              onOpen={() => setIsSheetOpen(true)}
+              onClose={() => setIsSheetOpen(false)}
+              onExport={handleExportCsv}
+              data={results.investors}
+              subtitle={`${results.investors.length} enriched investors ready for export`}
+            />
+          </>
+        )}
     </div>
   );
 }
