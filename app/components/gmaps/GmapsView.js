@@ -128,6 +128,8 @@ export default function GmapsView() {
 
     try {
       const jobData = await gmapsBulkSearch({ keywords, location: location.trim(), limit });
+      // # Reservation happens on FastAPI before this response; reload spendable credits immediately.
+      window.dispatchEvent(new Event("simpleads:credits-changed"));
 
       const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
       const wsHost = process.env.NEXT_PUBLIC_API_URL 
@@ -142,6 +144,10 @@ export default function GmapsView() {
         try {
           const msg = JSON.parse(event.data);
           
+          if (["completed", "failed", "cancelled"].includes(msg.status)) {
+            // # Settlement is authoritative on the server; the browser only reloads its wallet display.
+            window.dispatchEvent(new Event("simpleads:credits-changed"));
+          }
           if (msg.status === "completed") {
             ws.close();
             try {
@@ -178,6 +184,7 @@ export default function GmapsView() {
       };
 
     } catch (err) {
+      window.dispatchEvent(new Event("simpleads:credits-changed"));
       setSearchError(err.message || "Search failed. Please try again.");
       setIsSearching(false);
     }

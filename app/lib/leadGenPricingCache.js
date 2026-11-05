@@ -1,13 +1,18 @@
-import { normalizeLeadGenPricing } from "./leadGenPricing";
+import {
+  normalizeLeadGenPricing,
+  PIPELINE_PRICING_OPERATIONS,
+} from "./leadGenPricing";
 
 const DATABASE = "simpleads-credit-pricing";
 const STORE = "rules";
-const KEY = "SIMPLEADS:LEAD_GEN_PIPELINE";
-let pageRequest;
-let generation = 0;
+// # Each module owns its request, storage key and refresh generation.
+// # Switching modules reuses rules without replacing another module's in-flight refresh.
+const pageRequests = new Map();
+const generations = new Map();
 
 // # IndexedDB is optional: blocked storage must not prevent a fresh network estimate from rendering.
-async function pricingStorage(mode, value, requestGeneration) {
+async function pricingStorage(operation, mode, value, requestGeneration) {
+  const key = `SIMPLEADS:${operation}`;
   if (typeof indexedDB === "undefined")
     throw new Error("Browser storage is unavailable.");
   const db = await new Promise((resolve, reject) => {
@@ -34,12 +39,17 @@ async function pricingStorage(mode, value, requestGeneration) {
   });
   try {
     // # A refresh may have started while IndexedDB was opening; do not persist the older response afterward.
-    if (mode === "readwrite" && requestGeneration !== generation) return;
+    if (
+      mode === "readwrite" &&
+      requestGeneration !== (generations.get(operation) || 0)
+    ) {
+      return;
+    }
     return await new Promise((resolve, reject) => {
       const transaction = db.transaction(STORE, mode);
       const store = transaction.objectStore(STORE);
       const request =
-        mode === "readonly" ? store.get(KEY) : store.put(value, KEY);
+        mode === "readonly" ? store.get(key) : store.put(value, key);
       let result;
       request.onsuccess = () => {
         result = request.result;
@@ -53,27 +63,32 @@ async function pricingStorage(mode, value, requestGeneration) {
   }
 }
 
-// # A manual Refresh starts a new read; older requests may not overwrite the newer IndexedDB record.
-export function resetLeadGenPricing() {
-  generation += 1;
-  pageRequest = undefined;
+// # Manual refresh invalidates only the selected operation and prevents older writes from winning.
+export function resetPipelinePricing(operation) {
+  generations.set(operation, (generations.get(operation) || 0) + 1);
+  pageRequests.delete(operation);
 }
 
-// # LeadGenCredits calls this once per document/session, never in response to slider or feature changes.
-// # Always try fresh rules on page open; IndexedDB is a labeled offline fallback rather than a freshness signal.
-export function loadLeadGenPricing() {
-  if (!pageRequest) {
-    const requestGeneration = generation;
-    pageRequest = (async () => {
+// # Fetch once per operation per document, independently of form options and result sliders.
+// # Saved rules are an explicit offline fallback, never evidence that pricing is current.
+export function loadPipelinePricing(operation) {
+  if (!PIPELINE_PRICING_OPERATIONS.includes(operation)) {
+    return Promise.reject(new Error("Unsupported pricing operation."));
+  }
+  if (!pageRequests.has(operation)) {
+    const requestGeneration = generations.get(operation) || 0;
+    const pageRequest = (async () => {
       try {
-        const response = await fetch("/api/leadgen/pricing", {
-          cache: "no-store",
-        });
+        const response = await fetch(
+          `/api/leadgen/pricing?operation=${encodeURIComponent(operation)}`,
+          { cache: "no-store" },
+        );
         if (!response.ok) throw new Error("Pricing request failed.");
-        const pricing = normalizeLeadGenPricing(await response.json());
-        if (requestGeneration === generation) {
-          // # Storage runs in the background so restricted/slow IndexedDB does not stall the slider.
+        const pricing = normalizeLeadGenPricing(await response.json(), operation);
+        if (requestGeneration === (generations.get(operation) || 0)) {
+          // # Persist in the background so slow or restricted storage cannot block the UI.
           void pricingStorage(
+            operation,
             "readwrite",
             { pricing, fetchedAt: Date.now() },
             requestGeneration,
@@ -81,17 +96,26 @@ export function loadLeadGenPricing() {
         }
         return { pricing, cached: false };
       } catch {
-        const saved = await pricingStorage("readonly").catch(() => null);
-        if (!saved?.pricing)
-          throw new Error(
-            "Run pricing is unavailable. Please refresh to try again.",
-          );
+        const saved = await pricingStorage(operation, "readonly").catch(() => null);
+        if (!saved?.pricing) {
+          throw new Error("Pricing is not available for this module yet.");
+        }
         return {
-          pricing: normalizeLeadGenPricing(saved.pricing),
+          pricing: normalizeLeadGenPricing(saved.pricing, operation),
           cached: true,
         };
       }
     })();
+    pageRequests.set(operation, pageRequest);
   }
-  return pageRequest;
+  return pageRequests.get(operation);
+}
+
+// # Preserve the existing Lead Gen callers and their lead-based calculation behavior.
+export function resetLeadGenPricing() {
+  resetPipelinePricing("LEAD_GEN_PIPELINE");
+}
+
+export function loadLeadGenPricing() {
+  return loadPipelinePricing("LEAD_GEN_PIPELINE");
 }

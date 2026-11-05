@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { checkHealth } from "../lib/api";
+import HeaderCreditBalance from "./HeaderCreditBalance";
 import { Target, Map, Trash2, Activity, LogOut, Menu, Camera, Sun, Moon } from "lucide-react";
 import { useAuth } from "../lib/AuthContext";
 import { useRouter } from "next/navigation";
@@ -26,7 +27,15 @@ import { useRouter } from "next/navigation";
 
 import { PIPELINES as MODULES } from "../lib/pipelinesConfig";
 
-export default function Header({ onClearAll, activeModule, onModuleChange, onToggleSidebar, isDark, onToggleTheme }) {
+export default function Header({
+  onClearAll,
+  activeModule,
+  onModuleChange,
+  onToggleSidebar,
+  isDark,
+  onToggleTheme,
+  creditRefreshKey,
+}) {
   const [health, setHealth] = useState(null);
   const { logout } = useAuth();
   const router = useRouter();
@@ -147,7 +156,9 @@ export default function Header({ onClearAll, activeModule, onModuleChange, onTog
       </div>
 
       {/* Right side */}
-      <div className="flex items-center gap-2 lg:gap-4">
+      <div className="flex items-center gap-2 lg:gap-4 rw-header-actions">
+        {/* # Keep the wallet visible beside API status in every dashboard module. */}
+        <HeaderCreditBalance refreshKey={creditRefreshKey} />
         {/* Desktop-only items */}
         <div className="hidden lg:flex items-center gap-4">
         {/* Health status */}

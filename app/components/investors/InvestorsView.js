@@ -1,5 +1,7 @@
 "use client";
 
+import PipelineCreditEstimate from "../PipelineCreditEstimate";
+
 // # Feedback observes the existing run lifecycle without blocking pipeline work.
 import usePipelineFeedback from "../../hooks/usePipelineFeedback";
 
@@ -294,6 +296,16 @@ export default function InvestorsView() {
                   step={1}
                 />
               </div>
+
+              {/* # Discovery reflects the current selection at the configured per-run rate. */}
+              <PipelineCreditEstimate
+                operation="INVESTOR_DATA_PIPELINE"
+                resultCount={investorLimit}
+                minResults={10}
+                maxResults={300}
+                resultLabel="investors"
+                options={[industry, investmentStage, country || "Any country"]}
+              />
 
               <div className="flex justify-end pt-6 border-t border-border gap-3 mt-auto">
                 {isSearching && (

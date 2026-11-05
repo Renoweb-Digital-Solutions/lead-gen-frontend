@@ -1444,3 +1444,20 @@ body {
 
 .rounded-inherit { border-radius: inherit; }
 
+/* # Wrap header actions onto a second row when a phone cannot fit the wallet and logo. */
+@media (max-width: 639px) {
+  .rw-header {
+    height: auto;
+    min-height: 57px;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+
+  .rw-header-actions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    margin-left: auto;
+  }
+}

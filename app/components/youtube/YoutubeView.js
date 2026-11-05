@@ -1,5 +1,7 @@
 "use client";
 
+import PipelineCreditEstimate from "../PipelineCreditEstimate";
+
 // # Feedback observes the existing run lifecycle without blocking pipeline work.
 import usePipelineFeedback from "../../hooks/usePipelineFeedback";
 
@@ -181,6 +183,23 @@ export default function YoutubeView() {
           </label>
         </div>
         {renderFilters()}
+        {/* # Show unavailable until the YOUTUBE_SCRAPER pricing record exists. */}
+        <PipelineCreditEstimate
+          operation="YOUTUBE_SCRAPER"
+          resultCount={target}
+          maxResults={500}
+          resultLabel="channels"
+          options={[
+            country || "Any country",
+            minSubscribers
+              ? `Minimum ${minSubscribers} subscribers`
+              : "No subscriber minimum",
+            onlyEmail ? "Only channels with email" : "All channels",
+            ageAvailable && sort === "age"
+              ? "Oldest channels first"
+              : "Subscribers first",
+          ]}
+        />
         <div className="flex flex-wrap items-center justify-between gap-4">
           <label className="flex items-center gap-2 text-sm text-brand-dark"><input data-analytics-control="only_email" type="checkbox" checked={onlyEmail} onChange={(e) => setOnlyEmail(e.target.checked)} className="accent-red-500" />Only channels with email</label>
           <div className="flex items-center gap-3">

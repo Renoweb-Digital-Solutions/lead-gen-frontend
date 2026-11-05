@@ -1,6 +1,8 @@
 "use client";
 // # Stable action identifiers are consumed by the passive interaction observer.
 
+import PipelineCreditEstimate from "../PipelineCreditEstimate";
+
 import { motion } from "framer-motion";
 import { Search, MapPin, Loader2, X, AlertTriangle } from "lucide-react";
 import { useAuth } from "../../lib/AuthContext";
@@ -25,6 +27,11 @@ export default function SearchParametersCard({
   onAbort,
 }) {
   const { isSuspended } = useAuth();
+  // # Each nonempty keyword starts a separate actor with the selected per-keyword limit.
+  const keywordCount = Math.max(
+    keywords.filter((keyword) => keyword.trim()).length,
+    1,
+  );
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -142,6 +149,19 @@ export default function SearchParametersCard({
           step={1}
         />
       </div>
+
+      {/* # Maps estimates use the selected place count when its MongoDB rule declares RESULT pricing. */}
+      <PipelineCreditEstimate
+        operation="GOOGLE_MAPS"
+        resultCount={Number(limit) * keywordCount}
+        minResults={10}
+        maxResults={300 * keywordCount}
+        resultLabel="places"
+        options={[
+          keywordCount > 1 ? `${limit} places per keyword` : null,
+          keywordCount > 1 ? `${keywordCount} keywords` : null,
+        ]}
+      />
 
       <div className="flex justify-end gap-3">
         {isSearching && (

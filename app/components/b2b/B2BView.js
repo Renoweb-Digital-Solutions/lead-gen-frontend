@@ -1,5 +1,13 @@
 "use client";
 
+import PipelineCreditEstimate from "../PipelineCreditEstimate";
+import DirectoryLocationPicker from "./DirectoryLocationPicker";
+import {
+  DIRECTORY_COUNTRIES,
+  resolveDirectoryLocation,
+} from "../../lib/b2bLocations";
+import { Country } from "country-state-city";
+
 // # Feedback observes the existing run lifecycle without blocking pipeline work.
 import usePipelineFeedback from "../../hooks/usePipelineFeedback";
 
@@ -8,7 +16,7 @@ import { trackInteraction } from "../../lib/interactionAnalytics";
 
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Loader2, Building, MapPin, Download, BookOpen, ExternalLink, Phone, Mail, X, Globe, ChevronDown, Check, CheckCircle2, AlertCircle, Info } from "lucide-react";
+import { Search, Loader2, Building, Download, BookOpen, ExternalLink, Phone, Mail, X, Globe, ChevronDown, Check, CheckCircle2, AlertCircle, Info } from "lucide-react";
 import styles from "./B2BView.module.css";
 import TagInput from "../inputs/TagInput";
 import DirectoryNetworkPanel from "./DirectoryNetworkPanel";
@@ -70,6 +78,12 @@ const EUROPAGES_COUNTRIES = {
   "GB": "United Kingdom"
 };
 
+// # Use package country names while retaining the same server-approved European ISO-code allowlist.
+const EUROPAGES_OPTIONS = Country.getAllCountries()
+  .filter((country) => Object.hasOwn(EUROPAGES_COUNTRIES, country.isoCode))
+  .map((country) => [country.isoCode, country.name])
+  .sort((left, right) => left[1].localeCompare(right[1]));
+
 function europagesTableRow(row) {
   // Older results kept in session storage already contain coordinates.
   let mapsUrl = row.google_maps_url || "";
@@ -91,7 +105,8 @@ export default function B2BView() {
   // ─── Search Form State ───────────────────────────────────
   const [directory, setDirectory] = useSessionState("b2b-directory", "yellowpages");
   const [keywords, setKeywords] = useSessionState("b2b-keywords", []);
-  const [location, setLocation] = useSessionState("b2b-location", "");
+  // # Old free-text locations are intentionally not reused. Country-scoped selections cannot cross directories.
+  const [savedAreas, setSavedAreas] = useSessionState("b2b-structured-locations", {});
   const [countries, setCountries] = useState([]);
   const [enrichEmails, setEnrichEmails] = useState(false);
   const [countrySearch, setCountrySearch] = useState("");
@@ -100,9 +115,27 @@ export default function B2BView() {
   const [resultCsv, setResultCsv] = useSessionState("b2b-result-csv", null);
   const [maxResults, setMaxResults] = useSessionState("b2b-max-results", 20);
   const isEuropages = directory === "europages";
+  const countryCode = DIRECTORY_COUNTRIES[directory];
+  const selectedArea = savedAreas?.[countryCode] || { stateCode: "", city: "" };
+  const resolvedLocation = isEuropages
+    ? null
+    : resolveDirectoryLocation(directory, selectedArea);
+  const setSelectedArea = (area) => {
+    setSavedAreas((previous) => ({ ...(previous || {}), [countryCode]: area }));
+  };
+  // # IndiaMART applies Max Results per query; Europages caps the entire query batch.
+  // # Yellow Pages accepts only its first keyword, matching the existing actor contract.
+  const pricedKeywordCount = directory === "indiamart"
+    ? Math.max(
+        new Set(keywords.map((keyword) => keyword.trim()).filter(Boolean)).size,
+        1,
+      )
+    : 1;
   const hasKeywords = keywords.some(keyword => keyword.trim());
   const validMaxResults = Number.isInteger(Number(maxResults)) && Number(maxResults) >= 1 && Number(maxResults) <= 100;
-  const canExtract = hasKeywords && validMaxResults && (isEuropages ? countries.length > 0 : Boolean(location.trim()));
+  const canExtract = hasKeywords && validMaxResults && (
+    isEuropages ? countries.length > 0 : Boolean(resolvedLocation)
+  );
 
   // ─── Pagination State ─────────────────────────────────────
   const [currentPage, setCurrentPage] = useState(1);
@@ -139,8 +172,8 @@ export default function B2BView() {
       setErrorMsg("Max Results must be a whole number from 1 to 100");
       return;
     }
-    if (!isEuropages && !location.trim()) {
-      setErrorMsg("Please enter a location");
+    if (!isEuropages && !resolvedLocation) {
+      setErrorMsg("Select a state or region within the directory's country.");
       return;
     }
 
@@ -163,9 +196,11 @@ export default function B2BView() {
         maxResultsPerKeyword: Number(maxResults),
         ...(isEuropages
           ? { countries, enrich_emails: enrichEmails }
-          : { location: location.trim() })
+          : resolvedLocation)
       });
 
+      // # Reservation is already confirmed by FastAPI before the job response returns.
+      window.dispatchEvent(new Event("simpleads:credits-changed"));
       const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
       const wsHost = process.env.NEXT_PUBLIC_API_URL 
         ? process.env.NEXT_PUBLIC_API_URL.replace(/^https?:\/\//, "") 
@@ -180,6 +215,9 @@ export default function B2BView() {
           const msg = JSON.parse(event.data);
           setProgress({ message: msg.message, percent: msg.percent });
           
+          if (["completed", "failed", "cancelled"].includes(msg.status)) {
+            window.dispatchEvent(new Event("simpleads:credits-changed"));
+          }
           if (msg.status === "completed") {
             ws.close();
             try {
@@ -214,6 +252,7 @@ export default function B2BView() {
       };
 
     } catch (err) {
+      window.dispatchEvent(new Event("simpleads:credits-changed"));
       if (err.message === "Failed to fetch") {
         setErrorMsg("We couldn't reach the search service right now. Please check your internet connection and try again in a moment.");
       } else {
@@ -402,6 +441,20 @@ export default function B2BView() {
                 </div>
               </motion.div>
             )}
+            {directory === "indiamart" && (
+              <motion.div
+                key="indiamart-note"
+                initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                animate={{ opacity: 1, height: "auto", marginTop: 16 }}
+                exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                className="overflow-hidden"
+              >
+                <div className={styles.note}>
+                  <Info className="w-4 h-4 shrink-0" />
+                  IndiaMART searches are limited to India. Choose an Indian state and optionally a city.
+                </div>
+              </motion.div>
+            )}
             {isEuropages && (
               <motion.div
                 key="europages-note"
@@ -454,7 +507,7 @@ export default function B2BView() {
                     placeholder="Search countries..."
                   />
                   <div className="max-h-56 overflow-y-auto mt-2">
-                    {Object.entries(EUROPAGES_COUNTRIES)
+                    {EUROPAGES_OPTIONS
                       .filter(([code, name]) => `${code} ${name}`.toLowerCase().includes(countrySearch.toLowerCase()))
                       .map(([code, name]) => (
                         <label key={code} className="flex items-center gap-2 py-2 text-sm text-brand-dark cursor-pointer">
@@ -466,7 +519,7 @@ export default function B2BView() {
                           {name}
                         </label>
                       ))}
-                    {!Object.entries(EUROPAGES_COUNTRIES).some(([code, name]) => `${code} ${name}`.toLowerCase().includes(countrySearch.toLowerCase())) && (
+                    {!EUROPAGES_OPTIONS.some(([code, name]) => `${code} ${name}`.toLowerCase().includes(countrySearch.toLowerCase())) && (
                       <p className="text-xs text-gray-500 py-2">No countries match your search.</p>
                     )}
                   </div>
@@ -488,24 +541,13 @@ export default function B2BView() {
               {countries.length === 0 && <p className="mt-2 text-xs text-amber-700">Select at least one country.</p>}
             </div>
           ) : (
-          <div className="flex-1 relative group">
-            <label className="text-[13px] font-semibold text-brand-dark block mb-1.5 uppercase tracking-wide">
-              Location
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-3.5 flex items-center z-10 text-gray-400">
-                <MapPin className="w-4 h-4" />
-              </div>
-              <input
-                type="text"
-                className="w-full pl-10 pr-4 py-2.5 text-sm bg-surface border border-border rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all hover:border-indigo-500/40 text-brand-dark font-medium"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                placeholder="e.g. Mumbai, New York..."
+            <div className="flex-[2] min-w-0">
+              <DirectoryLocationPicker
+                directory={directory}
+                value={selectedArea}
+                onChange={setSelectedArea}
               />
             </div>
-          </div>
-
           )}
 
           <div className="flex-1 relative group">
@@ -530,6 +572,30 @@ export default function B2BView() {
             Find emails (extra cost, slower)
           </label>
         )}
+
+        {/* # Email enrichment needs its own configured addon for a complete estimate. */}
+        <PipelineCreditEstimate
+          operation="B2B_SCRAPER"
+          resultCount={Number(maxResults) * pricedKeywordCount}
+          maxResults={100 * pricedKeywordCount}
+          resultLabel="businesses"
+          options={[
+            directory === "yellowpages"
+              ? "Yellow Pages"
+              : directory === "indiamart"
+                ? "IndiaMART"
+                : "Europages",
+            isEuropages && countries.length > 0
+              ? `${countries.length} countries`
+              : null,
+            isEuropages && enrichEmails ? "Find emails" : null,
+            pricedKeywordCount > 1 ? `${maxResults} per keyword` : null,
+            directory === "yellowpages" && keywords.length > 1
+              ? "First keyword only"
+              : null,
+          ]}
+          features={isEuropages && enrichEmails ? ["enrich_emails"] : []}
+        />
 
         <div className="flex justify-end pt-4 border-t border-border gap-3">
           {isSearching && (

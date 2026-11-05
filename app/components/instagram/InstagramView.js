@@ -1,5 +1,7 @@
 "use client";
 
+import PipelineCreditEstimate from "../PipelineCreditEstimate";
+
 // # Feedback observes the existing run lifecycle without blocking pipeline work.
 import usePipelineFeedback from "../../hooks/usePipelineFeedback";
 
@@ -48,6 +50,13 @@ export default function InstagramView() {
       return;
     }
 
+    const count = Number(maxItems);
+    const maximum = sourceType === "comments" ? 10000 : 500;
+    if (!Number.isSafeInteger(count) || count < 50 || count > maximum) {
+      setErrorMsg(`Choose a whole number of items between 50 and ${maximum}.`);
+      return;
+    }
+
     // # Track validated submission without awaiting analytics or changing pipeline inputs.
     trackInteraction("run_submitted", "instagram", { settings: { source_type: sourceType, result_limit: Number(maxItems) } });
     setIsSearching(true);
@@ -60,8 +69,10 @@ export default function InstagramView() {
       const jobData = await extractInstagramLeads({
         source_type: sourceType,
         target: target.trim(),
-        max_items: Number(maxItems)
+        max_items: count,
       });
+      // # FastAPI reserved the budget before responding; refresh spendable credits now.
+      window.dispatchEvent(new Event("simpleads:credits-changed"));
 
       const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
       const wsHost = process.env.NEXT_PUBLIC_API_URL 
@@ -76,6 +87,10 @@ export default function InstagramView() {
         try {
           const msg = JSON.parse(event.data);
           
+          if (["completed", "failed", "cancelled"].includes(msg.status)) {
+            // # The server confirms capture/release; the browser only refreshes the wallet display.
+            window.dispatchEvent(new Event("simpleads:credits-changed"));
+          }
           if (msg.status === "completed") {
             ws.close();
             try {
@@ -124,6 +139,7 @@ export default function InstagramView() {
       };
 
     } catch (err) {
+      window.dispatchEvent(new Event("simpleads:credits-changed"));
       if (err.message === "Failed to fetch") {
         setErrorMsg("We couldn't reach the search service right now. Please check your internet connection and try again in a moment.");
       } else {
@@ -314,6 +330,18 @@ export default function InstagramView() {
                 )}
               </div>
             </div>
+
+            {/* # Source selection updates the summary without inventing option surcharges. */}
+            <PipelineCreditEstimate
+              operation="INSTAGRAM_SCRAPER"
+              resultCount={maxItems}
+              minResults={50}
+              maxResults={sourceType === "comments" ? 10000 : 500}
+              resultLabel={sourceType}
+              options={[
+                sourceType === "comments" ? "Post comments" : "Profile extraction",
+              ]}
+            />
 
             <div className="flex justify-end pt-4 border-t border-border gap-3">
               {isSearching && (

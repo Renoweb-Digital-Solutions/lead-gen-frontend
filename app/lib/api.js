@@ -454,7 +454,13 @@ export async function gmapsBulkSearch({ keywords, location, limit }) {
     }),
   });
   if (!res.ok) {
-    throw new Error("Failed to start GMaps bulk search");
+    // # Surface insufficient funds and service outages from FastAPI without exposing raw JSON.
+    const payload = await res.json().catch(() => ({}));
+    const detail = payload.detail;
+    throw new Error(
+      (typeof detail === "string" ? detail : detail?.message) ||
+        "Failed to start Google Maps search. Please try again.",
+    );
   }
 
   return res.json();
@@ -597,18 +603,15 @@ export async function extractInstagramLeads(params, signal) {
   });
 
   if (!res.ok) {
-    let errorDetail = "Failed to extract Instagram leads";
-    try {
-      const errData = await res.json();
-      errorDetail = errData.detail || errData.error || errorDetail;
-    } catch {
-      // Fallback if not json
-      const text = await res.text();
-      if (text) errorDetail = text;
-    }
-    const err = new Error(errorDetail);
-    err.status = res.status;
-    throw err;
+    // # Keep insufficient-funds and service errors readable; the response body is consumed only once.
+    const payload = await res.json().catch(() => ({}));
+    const detail = payload.detail;
+    const error = new Error(
+      (typeof detail === "string" ? detail : detail?.message) ||
+        "Failed to extract Instagram leads. Please try again.",
+    );
+    error.status = res.status;
+    throw error;
   }
 
   return res.json();
@@ -623,18 +626,15 @@ export async function fetchB2BLeads(params, signal) {
   });
 
   if (!res.ok) {
-    let errorDetail = "Failed to fetch B2B leads";
-    try {
-      const errData = await res.json();
-      errorDetail = errData.detail || errData.error || errorDetail;
-    } catch {
-      // Fallback if not json
-      const text = await res.text();
-      if (text) errorDetail = text;
-    }
-    const err = new Error(errorDetail);
-    err.status = res.status;
-    throw err;
+    // # Preserve readable insufficient-funds and unconfigured-enrichment errors from FastAPI.
+    const payload = await res.json().catch(() => ({}));
+    const detail = payload.detail;
+    const error = new Error(
+      (typeof detail === "string" ? detail : detail?.message) ||
+        "Failed to fetch B2B leads. Please try again.",
+    );
+    error.status = res.status;
+    throw error;
   }
 
   return res.json();

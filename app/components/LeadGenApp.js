@@ -348,6 +348,12 @@ export default function LeadGenApp() {
 
   const currentFormat = formState.exportFormat;
   const currentExportState = exportResults[currentFormat] || {};
+  // # Reload the header wallet after run transitions, settlement updates, or rejected starts.
+  const creditRefreshKey = [
+    currentExportState.progress?.status,
+    currentExportState.progress?.credits?.status,
+    currentExportState.errorCode,
+  ].join(":");
 
   const renderStep = () => {
     const props = { formState, updateField, updateFields };
@@ -399,6 +405,7 @@ export default function LeadGenApp() {
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
         isDark={isDark}
         onToggleTheme={() => setIsDark(!isDark)}
+        creditRefreshKey={creditRefreshKey}
       />
 
       {/* ── Google Maps Module ─────────────────────────── */}

@@ -1,5 +1,8 @@
 import { MongoClient } from "mongodb";
-import { normalizeLeadGenPricing } from "../../../lib/leadGenPricing";
+import {
+  normalizeLeadGenPricing,
+  PIPELINE_PRICING_OPERATIONS,
+} from "../../../lib/leadGenPricing";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -29,16 +32,24 @@ async function pricingDatabase() {
   return (await connection).db(name);
 }
 
-// # Expose public rules for this one operation. No client-supplied collection, query or wallet ID is accepted.
-export async function GET() {
+// # Accept only an allowlisted operation; collection names, queries and wallet IDs stay server-controlled.
+export async function GET(request) {
   const headers = { "Cache-Control": "no-store" };
+  const operation =
+    new URL(request.url).searchParams.get("operation") || "LEAD_GEN_PIPELINE";
+  if (!PIPELINE_PRICING_OPERATIONS.includes(operation)) {
+    return Response.json(
+      { message: "Unsupported pricing operation." },
+      { status: 400, headers },
+    );
+  }
   try {
     const db = await pricingDatabase();
     const now = new Date();
     const record = await db.collection("credit_pricing").findOne(
       {
         application: "SIMPLEADS",
-        operation: "LEAD_GEN_PIPELINE",
+        operation,
         active: true,
         effectiveFrom: { $lte: now },
         $or: [
@@ -59,7 +70,7 @@ export async function GET() {
         },
       },
     );
-    return Response.json(normalizeLeadGenPricing(record), { headers });
+    return Response.json(normalizeLeadGenPricing(record, operation), { headers });
   } catch {
     // # Never expose MongoDB URIs, credentials, topology details or raw database exceptions.
     return Response.json(
