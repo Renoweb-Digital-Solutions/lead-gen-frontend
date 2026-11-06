@@ -267,7 +267,14 @@ export default function Header({
           </span>
         </button>
 
-        {/* # Profile navigation lives on the sidebar account name and avatar. */}
+        {/* # Keep billing settings accessible from every dashboard module. */}
+        <button
+          type="button"
+          className="rw-btn rw-btn-ghost"
+          onClick={() => router.push("/settings")}
+        >
+          Settings
+        </button>
         {/* Logout button (Visible on all screens) */}
         <button
           type="button"

@@ -77,6 +77,7 @@ export async function feedbackApi(path = "/feedback/eligibility", data, signal) 
 // # Identity requests deliberately omit outreach authorization and stored JWTs.
 // # Errors retain machine-readable account-switch hints while displaying plain text.
 export async function identityApi(path, body, form = false, signal) {
+  // # FastAPI owns OTP verification and the mandatory starter-tier signup call.
   const res = await fetch(`${BASE_URL}/auth${path}`, {
     method: "POST",
     headers: {
