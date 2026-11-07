@@ -1,0 +1,155 @@
+/* # Shared navigation follows existing app variables. Billing-specific brand
+   colors live in Billing.module.css and never alter the dashboard palette. */
+.root {
+  position: relative;
+  flex-shrink: 0;
+  color: var(--rw-text, #17305a);
+}
+.trigger {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 9px;
+  border: 1px solid var(--rw-border, #dce7f7);
+  border-radius: 12px;
+  background: var(--rw-surface, #fff);
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+}
+.trigger:hover,
+.trigger[aria-expanded="true"] {
+  background: var(--rw-surface-hover, #edf4ff);
+  border-color: var(--rw-bright-blue, #308fef);
+}
+.triggerText {
+  font-size: 13px;
+  font-weight: 600;
+}
+.trigger > svg {
+  color: var(--rw-text-muted, #7185a5);
+  transition: transform 0.2s;
+}
+.trigger > .chevronOpen {
+  transform: rotate(180deg);
+}
+.avatar {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #023dbb, #308fef);
+  color: white;
+  font-size: 13px;
+  font-weight: 700;
+}
+/* # Padding bridges the visual gap so moving from trigger to panel does not
+   dismiss hover. The panel remains inside the same pointer/focus boundary. */
+.panel {
+  position: absolute;
+  z-index: 90;
+  top: 100%;
+  right: 0;
+  width: min(280px, calc(100vw - 32px));
+  margin-top: 0;
+  padding: 12px;
+  border: 1px solid var(--rw-border, #dce7f7);
+  border-radius: 16px;
+  background: var(--rw-surface, #fff);
+  box-shadow: 0 18px 55px #123c7429;
+}
+.panel[hidden] {
+  display: none;
+}
+.identity {
+  padding: 8px 10px 14px;
+  border-bottom: 1px solid var(--rw-border, #dce7f7);
+}
+.identity strong {
+  display: block;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+.identity > span {
+  display: block;
+  margin-top: 5px;
+  font-size: 12px;
+  color: var(--rw-text-muted, #7185a5);
+  overflow-wrap: anywhere;
+}
+.links {
+  display: grid !important;
+  gap: 4px !important;
+  margin: 8px 0 !important;
+}
+.links a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 10px !important;
+  border-radius: 10px;
+  font-size: 13px !important;
+  color: inherit !important;
+  text-decoration: none;
+}
+.links a:hover {
+  background: var(--rw-surface-hover, #edf4ff);
+}
+.links a > svg {
+  color: var(--rw-bright-blue, #308fef);
+}
+.links a span {
+  font-weight: 600;
+}
+.links small {
+  display: block;
+  font-size: 11px;
+  font-weight: 400;
+  margin-top: 3px;
+  color: var(--rw-text-muted, #7185a5);
+}
+.logout {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 10px;
+  border: 0;
+  border-top: 1px solid var(--rw-border, #dce7f7);
+  border-radius: 0 0 10px 10px;
+  color: #c43e4c;
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+.logout:hover {
+  background: #fff1f3;
+}
+.root :is(button, a):focus-visible {
+  outline: 2px solid #308fef;
+  outline-offset: 2px;
+}
+@media (max-width: 600px) {
+  .triggerText {
+    display: none;
+  }
+  .trigger {
+    gap: 5px;
+    padding: 4px 6px;
+  }
+  .avatar {
+    width: 27px;
+    height: 27px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .trigger > svg {
+    transition: none;
+  }
+}

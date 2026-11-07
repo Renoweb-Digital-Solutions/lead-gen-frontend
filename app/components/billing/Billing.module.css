@@ -1,13 +1,17 @@
-/* # Billing uses a scoped ivory/charcoal palette so the account workspace has
-   its own visual hierarchy without changing the rest of the application's theme. */
+/* # RenoWeb-inspired billing palette is scoped to this module. Shared app colors
+   and all other pages stay unchanged. Blue is structural; gold identifies annual plans. */
 .shell {
-  --ink: #242a26;
-  --muted: #7c817a;
-  --line: #e5e5dc;
-  --paper: #fbfaf6;
-  --accent: #ac7c3d;
+  --ink: #122b50;
+  --muted: #657c9e;
+  --line: #dce7f8;
+  --paper: #ffffff;
+  --accent: #023dbb;
+  --blue: #308fef;
+  --cyan: #4ec8ef;
+  --gold: #ffc857;
   min-height: 100vh;
-  background: #f6f5f1;
+  background:
+    radial-gradient(ellipse at 95% 8%, #4ec8ef12, transparent 35%), #eff5ff;
   color: var(--ink);
   font-size: 14px;
 }
@@ -41,21 +45,26 @@
   display: flex;
   align-items: center;
   gap: 22px;
-  height: 84px;
-  padding: 0 clamp(24px, 5vw, 88px);
+  height: 76px;
+  padding: 0 clamp(20px, 4vw, 72px);
   border-bottom: 1px solid var(--line);
-  background: #fbfaf7;
+  background: #ffffffed;
+  position: relative;
+  z-index: 45;
 }
 .brand {
-  font-size: 25px;
+  font-size: 22px;
   font-weight: 800;
-  letter-spacing: -1.4px;
+  letter-spacing: -1px;
+  color: #023dbb !important;
+  white-space: nowrap;
 }
 .brand > span {
-  vertical-align: super;
-  font-size: 10px;
-  margin-left: 4px;
-  letter-spacing: 0;
+  font-size: inherit;
+  vertical-align: baseline;
+  color: #308fef;
+  margin-left: 3px;
+  letter-spacing: inherit;
 }
 .topbarDivider {
   height: 24px;
@@ -63,10 +72,10 @@
   background: var(--line);
 }
 .workspaceLabel {
-  color: #8b8d82;
-  font-size: 10px;
+  color: #657c9e;
+  font-size: 12px;
   font-weight: 600;
-  letter-spacing: 2px;
+  letter-spacing: 1px;
 }
 .topbar nav {
   display: flex;
@@ -79,48 +88,50 @@
   gap: 8px;
   align-items: center;
   font-size: 12px;
-  color: #5c655e;
+  color: #42587f;
 }
 .topbar nav a:hover {
   color: #a2753f;
 }
 .main {
-  max-width: 1304px;
+  max-width: 1380px;
   margin: auto;
-  padding: 60px 40px 0;
+  padding: 42px 40px 0;
 }
 .pageHeading {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 32px;
-  margin-bottom: 42px;
+  margin-bottom: 26px;
 }
 .sectionKicker {
   display: block;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
-  letter-spacing: 2px;
-  color: #858477;
+  letter-spacing: 1.2px;
+  color: #308fef;
   line-height: 1.8;
 }
 .pageHeading h1 {
-  font-size: clamp(38px, 4.3vw, 62px);
-  font-weight: 500;
-  line-height: 1.08;
-  letter-spacing: -2.8px;
-  margin: 18px 0;
+  font-size: clamp(30px, 3.2vw, 43px);
+  font-weight: 750;
+  line-height: 1.2;
+  letter-spacing: -1.6px;
+  margin: 10px 0 12px;
 }
 .pageHeading h1 em {
-  font-family: Georgia, "Times New Roman", serif;
-  font-weight: 400;
-  color: #8c785b;
+  font-family: inherit;
+  font-weight: inherit;
+  color: #023dbb;
+  font-style: normal;
 }
 .pageHeading p {
-  max-width: 490px;
+  max-width: 610px;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.8;
+  margin: 0;
 }
 .pageTools {
   display: flex;
@@ -132,62 +143,69 @@
   display: flex;
   align-items: center;
   gap: 7px;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 600;
   letter-spacing: 1.2px;
-  color: #7a8073;
+  color: #536fa0;
 }
 .refreshButton {
   display: flex;
   gap: 8px;
   align-items: center;
-  color: #444d43;
-  background: #fbfaf7;
-  border: 1px solid #dcded3;
+  color: #31425f;
+  background: #f5f8fd;
+  border: 1px solid #bed1f3;
   border-radius: 7px;
   padding: 10px 15px;
-  font-size: 11px !important;
+  font-size: 12px !important;
 }
 .refreshButton:hover {
-  background: #efeee6;
+  background: #dce7f9;
 }
 .pageTools small {
-  font-size: 10px;
-  color: #91958b;
+  font-size: 12px;
+  color: #6c87b4;
 }
 .sectionNav {
   display: flex;
-  gap: 30px;
-  border-bottom: 1px solid #dcded3;
-  margin-bottom: 30px;
+  gap: 8px;
+  padding: 6px;
+  width: fit-content;
+  max-width: 100%;
+  border: 1px solid var(--line);
+  background: #ffffffa6;
+  border-radius: 13px;
+  margin-bottom: 26px;
 }
 .sectionNav a {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 0 0 15px;
-  font-size: 12px;
-  color: #8b8d83;
+  gap: 9px;
+  padding: 10px 16px;
+  font-size: 13px;
+  color: #657c9e;
+  border-radius: 9px;
 }
 .sectionNav a span {
-  font-size: 9px;
-  color: #a3a698;
+  font-size: 11px;
+  color: #8097be;
   font-variant-numeric: tabular-nums;
 }
 .sectionNav .sectionNavActive {
-  color: #333b30;
-  border-bottom: 2px solid #434d3c;
-  margin-bottom: -1px;
-  font-weight: 600;
+  color: #023dbb;
+  background: #e7efff;
+  border-bottom: 0;
+  margin: 0;
+  font-weight: 650;
 }
 .notice {
   display: flex;
   align-items: flex-start;
   gap: 10px;
   padding: 14px 17px;
-  color: #636340;
-  background: #f1f0df;
-  border: 1px solid #e4e0c2;
+  color: #374b6c;
+  background: #d8e4f8;
+  border: 1px solid #b4cbf2;
   border-radius: 9px;
   margin: 0 0 20px;
   font-size: 12px;
@@ -199,9 +217,9 @@
   margin-top: 2px;
 }
 .noticeError {
-  background: #fbefeb;
+  background: #ebf1fb;
   color: #994b3a;
-  border-color: #ecd6cc;
+  border-color: #c4d5f4;
 }
 .membershipGrid {
   display: grid;
@@ -212,28 +230,26 @@
 .subscription {
   position: relative;
   overflow: hidden;
-  background: #252d27;
-  background-image: linear-gradient(115deg, #232c26 10%, #323a2e 100%);
-  border: 1px solid #354131;
-  border-radius: 17px;
-  padding: 28px 30px 0;
-  color: #f6f3e8;
   isolation: isolate;
-  min-height: 398px;
+  min-height: 440px;
+  padding: 28px 30px 0;
+  border: 1px solid #ffffff;
+  border-radius: 24px;
+  color: #12346a;
+  background: linear-gradient(120deg, #ffffffeb, #deedffb8 65%, #d5f4ff94);
+  backdrop-filter: blur(22px);
+  box-shadow:
+    inset 0 1px 0 #ffffff,
+    0 12px 40px #023dbb0d;
 }
 .heroGlow {
   position: absolute;
-  width: 500px;
-  height: 500px;
+  width: 360px;
+  height: 360px;
   top: -160px;
-  right: -170px;
+  right: -70px;
   border-radius: 50%;
-  border: 1px solid #d8ca8f0b;
-  box-shadow:
-    0 0 0 44px #d8ca8f04,
-    0 0 0 86px #d8ca8f04,
-    0 0 0 130px #d8ca8f03;
-  background: radial-gradient(circle, #c2c28b13, transparent 70%);
+  background: radial-gradient(circle, #4ec8ef44, #308fef05 70%);
   z-index: -1;
   pointer-events: none;
 }
@@ -246,27 +262,28 @@
 .eyebrowLight {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 9px;
-  font-weight: 600;
-  letter-spacing: 1.7px;
-  color: #c7cbb8;
+  gap: 9px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.1px;
+  color: #35689f;
 }
 .liveDot {
   display: inline-block;
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  background: #c0d6a3;
-  box-shadow: 0 0 0 4px #acc3870d;
+  background: #308fef;
+  box-shadow: 0 0 0 5px #308fef12;
 }
 .heroBadge {
-  padding: 5px 10px;
-  border: 1px solid #bdc8a640;
-  color: #d4dfc3;
-  background: #9ab17e16;
-  border-radius: 5px;
-  font-size: 10px;
+  padding: 7px 12px;
+  border: 1px solid #308fef3d;
+  color: #023dbb;
+  background: #ffffffb3;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 650;
   white-space: nowrap;
 }
 .subscriptionBody {
@@ -278,53 +295,56 @@
 }
 .membershipType {
   display: block;
-  color: #b4b9a2;
-  font-size: 8px;
-  letter-spacing: 1.9px;
-  margin-bottom: 8px;
+  color: #5c7da4;
+  font-size: 12px;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+  font-weight: 600;
 }
 .subscription h2 {
-  max-width: 380px;
+  max-width: 430px;
   font-size: 30px;
-  font-weight: 500;
+  font-weight: 750;
   letter-spacing: -1px;
   line-height: 1.2;
   margin: 0 0 15px;
 }
 .heroPrice {
-  font-size: 31px;
-  letter-spacing: -1px;
-  font-weight: 500;
+  font-size: 38px;
+  letter-spacing: -1.5px;
+  font-weight: 750;
   font-variant-numeric: tabular-nums;
+  color: #023dbb;
 }
 .heroPrice > span {
-  font-size: 12px;
-  color: #c4c8b6;
-  font-weight: 400;
+  font-size: 13px;
+  color: #5c7da4;
+  font-weight: 450;
   letter-spacing: 0;
 }
 .heroDescription {
-  color: #a7b19f;
-  font-size: 11px;
-  line-height: 1.7;
+  color: #597699;
+  font-size: 13px;
+  line-height: 1.8;
   margin-top: 10px;
-  max-width: 300px;
+  max-width: 330px;
 }
 .orbit {
   position: relative;
   flex-shrink: 0;
   width: 146px;
   height: 146px;
-  border: 1px solid #c4b98345;
+  border: 1px solid #308fef33;
   border-radius: 50%;
   padding: 11px;
   transform: rotate(-12deg);
+  box-shadow: 0 0 0 8px #ffffff55;
 }
 .orbit::before {
   content: "";
   position: absolute;
   inset: 5px;
-  border: 1px dashed #c5bc8630;
+  border: 1px dashed #308fef44;
   border-radius: 50%;
 }
 .orbitInner {
@@ -335,12 +355,13 @@
   gap: 4px;
   height: 100%;
   border-radius: 50%;
-  background: radial-gradient(circle at 40% 25%, #78785025, #3947310c);
+  background: linear-gradient(135deg, #ffffffc9, #c7e5ff99);
   transform: rotate(12deg);
+  color: #023dbb;
 }
 .orbitInner svg {
-  color: #d1bd84;
-  width: 20px;
+  color: #308fef;
+  width: 23px;
 }
 .orbitInner strong {
   font-size: 37px;
@@ -349,25 +370,25 @@
   letter-spacing: -1.5px;
 }
 .orbitInner > span {
-  font-size: 9px;
-  color: #c0c5ae;
+  font-size: 12px;
+  color: #54779e;
 }
 .orbitDot {
   position: absolute;
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background: #d5bf87;
+  background: #ffc857;
   left: 9px;
   top: 26px;
-  box-shadow: 0 0 0 5px #d5bf8710;
+  box-shadow: 0 0 0 5px #ffc85722;
 }
 .cycleLabel {
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  font-size: 9px;
-  color: #afb7a4;
+  font-size: 12px;
+  color: #54779e;
   margin-bottom: 10px;
 }
 .cycleLabel > span {
@@ -376,27 +397,27 @@
   align-items: center;
 }
 .cycleLabel strong {
-  font-size: 9px;
-  font-weight: 400;
-  color: #d6d5bb;
+  font-size: 12px;
+  font-weight: 600;
+  color: #023dbb;
 }
 .progressTrack {
-  height: 3px;
-  background: #d1d6bb1a;
+  height: 5px;
+  background: #023dbb12;
   overflow: hidden;
   border-radius: 5px;
 }
 .progressTrack > span {
   display: block;
   height: 100%;
-  background: #d2ba7d;
+  background: linear-gradient(90deg, #023dbb, #308fef, #4ec8ef);
   border-radius: inherit;
 }
 .subscriptionDetails {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px 22px;
-  padding: 22px 0;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px 18px;
+  padding: 24px 0;
 }
 .subscriptionDetails > div {
   display: flex;
@@ -404,24 +425,26 @@
   gap: 5px;
 }
 .subscriptionDetails > div > span {
-  color: #9ca993;
-  font-size: 9px;
+  color: #597699;
+  font-size: 12px;
 }
 .subscriptionDetails strong {
-  color: #e6e6d7;
-  font-size: 11px;
-  font-weight: 500;
+  color: #173c73;
+  font-size: 13px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
 }
 .subscriptionFoot {
   margin: 0 -30px;
-  border-top: 1px solid #b6c6a51b;
-  padding: 13px 30px;
+  border-top: 1px solid #308fef20;
+  padding: 15px 30px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  color: #a0ad95;
-  font-size: 8px;
+  color: #55749a;
+  font-size: 12px;
+  background: #ffffff60;
 }
 .subscriptionFoot > span:last-child {
   display: flex;
@@ -446,20 +469,21 @@
   margin-top: 20px;
 }
 .emptySubscription h2 em {
-  color: #d5c28f;
-  font-family: Georgia, serif;
+  color: #308fef;
+  font-family: inherit;
+  font-style: normal;
 }
 .emptySubscription > p {
-  font-size: 12px;
-  color: #bbc5b4;
-  max-width: 370px;
+  font-size: 14px;
+  color: #597699;
+  max-width: 380px;
   line-height: 1.8;
 }
 .emptyMembershipIcon {
   position: absolute;
   right: 40px;
   top: 110px;
-  color: #c6c09c;
+  color: #98aaca;
   opacity: 0.4;
 }
 .heroLink {
@@ -468,23 +492,25 @@
   gap: 8px;
   margin-top: auto;
   padding-top: 22px;
-  font-size: 11px;
-  color: #dac48a !important;
+  font-size: 13px;
+  color: #023dbb !important;
+  font-weight: 650;
 }
 .accountCard {
-  background: #fbfaf7;
-  border: 1px solid #e0e2d8;
-  border-radius: 17px;
+  background: #ffffffd9;
+  border: 1px solid #dce7f8;
+  border-radius: 24px;
   padding: 27px;
   display: flex;
   flex-direction: column;
   min-width: 0;
+  box-shadow: 0 8px 32px #023dbb06;
 }
 .accountHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  color: #8e9683;
+  color: #6883b1;
 }
 .accountCard h3 {
   margin: 19px 0 9px;
@@ -493,8 +519,8 @@
   font-weight: 500;
 }
 .accountCard > p {
-  color: #8a8d81;
-  font-size: 11px;
+  color: #617dad;
+  font-size: 12px;
   line-height: 1.8;
   max-width: 235px;
 }
@@ -509,8 +535,8 @@
   gap: 5px;
 }
 .accountCard dt {
-  font-size: 9px;
-  color: #8d9386;
+  font-size: 11px;
+  color: #6883b1;
 }
 .accountCard dd {
   margin: 0;
@@ -519,7 +545,7 @@
   overflow-wrap: anywhere;
 }
 .accountCard .email {
-  font-size: 11px;
+  font-size: 12px;
 }
 .accountNote {
   display: flex;
@@ -528,48 +554,50 @@
   border-top: 1px solid var(--line);
   padding-top: 17px;
   margin-top: auto;
-  font-size: 9px;
-  color: #8b9284;
+  font-size: 11px;
+  color: #6681b0;
   line-height: 1.7;
 }
 .accountNote svg {
   flex-shrink: 0;
-  color: #8d9c7c;
+  color: #6782b1;
 }
 .summaryStrip {
   display: grid;
-  grid-template-columns: 1.2fr 1fr 1fr;
-  padding: 26px 0;
-  border-bottom: 1px solid #dfdfd5;
-  margin-bottom: 66px;
-  gap: 20px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+  margin: 22px 0 46px;
+  padding: 0;
 }
 .summaryStrip > div {
   display: flex;
-  gap: 13px;
   align-items: center;
+  gap: 15px;
   min-width: 0;
+  padding: 22px;
+  background: #ffffffcf;
+  border: 1px solid #dce7f8;
+  border-radius: 18px;
 }
 .summaryStrip > div + div {
-  border-left: 1px solid #dfe1d6;
-  padding-left: 24px;
+  border-left: 1px solid #dce7f8;
+  padding-left: 22px;
 }
 .summaryIcon {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  background: #eaf2ff;
+  color: #023dbb;
   flex-shrink: 0;
-  width: 39px;
-  height: 39px;
-  background: #eeeee5;
-  border: 1px solid #e2e3d6;
-  color: #7d8a6a;
-  border-radius: 10px;
 }
 .statLabel {
   display: block;
-  font-size: 10px;
-  color: #7f8777;
+  font-size: 12px;
+  color: #5674a8;
   margin-bottom: 6px;
 }
 .summaryStrip strong {
@@ -581,16 +609,16 @@
   overflow-wrap: anywhere;
 }
 .summaryStrip strong em {
-  font-size: 11px;
-  color: #939989;
+  font-size: 12px;
+  color: #6e88b4;
   font-style: normal;
   letter-spacing: 0;
   font-weight: 400;
 }
 .summaryStrip small {
   display: block;
-  font-size: 8px;
-  color: #9ca291;
+  font-size: 11px;
+  color: #7991ba;
   margin-top: 4px;
 }
 .plansSection,
@@ -605,36 +633,36 @@
   margin-bottom: 25px;
 }
 .sectionHeading h2 {
-  font-size: 29px;
-  font-weight: 500;
-  letter-spacing: -1.1px;
-  margin: 10px 0;
+  font-size: 28px;
+  font-weight: 750;
+  letter-spacing: -1px;
+  margin: 7px 0 10px;
 }
 .sectionHeading h2 > span {
   color: #bc9257;
 }
 .sectionHeading p {
-  color: #858b7f;
-  font-size: 11px;
+  color: #5e7bac;
+  font-size: 12px;
   line-height: 1.8;
 }
 .regionBadge {
   display: flex;
   align-items: center;
   gap: 8px;
-  border: 1px solid #dfe2d4;
-  background: #fbfaf6;
-  color: #727e66;
+  border: 1px solid #c2d4f4;
+  background: #f4f7fd;
+  color: #4e6896;
   border-radius: 6px;
   padding: 8px 11px;
-  font-size: 9px;
+  font-size: 11px;
   white-space: nowrap;
   margin-bottom: 3px;
 }
 .regionBadge > span {
   width: 3px;
   height: 3px;
-  background: #b3baaa;
+  background: #99abcb;
   border-radius: 50%;
 }
 .planGrid {
@@ -643,28 +671,40 @@
   gap: 18px;
 }
 .planCard {
+  --plan-accent: #023dbb;
+  --plan-soft: #eaf2ff;
+  --plan-border: #c4d8fa;
   position: relative;
   display: flex;
   flex-direction: column;
-  background: #fbfaf7;
-  border: 1px solid #e0e2d7;
-  border-radius: 13px;
-  padding: 25px 25px 19px;
   min-width: 0;
+  background: linear-gradient(155deg, #ffffff 30%, var(--plan-soft));
+  border: 1px solid var(--plan-border);
+  border-radius: 22px;
+  padding: 28px 25px 22px;
+  box-shadow:
+    inset 0 4px var(--plan-accent),
+    0 8px 25px #023dbb05;
   transition:
     border-color 0.2s,
     transform 0.2s,
     box-shadow 0.2s;
 }
 .planCard:hover {
-  border-color: #b1b99e;
-  transform: translateY(-4px);
-  box-shadow: 0 14px 35px #333e2609;
+  border-color: var(--plan-accent);
+  transform: translateY(-5px);
+  box-shadow:
+    inset 0 4px var(--plan-accent),
+    0 18px 42px #023dbb14;
 }
 .planFeatured {
-  background: #f1f0e5;
-  border-color: #b7b894;
-  box-shadow: inset 0 3px #9a9f73;
+  --plan-accent: #946307;
+  --plan-soft: #fff4d4;
+  --plan-border: #f3d693;
+  background: linear-gradient(145deg, #fffdf7 30%, #ffedb9);
+  box-shadow:
+    inset 0 4px #ffc857,
+    0 8px 25px #a1700910;
 }
 .planCardTop {
   display: flex;
@@ -677,54 +717,55 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 41px;
-  height: 41px;
-  background: #f0eee4;
-  color: #9d835a;
-  border: 1px solid #e7e2d3;
-  border-radius: 10px;
+  width: 46px;
+  height: 46px;
+  background: var(--plan-soft);
+  color: var(--plan-accent);
+  border: 1px solid var(--plan-border);
+  border-radius: 14px;
 }
 .planFeatured .planIcon {
-  background: #e7e7d6;
-  color: #737d49;
-  border-color: #d8ddbf;
+  background: #ffc85740;
+  color: #946307;
+  border-color: #f3d693;
 }
 .planTag {
-  font-size: 8px;
-  font-weight: 600;
-  letter-spacing: 1px;
-  color: #8c927e;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--plan-accent);
   text-align: right;
 }
 .planCard h3 {
-  font-size: 20px;
-  font-weight: 500;
+  font-size: 23px;
+  font-weight: 750;
   letter-spacing: -0.6px;
   margin: 0 0 10px;
 }
 .planDescription {
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.8;
-  color: #8a9082;
-  min-height: 58px;
+  color: #657c9e;
+  min-height: 68px;
 }
 .planPrice {
-  font-size: 38px;
+  font-size: 40px;
   letter-spacing: -1.8px;
-  font-weight: 500;
+  font-weight: 750;
   margin-top: 18px;
+  color: var(--plan-accent);
 }
 .planPrice > span {
   display: block;
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0;
-  color: #919785;
+  color: #6a84b2;
   font-weight: 400;
   margin-top: 3px;
 }
 .planDivider {
   height: 1px;
-  background: #e2e4d8;
+  background: var(--plan-border);
   margin: 23px 0;
 }
 .planCard ul {
@@ -738,48 +779,50 @@
   display: flex;
   gap: 8px;
   align-items: flex-start;
-  font-size: 10px;
-  line-height: 1.5;
-  color: #78846e;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #597092;
 }
 .planCard li svg {
   flex-shrink: 0;
-  color: #85936b;
+  color: var(--plan-accent);
+  margin-top: 2px;
 }
 .planCard li strong {
-  font-weight: 600;
-  color: #48533e;
+  font-weight: 650;
+  color: #173c73;
 }
 .planButton {
   display: flex;
   justify-content: space-between;
   gap: 12px;
   align-items: center;
-  border: 1px solid #d6dbca;
-  background: transparent;
-  color: #4b5b3b;
-  padding: 12px 15px;
-  border-radius: 7px;
-  font-size: 11px !important;
-  font-weight: 500 !important;
+  border: 1px solid var(--plan-accent);
+  background: var(--plan-accent);
+  color: white;
+  padding: 13px 16px;
+  border-radius: 11px;
+  font-size: 13px !important;
+  font-weight: 650 !important;
   margin-top: auto;
+  transition: filter 0.2s;
 }
 .planButton:hover {
-  background: #e9ebdf;
+  background: var(--plan-accent);
+  filter: brightness(1.1);
 }
 .planFeatured .planButton {
-  background: #35432c;
-  border-color: #35432c;
-  color: #f2f2e7;
+  background: #ffc857;
+  border-color: #ffc857;
+  color: #593c07;
 }
 .planFeatured .planButton:hover {
-  background: #445339;
+  background: #ffd672;
 }
 .planIndex {
   display: block;
-  font-size: 7px;
-  letter-spacing: 1.3px;
-  color: #9ea58f;
+  font-size: 12px;
+  color: #657c9e;
   margin-top: 16px;
   text-align: center;
 }
@@ -787,16 +830,17 @@
   padding-top: 70px;
 }
 .historyCount {
-  font-size: 10px;
-  color: #8b947e;
-  border: 1px solid #dfe2d4;
+  font-size: 12px;
+  color: #637faf;
+  border: 1px solid #c2d4f4;
   padding: 7px 10px;
   border-radius: 5px;
 }
 .historyCard {
-  border: 1px solid #dee2d4;
-  border-radius: 13px;
-  background: #fbfaf7;
+  background: #ffffff;
+  border: 1px solid #dce7f8;
+  border-radius: 22px;
+  box-shadow: 0 8px 30px #023dbb06;
   overflow: hidden;
 }
 .historyToolbar {
@@ -805,7 +849,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 17px 20px;
-  border-bottom: 1px solid #e4e6dc;
+  border-bottom: 1px solid #ccdbf6;
 }
 .filterTabs {
   display: flex;
@@ -817,34 +861,34 @@
   border: 1px solid transparent;
   padding: 7px 10px;
   border-radius: 5px;
-  font-size: 10px !important;
-  color: #8b947e;
+  font-size: 12px !important;
+  color: #637faf;
   white-space: nowrap;
 }
 .filterTabs .filterActive {
-  background: #ebede2;
-  border-color: #dde1cf;
-  color: #4f6040;
-  font-weight: 500;
+  color: #023dbb;
+  background: #eaf2ff;
+  border-color: #d6e5ff;
+  font-weight: 650;
 }
 .search {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #929c85;
+  color: #6d87b4;
   min-width: 190px;
 }
 .search input {
   border: 0;
   outline: 0;
   background: transparent;
-  font-size: 10px !important;
+  font-size: 12px !important;
   width: 185px;
-  color: #5e6c4e;
+  color: #3f557b;
   padding: 8px 1px;
 }
 .search input::placeholder {
-  color: #a0a792;
+  color: #7d94bc;
 }
 .search input:focus-visible {
   outline-offset: 2px;
@@ -859,20 +903,20 @@
   min-width: 760px;
 }
 .table thead {
-  background: #f4f4ed;
+  background: #e6eefb;
 }
 .table th {
   padding: 13px 22px;
-  font-size: 8px;
+  font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 1.2px;
-  color: #939b86;
+  color: #6d87b4;
   font-weight: 500;
   white-space: nowrap;
 }
 .table td {
   padding: 19px 22px;
-  border-top: 1px solid #eaebe2;
+  border-top: 1px solid #d5e2f8;
   vertical-align: middle;
 }
 .table tbody tr {
@@ -880,7 +924,7 @@
   transition: background 0.15s;
 }
 .table tbody tr:hover {
-  background: #f0f2e8;
+  background: #e0eafa;
 }
 .transactionCell {
   display: flex;
@@ -894,22 +938,22 @@
   justify-content: center;
   width: 34px;
   height: 34px;
-  border: 1px solid #e0e4d6;
+  border: 1px solid #c5d7f5;
   border-radius: 8px;
-  color: #82936a;
-  background: #f3f4ec;
+  color: #5674a7;
+  background: #e6edfa;
 }
 .transactionCell strong {
   display: block;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
-  color: #46523b;
+  color: #30405d;
 }
 .shortReference {
   display: block;
-  font-size: 8px;
+  font-size: 11px;
   font-family: ui-monospace, SFMono-Regular, monospace;
-  color: #9da78e;
+  color: #7a92bb;
   margin-top: 5px;
   max-width: 170px;
   overflow: hidden;
@@ -918,30 +962,30 @@
 }
 .dateText {
   display: block;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 400;
-  color: #68765a;
+  color: #475f89;
   white-space: nowrap;
 }
 .timeText {
   display: block;
-  font-size: 9px;
-  color: #a0aa91;
+  font-size: 11px;
+  color: #7e95bd;
   margin-top: 5px;
 }
 .method {
-  font-size: 10px;
-  color: #7e8e6d;
+  font-size: 12px;
+  color: #5573a6;
   white-space: nowrap;
 }
 .status {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  border: 1px solid #dfe4d4;
+  border: 1px solid #c4d5f4;
   padding: 4px 7px;
   border-radius: 5px;
-  font-size: 8px;
+  font-size: 11px;
   white-space: nowrap;
 }
 .status i {
@@ -952,23 +996,23 @@
   border-radius: 50%;
 }
 .success {
-  background: #edf3e6;
-  border-color: #dce7d1;
-  color: #71894e;
+  color: #0369a1;
+  background: #e5f5ff;
+  border: 1px solid #bee6fc;
 }
 .pending {
-  background: #f6f0df;
-  border-color: #eadeba;
+  background: #dce7f9;
+  border-color: #b2caf2;
   color: #ad8940;
 }
 .failed {
-  background: #f7eae5;
-  border-color: #ecd6cb;
+  background: #e2ebfa;
+  border-color: #c3d5f4;
   color: #b57964;
 }
 .neutral {
-  background: #eeeee8;
-  color: #898e7e;
+  background: #dde7f9;
+  color: #5f7cad;
 }
 .table .amountColumn {
   text-align: right;
@@ -977,28 +1021,28 @@
   display: block;
   font-size: 12px;
   font-weight: 500;
-  color: #445438;
+  color: #30405c;
   white-space: nowrap;
 }
 .zeroNote {
   display: block;
-  color: #a0a991;
-  font-size: 8px;
+  color: #7e95bc;
+  font-size: 11px;
   margin-top: 4px;
 }
 .rowButton {
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #e2e6d8;
-  color: #82946c;
+  border: 1px solid #c9d9f5;
+  color: #5775a9;
   background: transparent;
   border-radius: 5px;
   height: 27px;
   width: 27px;
 }
 .rowButton:hover {
-  background: #e8eddf;
+  background: #d4e1f8;
 }
 .tableFooter {
   display: flex;
@@ -1006,11 +1050,11 @@
   justify-content: space-between;
   gap: 20px;
   padding: 15px 22px;
-  border-top: 1px solid #e6e8dc;
+  border-top: 1px solid #ceddf6;
 }
 .tableFooter > span {
-  color: #9aa48a;
-  font-size: 9px;
+  color: #768eb8;
+  font-size: 11px;
 }
 .pagination {
   display: flex;
@@ -1023,25 +1067,25 @@
   justify-content: center;
   width: 27px;
   height: 27px;
-  border: 1px solid #e0e4d4;
+  border: 1px solid #c4d5f4;
   background: transparent;
-  color: #7a8f60;
+  color: #516d9e;
   border-radius: 5px;
 }
 .pagination > span {
-  font-size: 9px;
-  color: #6c7f54;
+  font-size: 11px;
+  color: #48608b;
 }
 .pagination em {
   font-style: normal;
-  color: #a2ad94;
+  color: #8298bf;
 }
 .ledgerNote {
   display: flex;
   gap: 6px;
   align-items: flex-start;
-  color: #a1a994;
-  font-size: 9px;
+  color: #8096bd;
+  font-size: 11px;
   line-height: 1.8;
   margin-top: 14px;
 }
@@ -1055,21 +1099,21 @@
   align-items: center;
   flex-direction: column;
   text-align: center;
-  background: #fafaf4;
+  background: #f1f6fd;
   border-radius: 13px;
-  color: #9ba98a;
+  color: #7991ba;
 }
 .emptyState h3 {
   font-size: 18px;
   font-weight: 500;
   letter-spacing: -0.4px;
-  color: #62724e;
+  color: #41587f;
   margin: 17px 0 7px;
 }
 .emptyState p {
   max-width: 330px;
-  font-size: 11px;
-  color: #9aa58b;
+  font-size: 12px;
+  color: #778fb9;
   line-height: 1.8;
 }
 .historyError {
@@ -1079,7 +1123,7 @@
   border: 1px solid var(--line);
   padding: 24px;
   border-radius: 17px;
-  background: #fbfaf7;
+  background: #f5f8fd;
   min-height: 250px;
 }
 .footer {
@@ -1089,9 +1133,9 @@
   gap: 22px;
   padding: 30px 0;
   margin-top: 48px;
-  border-top: 1px solid #e0e3d6;
-  color: #9fa891;
-  font-size: 9px;
+  border-top: 1px solid #c4d6f5;
+  color: #7d94bc;
+  font-size: 11px;
 }
 .footer > span:last-child {
   display: flex;
@@ -1103,7 +1147,7 @@
   width: 3px;
   height: 3px;
   border-radius: 50%;
-  background: #b3bba7;
+  background: #98aaca;
   margin: 0 6px;
 }
 .footer a {
@@ -1116,14 +1160,14 @@
   max-height: calc(100dvh - 40px);
   overflow-y: auto;
   padding: 0;
-  border: 1px solid #e2e4d7;
-  border-radius: 18px;
-  background: #fbfaf6;
-  color: #36422c;
-  box-shadow: 0 35px 100px #101a1160;
+  border: 1px solid #dce7f8;
+  border-radius: 24px;
+  background: #ffffff;
+  color: #122b50;
+  box-shadow: 0 30px 100px #023dbb30;
 }
 .dialog::backdrop {
-  background: #15201680;
+  background: #12182380;
   backdrop-filter: blur(6px);
 }
 .dialog[open] {
@@ -1140,23 +1184,22 @@
   display: flex;
   border: 0;
   background: transparent;
-  color: #8d9d7b;
+  color: #6782b1;
   padding: 5px;
 }
 .dialogIcon {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 49px;
-  width: 49px;
-  background: #edefe2;
-  color: #839462;
-  border: 1px solid #dfe5cc;
-  border-radius: 12px;
-  margin-bottom: 22px;
+  width: 50px;
+  height: 50px;
+  border-radius: 15px;
+  background: #eaf2ff;
+  color: #023dbb;
+  margin-bottom: 23px;
 }
 .dialog h2 {
-  font-family: Georgia, serif;
+  font-family: inherit;
   font-size: 31px;
   line-height: 1.2;
   font-weight: 400;
@@ -1164,7 +1207,7 @@
   margin: 9px 0 12px;
 }
 .dialogIntro {
-  color: #929e80;
+  color: #6b85b3;
   font-size: 12px;
   line-height: 1.8;
 }
@@ -1174,53 +1217,53 @@
   justify-content: space-between;
   gap: 12px;
   padding: 19px;
-  border: 1px solid #e0e5d2;
+  border: 1px solid #c3d5f4;
   border-radius: 9px;
-  background: #f1f3e8;
+  background: #e1eafa;
   margin: 22px 0;
 }
 .checkoutRecap > span {
-  font-size: 11px;
-  color: #869771;
+  font-size: 12px;
+  color: #5d7aab;
 }
 .checkoutRecap strong {
   text-align: right;
   font-weight: 500;
   font-size: 21px;
-  color: #526a37;
+  color: #374a6a;
 }
 .checkoutRecap small {
   display: block;
-  font-size: 9px;
-  color: #96a282;
+  font-size: 11px;
+  color: #6f89b5;
   font-weight: 400;
   margin-top: 4px;
 }
 .phoneLabel {
   display: block;
   font-size: 12px;
-  color: #687e4d;
+  color: #455d86;
 }
 .phoneLabel span {
   display: block;
-  font-size: 9px;
-  color: #a0ab8d;
+  font-size: 11px;
+  color: #7c94bc;
   margin-top: 5px;
 }
 .phoneField {
   display: flex;
   align-items: center;
-  border: 1px solid #d6dfc6;
+  border: 1px solid #b3caf2;
   border-radius: 8px;
   margin: 12px 0 18px;
-  background: #fffef9;
+  background: #fafbfe;
   overflow: hidden;
 }
 .phoneField > span {
-  border-right: 1px solid #e2e8d6;
+  border-right: 1px solid #c9d9f5;
   padding: 0 13px;
   font-size: 12px;
-  color: #93a47a;
+  color: #6b85b3;
 }
 .phoneField input {
   min-width: 0;
@@ -1228,66 +1271,68 @@
   border: 0;
   background: transparent;
   padding: 13px 12px;
-  color: #536d36;
+  color: #374b6c;
   font-size: 13px;
   outline: none;
 }
 .phoneField:focus-within {
-  border-color: #91a46e;
-  box-shadow: 0 0 0 3px #a4b58015;
+  border-color: #637faf;
+  box-shadow: 0 0 0 3px #7a92bb15;
 }
 .phoneField input::placeholder {
-  color: #aab79a;
+  color: #8da1c4;
 }
 .checkoutButton {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  background: #36482a;
-  color: #f4f5e9;
+  gap: 12px;
   width: 100%;
-  padding: 14px;
   border: 0;
-  border-radius: 8px;
-  font-size: 12px !important;
+  border-radius: 11px;
+  background: #023dbb;
+  color: #ffffff;
+  padding: 15px;
+  font-size: 14px !important;
+  font-weight: 650;
+  margin-top: 22px;
 }
 .checkoutButton:hover {
-  background: #455e34;
+  background: #1754cf;
 }
 .secureNote {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 5px;
-  color: #a2ae91;
-  font-size: 8px;
+  color: #8197be;
+  font-size: 11px;
   margin-top: 15px;
 }
 .receiptAmount {
   font-size: 42px;
   letter-spacing: -1px;
   margin: 24px 0 12px;
-  color: #455d2f;
+  color: #30405c;
 }
 .receiptDetails {
   margin: 24px 0;
-  border-top: 1px solid #e1e7d5;
+  border-top: 1px solid #c7d8f5;
 }
 .receiptDetails > div {
   display: grid;
   grid-template-columns: 1fr 1.2fr;
   gap: 16px;
   padding: 13px 0;
-  border-bottom: 1px solid #e6ebdd;
+  border-bottom: 1px solid #d1dff7;
 }
 .receiptDetails dt {
-  font-size: 10px;
-  color: #97a887;
+  font-size: 12px;
+  color: #768fb9;
 }
 .receiptDetails dd {
-  font-size: 10px;
-  color: #647e47;
+  font-size: 12px;
+  color: #435a82;
   overflow-wrap: anywhere;
   text-align: right;
   margin: 0;
@@ -1299,23 +1344,23 @@
   gap: 8px;
   width: 100%;
   padding: 11px;
-  background: #eef2e5;
-  color: #769054;
-  border: 1px solid #dde5cd;
+  background: #dee8f9;
+  color: #4e6896;
+  border: 1px solid #bed2f4;
   border-radius: 7px;
-  font-size: 11px !important;
+  font-size: 12px !important;
 }
 .receiptNote {
-  color: #a3b28f;
-  font-size: 9px;
+  color: #8298bf;
+  font-size: 11px;
   line-height: 1.8;
   margin-top: 17px;
 }
 .skeleton {
   min-height: 398px;
   border-radius: 17px;
-  border: 1px solid #e0e4d6;
-  background: #f5f5ed;
+  border: 1px solid #c5d7f5;
+  background: #e7eefb;
   display: flex;
   flex-direction: column;
   gap: 22px;
@@ -1326,7 +1371,7 @@
   display: block;
   width: 60%;
   height: 16px;
-  background: linear-gradient(90deg, #e6e9dc, #f0f2e8, #e6e9dc);
+  background: linear-gradient(90deg, #cfddf6, #e0eafa, #cfddf6);
   background-size: 200% 100%;
   animation: shimmer 1.6s infinite;
   border-radius: 5px;
@@ -1347,21 +1392,21 @@
   height: 12px !important;
 }
 .authLoading {
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  gap: 16px;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
-  background: #f6f5f1;
-  color: #748665;
-  font-size: 12px;
+  gap: 20px;
+  background: #eff5ff;
+  color: #023dbb;
+  font-size: 14px;
 }
 .loadingMark {
   padding: 20px;
-  border: 1px solid #e2e6d7;
+  border: 1px solid #c8d8f5;
   border-radius: 18px;
-  background: #fafaf3;
+  background: #f1f5fc;
 }
 .spin {
   animation: rotate 1s linear infinite;
@@ -1398,6 +1443,413 @@
   }
 }
 
+/* # Transparent wave layers remain behind all billing data and never receive
+   pointer events. Each SVG repeats halfway across its width for a seamless loop.
+   Only transforms animate, and reduced-motion rules below stop both surfaces. */
+.pageHeading h1 > span {
+  color: #023dbb;
+}
+.waveField {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: -1;
+  border-radius: inherit;
+}
+.waveField svg {
+  position: absolute;
+  left: 0;
+  bottom: -16%;
+  width: 200%;
+  height: 95%;
+  max-width: none;
+}
+.waveBack {
+  fill: #308fef;
+  opacity: 0.09;
+  animation: liquidDrift 23s linear infinite;
+}
+.waveFront {
+  fill: #4ec8ef;
+  opacity: 0.13;
+  animation: liquidDrift 17s linear infinite reverse;
+}
+.planMonthly {
+  --plan-accent: #4460ef;
+  --plan-soft: #eaf2ff;
+  --plan-border: #c4d8fa;
+}
+.planPass {
+  --plan-accent: #08769e;
+  --plan-soft: #e4f8ff;
+  --plan-border: #b5e7f6;
+  background: linear-gradient(145deg, #ffffff 30%, #dff6ff);
+  box-shadow:
+    inset 0 4px #4ec8ef,
+    0 8px 25px #023dbb05;
+}
+.planCurrent::after {
+  content: "";
+  position: absolute;
+  right: 18px;
+  top: -5px;
+  width: 8px;
+  height: 8px;
+  border: 3px solid #fff;
+  box-sizing: content-box;
+  border-radius: 50%;
+  background: var(--plan-accent);
+}
+@keyframes liquidDrift {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+@media (max-width: 1050px) {
+  .subscriptionDetails {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* # Theme follows the same session preference as Dashboard/Profile. The scope
+   includes native dialogs (which keep DOM inheritance in the browser top layer)
+   and the shared account menu via local --rw-* tokens. No global colors change. */
+.themeToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 9px 11px;
+  background: var(--paper);
+  color: var(--accent);
+  font-size: 13px !important;
+}
+.themeToggle:hover {
+  background: #308fef12;
+}
+.shell {
+  color-scheme: light;
+}
+.shell[data-theme="dark"] {
+  color-scheme: dark;
+  --ink: #e5efff;
+  --muted: #9eb2d0;
+  --line: #293b57;
+  --paper: #101d32;
+  --accent: #83b6ff;
+  /* # The account dropdown uses shared tokens, overridden only inside billing. */
+  --rw-text: #e5efff;
+  --rw-text-muted: #9eb2d0;
+  --rw-surface: #101d32;
+  --rw-surface-hover: #1a2c47;
+  --rw-border: #293b57;
+  background:
+    radial-gradient(ellipse at 95% 8%, #308fef15, transparent 40%), #080f1c;
+}
+.shell[data-theme="dark"]
+  :is(.topbar, .accountCard, .historyCard, .dialog, .summaryStrip > div) {
+  background: #101d32;
+  border-color: var(--line);
+  color: var(--ink);
+  box-shadow: 0 12px 35px #00000018;
+}
+.shell[data-theme="dark"] .topbar {
+  background: #0c1729ed;
+}
+.shell[data-theme="dark"]
+  :is(.brand, .pageHeading h1 > span, .sectionKicker, .heroLink) {
+  color: #83b6ff !important;
+}
+.shell[data-theme="dark"] .brand > span {
+  color: #4ec8ef;
+}
+.shell[data-theme="dark"]
+  :is(
+    .workspaceLabel,
+    .topbar nav a,
+    .privateBadge,
+    .pageTools small,
+    .sectionNav a,
+    .sectionNav a span,
+    .accountCard > p,
+    .accountCard dt,
+    .accountHeader,
+    .accountNote,
+    .statLabel,
+    .summaryStrip small,
+    .summaryStrip strong em,
+    .sectionHeading p,
+    .planDescription,
+    .planPrice > span,
+    .planCard li,
+    .planIndex,
+    .historyCount,
+    .filterTabs button,
+    .search,
+    .table th,
+    .timeText,
+    .shortReference,
+    .method,
+    .zeroNote,
+    .tableFooter > span,
+    .pagination em,
+    .ledgerNote,
+    .emptyState p,
+    .footer,
+    .dialogIntro,
+    .dialogClose,
+    .checkoutRecap > span,
+    .checkoutRecap small,
+    .phoneLabel span,
+    .phoneField > span,
+    .secureNote,
+    .receiptDetails dt,
+    .receiptNote
+  ) {
+  color: var(--muted);
+}
+.shell[data-theme="dark"]
+  :is(
+    .accountCard dd,
+    .summaryStrip strong,
+    .planCard li strong,
+    .dateText,
+    .transactionCell strong,
+    .transactionAmount,
+    .search input,
+    .receiptAmount,
+    .receiptDetails dd,
+    .phoneLabel,
+    .phoneField input,
+    .checkoutRecap strong
+  ) {
+  color: var(--ink);
+}
+.shell[data-theme="dark"] :is(.topbarDivider, .planDivider) {
+  background: var(--line);
+}
+.shell[data-theme="dark"]
+  :is(
+    .sectionNav,
+    .refreshButton,
+    .regionBadge,
+    .pagination button,
+    .rowButton,
+    .copyButton,
+    .checkoutRecap,
+    .phoneField
+  ) {
+  border-color: var(--line);
+  background: #15243b;
+  color: #b9d5ff;
+}
+.shell[data-theme="dark"]
+  :is(
+    .refreshButton:hover,
+    .pagination button:hover,
+    .rowButton:hover,
+    .copyButton:hover
+  ) {
+  background: #203653;
+}
+.shell[data-theme="dark"] .sectionNav .sectionNavActive {
+  background: #24487966;
+  color: #a7ceff;
+}
+/* # Preserve the translucent water effect while raising text contrast. Waves
+   keep the original reduced-motion behavior and never encode account data. */
+.shell[data-theme="dark"] .subscription {
+  background: linear-gradient(120deg, #142747eb, #153d62b8 70%, #10476394);
+  border-color: #315781;
+  color: #e5efff;
+  box-shadow:
+    inset 0 1px 0 #ffffff0d,
+    0 12px 40px #00000022;
+}
+.shell[data-theme="dark"]
+  :is(
+    .eyebrowLight,
+    .membershipType,
+    .heroDescription,
+    .heroPrice > span,
+    .cycleLabel,
+    .subscriptionDetails > div > span,
+    .subscriptionFoot,
+    .emptySubscription > p
+  ) {
+  color: #abc5e8;
+}
+.shell[data-theme="dark"] :is(.subscriptionDetails strong, .cycleLabel strong) {
+  color: #e5efff;
+}
+.shell[data-theme="dark"] .heroPrice {
+  color: #8fcaff;
+}
+.shell[data-theme="dark"] .heroBadge {
+  color: #a9d4ff;
+  border-color: #5187c46b;
+  background: #122d4caa;
+}
+.shell[data-theme="dark"] .orbit {
+  border-color: #74b4f65c;
+  box-shadow: 0 0 0 8px #308fef0d;
+}
+.shell[data-theme="dark"] .orbitInner {
+  background: linear-gradient(135deg, #274f7bc9, #12486799);
+  color: #d5ecff;
+}
+.shell[data-theme="dark"] .orbitInner > span {
+  color: #b1d3f5;
+}
+.shell[data-theme="dark"] .orbitInner svg {
+  color: #4ec8ef;
+}
+.shell[data-theme="dark"] .progressTrack {
+  background: #8fcaff1c;
+}
+.shell[data-theme="dark"] .subscriptionFoot {
+  background: #081c3460;
+  border-color: #74b4f62b;
+}
+.shell[data-theme="dark"]
+  :is(
+    .accountNote,
+    .footer,
+    .historyToolbar,
+    .search,
+    .table td,
+    .tableFooter,
+    .receiptDetails,
+    .receiptDetails > div,
+    .phoneField > span
+  ) {
+  border-color: var(--line);
+}
+.shell[data-theme="dark"] :is(.summaryIcon, .transactionIcon, .dialogIcon) {
+  background: #213d6266;
+  color: #83b6ff;
+  border-color: var(--line);
+}
+/* # Plan variants retain their identity in dark mode; buttons use stronger
+   fills so light accent colors are never paired with white button text. */
+.shell[data-theme="dark"] .planCard {
+  --plan-accent: #a6b4ff;
+  --plan-soft: #19274c;
+  --plan-border: #364878;
+  background: linear-gradient(155deg, #101d32 30%, var(--plan-soft));
+  border-color: var(--plan-border);
+}
+.shell[data-theme="dark"] .planPass {
+  --plan-accent: #70d7f8;
+  --plan-soft: #102d3e;
+  --plan-border: #275366;
+}
+.shell[data-theme="dark"] .planFeatured {
+  --plan-accent: #ffd47a;
+  --plan-soft: #302819;
+  --plan-border: #65512b;
+}
+.shell[data-theme="dark"] .planFeatured .planIcon {
+  color: #ffd47a;
+  background: #ffc85718;
+  border-color: #65512b;
+}
+.shell[data-theme="dark"] .planButton {
+  background: #4460ef;
+  border-color: #637bf8;
+  color: #fff;
+}
+.shell[data-theme="dark"] .planPass .planButton {
+  background: #075f80;
+  border-color: #2789ac;
+}
+.shell[data-theme="dark"] .planFeatured .planButton {
+  color: #382504;
+  background: #ffc857;
+  border-color: #ffc857;
+}
+.shell[data-theme="dark"] .planCurrent::after {
+  border-color: #101d32;
+}
+.shell[data-theme="dark"] :is(.table thead, .table tbody tr:hover) {
+  background: #192b45;
+}
+.shell[data-theme="dark"] .filterTabs .filterActive {
+  color: #a7ceff;
+  background: #24487966;
+  border-color: #365d8b;
+}
+.shell[data-theme="dark"]
+  :is(.search input::placeholder, .phoneField input::placeholder) {
+  color: #8ca2c2;
+}
+.shell[data-theme="dark"] .success {
+  color: #90d6fa;
+  background: #0c3c5566;
+  border-color: #205e7b;
+}
+.shell[data-theme="dark"] .pending {
+  color: #ffda89;
+  background: #5c451a55;
+  border-color: #6a5229;
+}
+.shell[data-theme="dark"] .failed {
+  color: #ffb5bf;
+  background: #592a3855;
+  border-color: #6f3946;
+}
+.shell[data-theme="dark"] .neutral {
+  color: #bfd0e8;
+  background: #263b5566;
+}
+.shell[data-theme="dark"] .notice {
+  color: #b9d8ff;
+  background: #173459;
+  border-color: #2e527d;
+}
+.shell[data-theme="dark"] .noticeError {
+  color: #ffbdc7;
+  background: #35202d;
+  border-color: #713c4a;
+}
+.shell[data-theme="dark"] .phoneField:focus-within {
+  border-color: #83b6ff;
+  box-shadow: 0 0 0 3px #308fef22;
+}
+.shell[data-theme="dark"] .dialog::backdrop {
+  background: #020710bb;
+}
+.shell[data-theme="dark"] .skeleton {
+  background: #13223a;
+  border-color: var(--line);
+}
+.shell[data-theme="dark"] .skeleton span {
+  background: linear-gradient(90deg, #1a2f4c, #2a4669, #1a2f4c);
+  background-size: 200% 100%;
+}
+.authLoading[data-theme="dark"] {
+  color-scheme: dark;
+  background: #080f1c;
+  color: #a7ceff;
+}
+.authLoading[data-theme="dark"] .loadingMark {
+  background: #192b45;
+}
+@media (max-width: 600px) {
+  .themeToggle {
+    padding: 9px;
+  }
+  .themeToggle > span {
+    display: none;
+  }
+}
+
 /* # Collapse in reading order: membership, identity, summaries, offers, ledger.
    The transaction table retains column meaning and scrolls instead of clipping. */
 @media (max-width: 1050px) {
@@ -1424,7 +1876,7 @@
     font-size: 30px;
   }
   .orbitInner > span {
-    font-size: 8px;
+    font-size: 11px;
   }
   .subscriptionFoot {
     margin-left: -24px;
@@ -1474,10 +1926,10 @@
   }
   .pageHeading h1 {
     letter-spacing: -1.8px;
-    font-size: 43px;
+    font-size: 34px;
   }
   .pageHeading p {
-    font-size: 11px;
+    font-size: 12px;
     max-width: 320px;
   }
   .privateBadge {
@@ -1488,10 +1940,10 @@
     gap: 9px;
   }
   .pageTools small {
-    font-size: 8px;
+    font-size: 11px;
   }
   .refreshButton {
-    font-size: 9px !important;
+    font-size: 11px !important;
     padding: 9px;
     white-space: nowrap;
   }
@@ -1511,7 +1963,7 @@
     margin-top: 7px;
   }
   .subscription h2 {
-    font-size: 31px;
+    font-size: 28px;
   }
   .orbit {
     width: 140px;
@@ -1528,7 +1980,7 @@
   }
   .summaryStrip > div + div {
     border-left: 0;
-    padding: 0;
+    padding: 22px;
   }
   .summaryStrip strong {
     font-size: 23px;
@@ -1552,7 +2004,7 @@
   }
   .filterTabs button {
     padding: 7px;
-    font-size: 9px !important;
+    font-size: 11px !important;
   }
   .historyToolbar {
     gap: 10px;
@@ -1560,7 +2012,7 @@
   }
   .search {
     width: 100%;
-    border-top: 1px solid #e4e9d9;
+    border-top: 1px solid #ccdbf6;
     padding: 8px 6px 0;
   }
   .search input {
@@ -1591,14 +2043,18 @@
     padding-top: 0;
   }
   .sectionNav {
-    gap: 20px;
+    gap: 3px;
+    width: 100%;
   }
   .sectionNav a {
-    gap: 7px;
-    font-size: 10px;
+    gap: 5px;
+    padding: 9px 8px;
+    flex: 1;
+    justify-content: center;
+    font-size: 12px;
   }
   .sectionNav a span {
-    font-size: 8px;
+    font-size: 11px;
   }
   .subscription {
     padding-left: 20px;
@@ -1608,11 +2064,11 @@
     gap: 7px;
   }
   .eyebrowLight {
-    font-size: 7px;
+    font-size: 11px;
     letter-spacing: 1.3px;
   }
   .heroBadge {
-    font-size: 8px;
+    font-size: 11px;
   }
   .subscriptionBody {
     gap: 12px;
@@ -1624,10 +2080,10 @@
     font-size: 27px;
   }
   .heroPrice > span {
-    font-size: 10px;
+    font-size: 12px;
   }
   .heroDescription {
-    font-size: 9px;
+    font-size: 11px;
   }
   .orbit {
     width: 100px;
@@ -1641,31 +2097,31 @@
     width: 16px;
   }
   .orbitInner > span {
-    font-size: 7px;
+    font-size: 11px;
   }
   .membershipType {
-    font-size: 6px;
+    font-size: 10px;
     letter-spacing: 1.3px;
   }
   .cycleLabel {
-    font-size: 8px;
+    font-size: 11px;
     flex-wrap: wrap;
   }
   .cycleLabel strong {
-    font-size: 8px;
+    font-size: 11px;
   }
   .subscriptionDetails {
     gap: 17px 12px;
   }
   .subscriptionDetails strong {
-    font-size: 10px;
+    font-size: 12px;
   }
   .subscriptionFoot {
     margin-left: -20px;
     margin-right: -20px;
     padding-left: 20px;
     padding-right: 20px;
-    font-size: 7px;
+    font-size: 11px;
   }
   .reference {
     max-width: 60%;

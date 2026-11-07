@@ -1,20 +1,34 @@
 "use client";
 
-
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Lock, X, Loader2, CheckCircle, AlertCircle, Eye, EyeOff, KeyRound, Mail } from "lucide-react";
-import { apiForgotPassword, apiVerifyOtp, apiResetPassword } from "../../lib/api";
+import {
+  Lock,
+  X,
+  Loader2,
+  CheckCircle,
+  AlertCircle,
+  Eye,
+  EyeOff,
+  KeyRound,
+  Mail,
+} from "lucide-react";
+import styles from "./ProfileLogbook.module.css";
+import {
+  apiForgotPassword,
+  apiVerifyOtp,
+  apiResetPassword,
+} from "../../lib/api";
 
 export default function ChangePasswordModal({ isOpen, onClose, username }) {
   const [step, setStep] = useState("confirm"); // 'confirm', 'otp', 'reset', 'success'
   const [otp, setOtp] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  
+
   const [showNewPwd, setShowNewPwd] = useState(false);
   const [showConfirmPwd, setShowConfirmPwd] = useState(false);
-  
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [resendTimer, setResendTimer] = useState(0);
@@ -30,19 +44,34 @@ export default function ChangePasswordModal({ isOpen, onClose, username }) {
     const handleKey = (event) => {
       if (event.key === "Escape") onClose();
       if (event.key !== "Tab") return;
-      const focusable = [...dialogRef.current.querySelectorAll('button:not(:disabled), input:not(:disabled)')];
+      const focusable = [
+        ...dialogRef.current.querySelectorAll(
+          "button:not(:disabled), input:not(:disabled)",
+        ),
+      ];
       const first = focusable[0];
       const last = focusable.at(-1);
       // # Step transitions can remove the focused button; keep the next Tab inside the modal.
-      if (!dialogRef.current.contains(document.activeElement)) { event.preventDefault(); first?.focus(); return; }
-      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
-      if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+      if (!dialogRef.current.contains(document.activeElement)) {
+        event.preventDefault();
+        first?.focus();
+        return;
+      }
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last?.focus();
+      }
+      if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first?.focus();
+      }
     };
     document.addEventListener("keydown", handleKey);
     return () => {
       document.body.style.overflow = previousOverflow;
       document.removeEventListener("keydown", handleKey);
-      if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true });
+      if (previousFocus?.isConnected)
+        previousFocus.focus({ preventScroll: true });
     };
   }, [isOpen, onClose]);
 
@@ -112,11 +141,17 @@ export default function ChangePasswordModal({ isOpen, onClose, username }) {
   const variants = {
     initial: { opacity: 0, x: 20 },
     animate: { opacity: 1, x: 0 },
-    exit: { opacity: 0, x: -20 }
+    exit: { opacity: 0, x: -20 },
   };
 
   return (
-    <div ref={dialogRef} role="dialog" aria-modal="true" aria-label="Change password with email verification" className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div
+      ref={dialogRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Change password with email verification"
+      className={`${styles.passwordDialog} fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm`}
+    >
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -134,7 +169,6 @@ export default function ChangePasswordModal({ isOpen, onClose, username }) {
 
         <div className="p-8">
           <AnimatePresence mode="wait">
-            
             {step === "confirm" && (
               <motion.div
                 key="confirm"
@@ -145,18 +179,22 @@ export default function ChangePasswordModal({ isOpen, onClose, username }) {
                 transition={{ duration: 0.2 }}
                 className="flex flex-col"
               >
-                <div className="w-12 h-12 bg-[var(--rw-surface-hover)] rounded-2xl flex items-center justify-center mb-6 text-[#023dbb]">
+                <div className="w-12 h-12 bg-[var(--rw-surface-hover)] rounded-2xl flex items-center justify-center mb-6 text-[var(--log-blue)]">
                   <Lock className="w-6 h-6" />
                 </div>
-                <h2 className="text-2xl font-bold text-[var(--rw-text)] mb-2 font-oswald tracking-wide">
+                <h2 className="text-2xl font-bold text-[var(--rw-text)] mb-2 tracking-wide">
                   Change Password
                 </h2>
                 <p className="text-[var(--rw-text-muted)] font-medium text-sm mb-6">
-                  For your security, we will send a one-time password (OTP) to your registered email address to verify your identity.
+                  For your security, we will send a one-time password (OTP) to
+                  your registered email address to verify your identity.
                 </p>
 
                 {error && (
-                  <div role="alert" className="mb-6 p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl font-medium flex items-center gap-2">
+                  <div
+                    role="alert"
+                    className="mb-6 p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl font-medium flex items-center gap-2"
+                  >
                     <AlertCircle className="w-4 h-4 shrink-0" />
                     {error}
                   </div>
@@ -167,7 +205,11 @@ export default function ChangePasswordModal({ isOpen, onClose, username }) {
                   disabled={loading}
                   className="w-full bg-[#023dbb] hover:bg-[#308fef] text-white font-bold py-3 px-4 rounded-xl transition-colors duration-200 flex items-center justify-center gap-2"
                 >
-                  {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Mail className="w-5 h-5" />}
+                  {loading ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <Mail className="w-5 h-5" />
+                  )}
                   Send OTP to Email
                 </button>
               </motion.div>
@@ -183,10 +225,10 @@ export default function ChangePasswordModal({ isOpen, onClose, username }) {
                 transition={{ duration: 0.2 }}
                 className="flex flex-col"
               >
-                <div className="w-12 h-12 bg-[var(--rw-surface-hover)] rounded-2xl flex items-center justify-center mb-6 text-[#023dbb]">
+                <div className="w-12 h-12 bg-[var(--rw-surface-hover)] rounded-2xl flex items-center justify-center mb-6 text-[var(--log-blue)]">
                   <KeyRound className="w-6 h-6" />
                 </div>
-                <h2 className="text-2xl font-bold text-[var(--rw-text)] mb-2 font-oswald tracking-wide">
+                <h2 className="text-2xl font-bold text-[var(--rw-text)] mb-2 tracking-wide">
                   Enter OTP
                 </h2>
                 <p className="text-[var(--rw-text-muted)] font-medium text-sm mb-6">
@@ -194,7 +236,10 @@ export default function ChangePasswordModal({ isOpen, onClose, username }) {
                 </p>
 
                 {error && (
-                  <div role="alert" className="mb-6 p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl font-medium flex items-center gap-2">
+                  <div
+                    role="alert"
+                    className="mb-6 p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl font-medium flex items-center gap-2"
+                  >
                     <AlertCircle className="w-4 h-4 shrink-0" />
                     {error}
                   </div>
@@ -202,7 +247,10 @@ export default function ChangePasswordModal({ isOpen, onClose, username }) {
 
                 <form onSubmit={handleVerifyOtp} className="space-y-4">
                   <div>
-                    <label htmlFor="profile-password-otp" className="text-[13px] font-bold text-[var(--rw-text)] block mb-1.5 uppercase tracking-wide">
+                    <label
+                      htmlFor="profile-password-otp"
+                      className="text-[13px] font-bold text-[var(--rw-text)] block mb-1.5 uppercase tracking-wide"
+                    >
                       Verification Code
                     </label>
                     <input
@@ -218,22 +266,28 @@ export default function ChangePasswordModal({ isOpen, onClose, username }) {
                       maxLength={6}
                     />
                   </div>
-                  
+
                   <button
                     type="submit"
                     disabled={loading || otp.length < 4}
                     className="w-full bg-[#023dbb] hover:bg-[#308fef] text-white font-bold py-3 px-4 rounded-xl transition-colors duration-200 flex items-center justify-center gap-2 disabled:opacity-50"
                   >
-                    {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Verify Code"}
+                    {loading ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      "Verify Code"
+                    )}
                   </button>
 
                   <button
                     type="button"
                     onClick={handleSendOtp}
                     disabled={loading || resendTimer > 0}
-                    className="w-full text-sm font-semibold text-[#023dbb] hover:text-[#308fef] transition-colors mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full text-sm font-semibold text-[var(--log-blue)] hover:text-[#308fef] transition-colors mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {resendTimer > 0 ? `Resend code in ${resendTimer}s` : "Resend Code"}
+                    {resendTimer > 0
+                      ? `Resend code in ${resendTimer}s`
+                      : "Resend Code"}
                   </button>
                 </form>
               </motion.div>
@@ -249,10 +303,10 @@ export default function ChangePasswordModal({ isOpen, onClose, username }) {
                 transition={{ duration: 0.2 }}
                 className="flex flex-col"
               >
-                <div className="w-12 h-12 bg-[var(--rw-surface-hover)] rounded-2xl flex items-center justify-center mb-6 text-[#023dbb]">
+                <div className="w-12 h-12 bg-[var(--rw-surface-hover)] rounded-2xl flex items-center justify-center mb-6 text-[var(--log-blue)]">
                   <Lock className="w-6 h-6" />
                 </div>
-                <h2 className="text-2xl font-bold text-[var(--rw-text)] mb-2 font-oswald tracking-wide">
+                <h2 className="text-2xl font-bold text-[var(--rw-text)] mb-2 tracking-wide">
                   New Password
                 </h2>
                 <p className="text-[var(--rw-text-muted)] font-medium text-sm mb-6">
@@ -260,7 +314,10 @@ export default function ChangePasswordModal({ isOpen, onClose, username }) {
                 </p>
 
                 {error && (
-                  <div role="alert" className="mb-6 p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl font-medium flex items-center gap-2">
+                  <div
+                    role="alert"
+                    className="mb-6 p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl font-medium flex items-center gap-2"
+                  >
                     <AlertCircle className="w-4 h-4 shrink-0" />
                     {error}
                   </div>
@@ -268,7 +325,10 @@ export default function ChangePasswordModal({ isOpen, onClose, username }) {
 
                 <form onSubmit={handleResetPassword} className="space-y-4">
                   <div>
-                    <label htmlFor="profile-new-password" className="text-[13px] font-bold text-[var(--rw-text)] block mb-1.5 uppercase tracking-wide">
+                    <label
+                      htmlFor="profile-new-password"
+                      className="text-[13px] font-bold text-[var(--rw-text)] block mb-1.5 uppercase tracking-wide"
+                    >
                       New Password
                     </label>
                     <div className="relative">
@@ -285,18 +345,27 @@ export default function ChangePasswordModal({ isOpen, onClose, username }) {
                       <button
                         type="button"
                         onClick={() => setShowNewPwd(!showNewPwd)}
-                        aria-label={showNewPwd ? "Hide new password" : "Show new password"}
+                        aria-label={
+                          showNewPwd ? "Hide new password" : "Show new password"
+                        }
                         aria-pressed={showNewPwd}
                         className="absolute inset-y-0 right-3 flex items-center text-[var(--rw-text-muted)] hover:text-[var(--rw-text-secondary)] transition-colors"
                         tabIndex="-1"
                       >
-                        {showNewPwd ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                        {showNewPwd ? (
+                          <EyeOff className="w-5 h-5" />
+                        ) : (
+                          <Eye className="w-5 h-5" />
+                        )}
                       </button>
                     </div>
                   </div>
 
                   <div>
-                    <label htmlFor="profile-confirm-password" className="text-[13px] font-bold text-[var(--rw-text)] block mb-1.5 uppercase tracking-wide">
+                    <label
+                      htmlFor="profile-confirm-password"
+                      className="text-[13px] font-bold text-[var(--rw-text)] block mb-1.5 uppercase tracking-wide"
+                    >
                       Confirm New Password
                     </label>
                     <div className="relative">
@@ -313,12 +382,20 @@ export default function ChangePasswordModal({ isOpen, onClose, username }) {
                       <button
                         type="button"
                         onClick={() => setShowConfirmPwd(!showConfirmPwd)}
-                        aria-label={showConfirmPwd ? "Hide password confirmation" : "Show password confirmation"}
+                        aria-label={
+                          showConfirmPwd
+                            ? "Hide password confirmation"
+                            : "Show password confirmation"
+                        }
                         aria-pressed={showConfirmPwd}
                         className="absolute inset-y-0 right-3 flex items-center text-[var(--rw-text-muted)] hover:text-[var(--rw-text-secondary)] transition-colors"
                         tabIndex="-1"
                       >
-                        {showConfirmPwd ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                        {showConfirmPwd ? (
+                          <EyeOff className="w-5 h-5" />
+                        ) : (
+                          <Eye className="w-5 h-5" />
+                        )}
                       </button>
                     </div>
                   </div>
@@ -328,7 +405,11 @@ export default function ChangePasswordModal({ isOpen, onClose, username }) {
                     disabled={loading || !newPassword || !confirmPassword}
                     className="w-full bg-[#023dbb] hover:bg-[#308fef] text-white font-bold py-3 px-4 rounded-xl transition-colors duration-200 flex items-center justify-center gap-2 mt-4 disabled:opacity-50"
                   >
-                    {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Save Password"}
+                    {loading ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      "Save Password"
+                    )}
                   </button>
                 </form>
               </motion.div>
@@ -344,10 +425,12 @@ export default function ChangePasswordModal({ isOpen, onClose, username }) {
                 transition={{ duration: 0.2 }}
                 className="flex flex-col items-center text-center py-6"
               >
-                <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mb-6 text-green-500">
+                <div
+                  className={`${styles.passwordSuccess} w-16 h-16 rounded-full flex items-center justify-center mb-6`}
+                >
                   <CheckCircle className="w-8 h-8" />
                 </div>
-                <h2 className="text-2xl font-bold text-[var(--rw-text)] mb-2 font-oswald tracking-wide">
+                <h2 className="text-2xl font-bold text-[var(--rw-text)] mb-2 tracking-wide">
                   Password Updated!
                 </h2>
                 <p className="text-[var(--rw-text-muted)] font-medium text-sm mb-8 max-w-[250px]">
@@ -361,7 +444,6 @@ export default function ChangePasswordModal({ isOpen, onClose, username }) {
                 </button>
               </motion.div>
             )}
-
           </AnimatePresence>
         </div>
       </motion.div>

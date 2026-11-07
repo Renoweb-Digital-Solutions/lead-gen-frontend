@@ -46,6 +46,30 @@ export function Skeleton({ compact = false }) {
   );
 }
 
+function SubscriptionWaves() {
+  // # Two seamless SVG surfaces drift at different speeds behind the content.
+  // # They do not represent usage, balance, or cycle progress; CSS disables all
+  // # motion when the user requests reduced motion.
+  return (
+    <div className={s.waveField} aria-hidden="true">
+      <svg
+        className={s.waveBack}
+        viewBox="0 0 1440 320"
+        preserveAspectRatio="none"
+      >
+        <path d="M0 160 C180 60 540 260 720 160 C900 60 1260 260 1440 160 V320 H0 Z" />
+      </svg>
+      <svg
+        className={s.waveFront}
+        viewBox="0 0 1440 320"
+        preserveAspectRatio="none"
+      >
+        <path d="M0 160 C180 260 540 60 720 160 C900 260 1260 60 1440 160 V320 H0 Z" />
+      </svg>
+    </div>
+  );
+}
+
 export function SubscriptionCard({ section, loading }) {
   if (loading) return <Skeleton />;
   if (section?.error)
@@ -59,6 +83,7 @@ export function SubscriptionCard({ section, loading }) {
     return (
       <section className={`${s.subscription} ${s.emptySubscription}`}>
         <div className={s.heroGlow} aria-hidden="true" />
+        <SubscriptionWaves />
         <span className={s.eyebrowLight}>
           <span className={s.liveDot} /> YOUR MEMBERSHIP
         </span>
@@ -66,9 +91,9 @@ export function SubscriptionCard({ section, loading }) {
           <Sparkles size={30} />
         </div>
         <h2>
-          Room for your
+          Ready for your
           <br />
-          <em>next big move.</em>
+          <em>next upgrade.</em>
         </h2>
         <p>
           No active subscription is recorded for your account. Find your fit in
@@ -95,6 +120,7 @@ export function SubscriptionCard({ section, loading }) {
   return (
     <section className={s.subscription}>
       <div className={s.heroGlow} aria-hidden="true" />
+      <SubscriptionWaves />
       <div className={s.subscriptionTop}>
         <span className={s.eyebrowLight}>
           <span className={s.liveDot} /> YOUR CURRENT MEMBERSHIP
@@ -106,7 +132,7 @@ export function SubscriptionCard({ section, loading }) {
       <div className={s.subscriptionBody}>
         <div>
           <span className={s.membershipType}>
-            {sub.isFree ? "THE STARTER CHAPTER" : "SIMPLEADS MEMBERSHIP"}
+            {sub.isFree ? "STARTER SUBSCRIPTION" : "SIMPLEADS SUBSCRIPTION"}
           </span>
           <h2>{sub.name}</h2>
           <div className={s.heroPrice}>
@@ -115,8 +141,8 @@ export function SubscriptionCard({ section, loading }) {
           </div>
           <p className={s.heroDescription}>
             {sub.isFree
-              ? "Your first step toward the right connections."
-              : "A little structure for your next stage of growth."}
+              ? "Starter access is active on your workspace."
+              : "Your plan details, renewal schedule, and credit allocation."}
           </p>
         </div>
         <div
@@ -205,11 +231,11 @@ export function AccountCard({ account, current, loading }) {
   return (
     <aside className={s.accountCard}>
       <div className={s.accountHeader}>
-        <span className={s.sectionKicker}>THE DETAILS</span>
+        <span className={s.sectionKicker}>BILLING DETAILS</span>
         <CreditCard size={18} />
       </div>
-      <h3>Your billing identity.</h3>
-      <p>The home for your membership and payment records.</p>
+      <h3>Account details.</h3>
+      <p>Contact and schedule for your current subscription.</p>
       <dl>
         <div>
           <dt>Account holder</dt>
@@ -326,11 +352,13 @@ export function PlanGallery({ section, loading, current, onChoose, busy }) {
     <section id="plans" className={s.plansSection}>
       <div className={s.sectionHeading}>
         <div>
-          <span className={s.sectionKicker}>BUILT FOR YOUR NEXT CHAPTER</span>
+          <span className={s.sectionKicker}>PLANS & PRICING</span>
           <h2>
-            A plan for every ambition<span>.</span>
+            Choose your next plan<span>.</span>
           </h2>
-          <p>Pick your pace. Your next connection is closer than you think.</p>
+          <p>
+            Compare billing options and find the right fit for your workspace.
+          </p>
         </div>
         {region && (
           <span className={s.regionBadge}>
@@ -357,7 +385,7 @@ export function PlanGallery({ section, loading, current, onChoose, busy }) {
         </div>
       ) : (
         <div className={s.planGrid}>
-          {plans.map((plan, index) => {
+          {plans.map((plan) => {
             const annual = plan.intervalType === "YEAR" || plan.totalCycles > 1;
             const oneTime = plan.billingType === "ONE_TIME";
             const highlighted = annual && !oneTime;
@@ -367,7 +395,7 @@ export function PlanGallery({ section, loading, current, onChoose, busy }) {
             return (
               <article
                 key={plan.id}
-                className={`${s.planCard} ${highlighted ? s.planFeatured : ""}`}
+                className={`${s.planCard} ${highlighted ? s.planFeatured : oneTime ? s.planPass : s.planMonthly} ${isCurrent ? s.planCurrent : ""}`}
               >
                 <div className={s.planCardTop}>
                   <span className={s.planIcon}>
@@ -440,12 +468,13 @@ export function PlanGallery({ section, loading, current, onChoose, busy }) {
                   Choose this plan <ArrowUpRight size={17} />
                 </button>
                 <span className={s.planIndex}>
-                  0{index + 1} /{" "}
-                  {oneTime
-                    ? "PAY ONCE. KEEP MOVING."
-                    : annual
-                      ? "THINK LONGER. GO FURTHER."
-                      : "A LITTLE MOMENTUM, EVERY MONTH."}
+                  {isCurrent
+                    ? "Currently active on your workspace"
+                    : oneTime
+                      ? "Single payment ? Fixed access period"
+                      : annual
+                        ? "Annual billing ? Scheduled credit cycles"
+                        : "Monthly billing ? Recurring access"}
                 </span>
               </article>
             );
@@ -478,9 +507,9 @@ export function TransactionHistory({
     <section id="history" className={s.historySection}>
       <div className={s.sectionHeading}>
         <div>
-          <span className={s.sectionKicker}>EVERY DETAIL, ACCOUNTED FOR</span>
+          <span className={s.sectionKicker}>PAYMENT ACTIVITY</span>
           <h2>
-            Your payment journal<span>.</span>
+            Transaction history<span>.</span>
           </h2>
           <p>A clear record of your transactions, all in one place.</p>
         </div>
@@ -529,7 +558,7 @@ export function TransactionHistory({
             <h3>
               {query || status !== "all"
                 ? "No matching entries."
-                : "Your journal starts here."}
+                : "No transactions yet."}
             </h3>
             <p>
               {query || status !== "all"
@@ -638,7 +667,7 @@ export function TransactionHistory({
           <span>
             {data?.total
               ? `Showing ${(page - 1) * data.pageSize + 1}–${Math.min(page * data.pageSize, data.total)} of ${count(data.total)} entries`
-              : "Your financial record, without the guesswork."}
+              : "Payment records will appear here."}
           </span>
           <div className={s.pagination}>
             <button

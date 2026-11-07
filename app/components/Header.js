@@ -3,18 +3,17 @@
 import { useState, useEffect } from "react";
 import { checkHealth } from "../lib/api";
 import HeaderCreditBalance from "./HeaderCreditBalance";
+import AccountMenu from "./AccountMenu";
 import {
   Target,
   Map,
   Trash2,
   Activity,
-  LogOut,
   Menu,
   Camera,
   Sun,
   Moon,
 } from "lucide-react";
-import { useAuth } from "../lib/AuthContext";
 import { useRouter } from "next/navigation";
 
 /**
@@ -47,13 +46,7 @@ export default function Header({
   creditRefreshKey,
 }) {
   const [health, setHealth] = useState(null);
-  const { logout } = useAuth();
   const router = useRouter();
-
-  const handleLogout = () => {
-    logout();
-    router.push("/");
-  };
 
   useEffect(() => {
     let mounted = true;
@@ -267,30 +260,8 @@ export default function Header({
           </span>
         </button>
 
-        {/* # Keep billing settings accessible from every dashboard module. */}
-        <button
-          type="button"
-          className="rw-btn rw-btn-ghost"
-          onClick={() => router.push("/settings")}
-        >
-          Settings
-        </button>
-        {/* Logout button (Visible on all screens) */}
-        <button
-          type="button"
-          className="rw-header-logout rw-btn rw-btn-ghost hover:bg-[var(--rw-surface-hover)] p-2 lg:px-3 lg:py-2"
-          onClick={handleLogout}
-          style={{
-            color: "var(--rw-text-muted)",
-          }}
-          title="Logout"
-          aria-label="Logout"
-        >
-          <LogOut className="w-5 h-5 lg:w-4 lg:h-4 text-gray-500 hover:text-gray-700" />
-          <span className="hidden lg:inline font-medium text-[13px]">
-            Logout
-          </span>
-        </button>
+        {/* # Profile owns account navigation; the shared header retains its existing theme. */}
+        <AccountMenu />
       </div>
     </header>
   );

@@ -14,6 +14,8 @@ import {
   LoaderCircle,
   LockKeyhole,
   RefreshCw,
+  Moon,
+  Sun,
   ShieldCheck,
   X,
 } from "lucide-react";
@@ -32,6 +34,8 @@ import {
 } from "./BillingPanels";
 import { cadence, day, money, statusLabel, statusTone } from "./format";
 import s from "./Billing.module.css";
+import AccountMenu from "../AccountMenu";
+import { useSessionState } from "../../hooks/useSessionState";
 
 function Dialog({ open, onDismiss, locked = false, label, children }) {
   const ref = useRef(null);
@@ -72,6 +76,9 @@ function Dialog({ open, onDismiss, locked = false, label, children }) {
 
 export default function BillingDashboard() {
   const { token, isInitializing } = useAuth();
+  // # Reuse the dashboard/profile preference and its same-tab change event.
+  // # Scope data-theme to this page; never mutate document/global theme state.
+  const [isDark, setIsDark] = useSessionState("renoweb-theme-dark", false);
   const router = useRouter();
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -304,7 +311,7 @@ export default function BillingDashboard() {
 
   if (isInitializing || !token)
     return (
-      <main className={s.authLoading}>
+      <main className={s.authLoading} data-theme={isDark ? "dark" : "light"}>
         <span className={s.loadingMark}>
           <CreditCard size={24} />
         </span>
@@ -313,7 +320,7 @@ export default function BillingDashboard() {
     );
 
   return (
-    <div className={s.shell}>
+    <div className={s.shell} data-theme={isDark ? "dark" : "light"}>
       <Script
         src="https://sdk.cashfree.com/js/v3/cashfree.js"
         onReady={() => setSdkReady(true)}
@@ -334,31 +341,38 @@ export default function BillingDashboard() {
             <ArrowLeft size={14} />
             Dashboard
           </Link>
-          <Link href="/profile">
-            Profile <ArrowUpRight size={14} />
-          </Link>
+          <button
+            type="button"
+            className={s.themeToggle}
+            onClick={() => setIsDark((value) => !value)}
+            aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+            aria-pressed={isDark}
+            title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+          >
+            {isDark ? <Sun size={17} /> : <Moon size={17} />}
+            <span>{isDark ? "Light" : "Dark"}</span>
+          </button>
+          <AccountMenu />
         </nav>
       </header>
       <main className={s.main}>
         <div className={s.pageHeading}>
           <div>
             <span className={s.sectionKicker}>
-              ACCOUNT / BILLING & MEMBERSHIP
+              WORKSPACE SETTINGS / BILLING
             </span>
             <h1>
-              Your growth,
-              <br />
-              <em>well accounted for.</em>
+              Billing & <span>subscriptions</span>
             </h1>
             <p>
-              One clear view of your plan, your possibilities, and every payment
-              along the way.
+              Manage your subscription, explore plans, and track your payments
+              from one place.
             </p>
           </div>
           <div className={s.pageTools}>
             <span className={s.privateBadge}>
               <LockKeyhole size={13} />
-              YOUR PRIVATE BILLING SPACE
+              SECURE BILLING WORKSPACE
             </span>
             <button
               className={s.refreshButton}
@@ -388,7 +402,7 @@ export default function BillingDashboard() {
             Available plans <span>02</span>
           </a>
           <a href="#history">
-            Payment journal <span>03</span>
+            Transactions <span>03</span>
           </a>
         </nav>
         {message && <Notice>{message}</Notice>}
@@ -434,7 +448,7 @@ export default function BillingDashboard() {
           }}
         />
         <footer className={s.footer}>
-          <span>Clarity for every stage of growth.</span>
+          <span>SimpleAds ? Account & billing</span>
           <span>
             <ShieldCheck size={13} />
             Payments by Cashfree
@@ -460,8 +474,8 @@ export default function BillingDashboard() {
             <span className={s.dialogIcon}>
               <CreditCard size={23} />
             </span>
-            <span className={s.sectionKicker}>YOUR NEXT CHAPTER</span>
-            <h2>Make room for more.</h2>
+            <span className={s.sectionKicker}>PLAN CHECKOUT</span>
+            <h2>Confirm your plan.</h2>
             <p className={s.dialogIntro}>
               You’re choosing {selectedPlan.name}.
             </p>
@@ -532,7 +546,7 @@ export default function BillingDashboard() {
             <span className={s.dialogIcon}>
               <ArrowUpRight size={23} />
             </span>
-            <span className={s.sectionKicker}>A PAGE FROM YOUR JOURNAL</span>
+            <span className={s.sectionKicker}>TRANSACTION RECORD</span>
             <h2>Payment details.</h2>
             <div className={s.receiptAmount}>
               {money(selectedTransaction.amount, selectedTransaction.currency)}
